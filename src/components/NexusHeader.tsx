@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import aieLogoLight from "@/assets/aie-logo-light.png";
 
 const NAV_LINKS = [
@@ -14,43 +14,53 @@ export function NexusHeader() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 80);
+    const handleScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <motion.header
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-200 ${
-        scrolled ? "bg-background/90 backdrop-blur-md hairline-b" : ""
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-background/95 backdrop-blur-md shadow-sm hairline-b"
+          : "bg-background/80 backdrop-blur-sm"
       }`}
     >
-      <div className="max-w-[1600px] mx-auto px-8 h-14 flex items-center justify-between">
+      <div className="max-w-[1400px] mx-auto px-6 md:px-10 h-16 flex items-center justify-between gap-6">
         {/* Brand */}
-        <a href="#" className="flex items-center gap-3">
-          <span className="display-font text-sm font-semibold tracking-[0.2em] uppercase text-foreground">
-            Nexus
-          </span>
-          <span className="hairline-l pl-3 text-xs mono text-nexus-muted tracking-widest uppercase">
-            by Aetheris
-          </span>
+        <a href="#" className="flex items-center gap-3 flex-shrink-0">
+          <div className="bg-foreground rounded-lg p-1.5 flex items-center justify-center w-8 h-8">
+            <img
+              src={aieLogoLight}
+              alt="Aetheris"
+              className="w-5 h-5 object-contain"
+              style={{ filter: "brightness(10)" }}
+            />
+          </div>
+          <div className="flex flex-col leading-none">
+            <span className="display-font text-sm font-semibold tracking-tight text-foreground">
+              Nexus
+            </span>
+            <span className="text-[10px] text-nexus-muted tracking-wide uppercase">
+              by Aetheris
+            </span>
+          </div>
         </a>
 
         {/* Navigation */}
-        <nav className="hidden md:flex items-center gap-0">
-          {NAV_LINKS.map((link, i) => (
+        <nav className="hidden md:flex items-center gap-1">
+          {NAV_LINKS.map((link) => (
             <a
               key={link.label}
               href={link.href}
-              className={`px-5 h-14 flex items-center text-xs tracking-[0.15em] uppercase font-medium transition-colors duration-200 text-nexus-muted hover:text-foreground ${
-                i < NAV_LINKS.length - 1 ? "hairline-r" : ""
-              }`}
+              className="px-4 h-9 flex items-center gap-1.5 text-xs tracking-wide font-medium rounded-md transition-colors duration-200 text-nexus-muted hover:text-foreground hover:bg-nexus-surface"
             >
               {link.label === "Live" && (
-                <span className="w-1.5 h-1.5 rounded-full bg-nexus-live mr-2 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-nexus-live animate-pulse flex-shrink-0" />
               )}
               {link.label}
             </a>
@@ -58,14 +68,12 @@ export function NexusHeader() {
         </nav>
 
         {/* CTA */}
-        <div className="flex items-center gap-4">
-          <a
-            href="#register"
-            className="hidden md:flex items-center h-8 px-5 text-xs tracking-[0.15em] uppercase font-medium bg-foreground text-primary-foreground hover:bg-nexus-muted transition-colors duration-200 btn-click"
-          >
-            Register Now
-          </a>
-        </div>
+        <a
+          href="#register"
+          className="hidden md:flex items-center h-9 px-5 text-xs font-semibold tracking-wide bg-foreground text-primary-foreground rounded-lg hover:opacity-85 transition-opacity btn-click"
+        >
+          Register Now
+        </a>
       </div>
     </motion.header>
   );
