@@ -39,55 +39,49 @@ export function LevelSwitcher({ onLevelChange, onSportChange }: LevelSwitcherPro
     <div className="hairline-b">
       {/* Section label */}
       <div className="px-8 py-4 hairline-b">
-        <p className="text-xs mono tracking-[0.2em] uppercase text-nexus-muted">Filter by Level & Discipline</p>
+        <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">Filter by Level & Discipline</p>
       </div>
 
-      {/* Level ruler */}
+      {/* Level pills */}
       <div className="overflow-x-auto hairline-b">
-        <div className="flex min-w-max">
-          {LEVELS.map((level, i) => (
+        <div className="flex min-w-max px-5 py-4 gap-2">
+          {LEVELS.map((level) => (
             <button
               key={level.id}
               onClick={() => handleLevel(level.id)}
-              className={`relative px-8 py-5 flex flex-col items-start gap-1 transition-colors duration-200 btn-click
-                ${i < LEVELS.length - 1 ? "hairline-r" : ""}
-                ${activeLevel === level.id ? "bg-foreground" : "bg-background hover:bg-nexus-surface"}`}
+              className={`relative px-5 py-3 flex flex-col items-start gap-0.5 rounded-xl transition-all duration-200 btn-click
+                ${activeLevel === level.id
+                  ? "bg-foreground shadow-sm"
+                  : "bg-nexus-surface hover:bg-nexus-silver/60"}`}
             >
               <span
-                className={`text-xs tracking-[0.15em] uppercase font-medium transition-colors duration-200
-                  ${activeLevel === level.id ? "text-primary-foreground" : "text-nexus-muted"}`}
+                className={`text-[10px] tracking-[0.12em] uppercase font-medium transition-colors duration-200
+                  ${activeLevel === level.id ? "text-primary-foreground/70" : "text-nexus-muted"}`}
               >
                 {level.label}
               </span>
               <span
-                className={`mono text-lg font-semibold transition-colors duration-200
+                className={`mono text-base font-bold transition-colors duration-200
                   ${activeLevel === level.id ? "text-primary-foreground" : "text-foreground"}`}
               >
                 {level.count.toLocaleString()}
               </span>
-              {activeLevel === level.id && (
-                <motion.div
-                  layoutId="level-indicator"
-                  className="absolute bottom-0 left-0 right-0 h-[2px] bg-nexus-live"
-                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                />
-              )}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Sport filter strip */}
+      {/* Sport filter pills */}
       <div className="overflow-x-auto">
-        <div className="flex min-w-max px-2 py-3 gap-0">
+        <div className="flex min-w-max px-5 py-3 gap-1.5">
           {SPORTS.map((sport) => (
             <button
               key={sport}
               onClick={() => handleSport(sport)}
-              className={`px-5 py-2 text-xs tracking-[0.12em] uppercase font-medium transition-all duration-200 btn-click mx-1
+              className={`px-4 py-1.5 text-xs tracking-wide font-medium rounded-full transition-all duration-200 btn-click
                 ${activeSport === sport
                   ? "bg-foreground text-primary-foreground"
-                  : "bg-transparent text-nexus-muted hover:text-foreground hairline"
+                  : "bg-nexus-surface text-nexus-muted hover:text-foreground hover:bg-nexus-silver/50"
                 }`}
             >
               {sport}

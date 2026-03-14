@@ -55,26 +55,27 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Nexus-specific palette
-        "nexus-slate": "hsl(222 47% 11%)",
-        "nexus-silver": "hsl(210 14% 89%)",
-        "nexus-muted": "hsl(215 20% 46%)",
-        "nexus-surface": "hsl(210 40% 96%)",
-        "nexus-live": "hsl(0 84% 60%)",
+        // Nexus-specific palette — strictly grayscale
+        "nexus-slate": "hsl(0 0% 9%)",
+        "nexus-silver": "hsl(0 0% 87%)",
+        "nexus-muted": "hsl(0 0% 44%)",
+        "nexus-surface": "hsl(0 0% 96%)",
+        "nexus-live": "hsl(0 0% 18%)",
       },
       borderRadius: {
-        // Sharp — Swiss watch aesthetic
-        lg: "0px",
-        md: "0px",
-        sm: "0px",
-        DEFAULT: "0px",
-        xl: "2px",   // Only for micro internal pill badges
+        DEFAULT: "10px",
+        sm: "6px",
+        md: "10px",
+        lg: "14px",
+        xl: "18px",
+        "2xl": "24px",
+        full: "9999px",
       },
       fontFamily: {
-        display: ["Instrument Sans", "sans-serif"],
-        mono: ["Geist Mono", "monospace"],
-        body: ["Inter", "sans-serif"],
-        sans: ["Inter", "sans-serif"],
+        display: ["Segoe UI", "Segoe UI Historic", "system-ui", "sans-serif"],
+        mono: ["Geist Mono", "Consolas", "monospace"],
+        body: ["Segoe UI", "Segoe UI Historic", "system-ui", "sans-serif"],
+        sans: ["Segoe UI", "Segoe UI Historic", "system-ui", "sans-serif"],
       },
       fontSize: {
         "score-lg": ["clamp(3rem, 8vw, 7rem)", { lineHeight: "1", letterSpacing: "-0.05em" }],

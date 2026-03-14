@@ -51,18 +51,19 @@ export function StandingsTable() {
     <section id="standings" className="hairline-b">
       {/* Header */}
       <div className="px-8 py-5 hairline-b flex items-center justify-between">
-        <p className="text-xs mono tracking-[0.2em] uppercase text-nexus-muted">League Standings</p>
+        <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">League Standings</p>
       </div>
 
       {/* League tabs */}
-      <div className="flex hairline-b overflow-x-auto">
-        {LEAGUES.map((league, i) => (
+      <div className="flex px-5 py-3 gap-2 hairline-b overflow-x-auto">
+        {LEAGUES.map((league) => (
           <button
             key={league.id}
             onClick={() => setActiveLeague(league.id)}
-            className={`px-7 py-4 text-xs tracking-[0.15em] uppercase font-medium transition-colors duration-200 btn-click whitespace-nowrap flex-shrink-0
-              ${i < LEAGUES.length - 1 ? "hairline-r" : ""}
-              ${activeLeague === league.id ? "bg-foreground text-primary-foreground" : "text-nexus-muted hover:text-foreground"}`}
+            className={`px-5 py-2 text-xs font-semibold tracking-wide rounded-lg transition-all duration-200 btn-click whitespace-nowrap flex-shrink-0
+              ${activeLeague === league.id
+                ? "bg-foreground text-primary-foreground"
+                : "bg-nexus-surface text-nexus-muted hover:text-foreground"}`}
           >
             {league.label}
           </button>
@@ -70,15 +71,15 @@ export function StandingsTable() {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px]">
+      <div className="overflow-x-auto px-4 py-4">
+        <table className="w-full min-w-[640px] border-collapse">
           <thead>
-            <tr className="hairline-b">
+            <tr>
               {["#", "Club", "P", "W", "D", "L", "GF", "GA", "PTS"].map((col) => (
                 <th
                   key={col}
-                  className={`py-3 text-xs mono tracking-[0.15em] uppercase text-nexus-muted font-medium
-                    ${col === "Club" ? "text-left px-8" : "text-center px-3"}`}
+                  className={`pb-3 text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold
+                    ${col === "Club" ? "text-left px-4" : "text-center px-3"}`}
                 >
                   {col}
                 </th>
@@ -92,21 +93,25 @@ export function StandingsTable() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: i * 0.04 }}
-                className="hairline-b hover:bg-nexus-surface/50 transition-colors duration-200"
+                className="rounded-lg hover:bg-nexus-surface/60 transition-colors duration-200"
               >
-                <td className="py-4 text-center px-3">
-                  <span className="mono text-sm text-nexus-muted">{row.pos}</span>
+                <td className="py-3.5 text-center px-3">
+                  <span className={`mono text-sm font-semibold ${row.pos <= 3 ? "text-foreground" : "text-nexus-muted"}`}>
+                    {row.pos}
+                  </span>
                 </td>
-                <td className="py-4 px-8">
+                <td className="py-3.5 px-4">
                   <span className="display-font text-sm font-semibold text-foreground">{row.team}</span>
                 </td>
                 {[row.p, row.w, row.d, row.l, row.gf, row.ga].map((val, j) => (
-                  <td key={j} className="py-4 text-center px-3">
+                  <td key={j} className="py-3.5 text-center px-3">
                     <span className="mono text-sm text-nexus-muted">{val}</span>
                   </td>
                 ))}
-                <td className="py-4 text-center px-3">
-                  <span className="mono text-sm font-bold text-foreground">{row.pts}</span>
+                <td className="py-3.5 text-center px-3">
+                  <span className="mono text-sm font-bold text-foreground bg-nexus-surface px-2.5 py-1 rounded-md">
+                    {row.pts}
+                  </span>
                 </td>
               </motion.tr>
             ))}

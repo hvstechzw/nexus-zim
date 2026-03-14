@@ -9,38 +9,37 @@ const FOOTER_LINKS = {
 
 export function NexusFooter() {
   return (
-    <footer className="hairline-t">
+    <footer className="hairline-t bg-background">
       {/* Main footer body */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_3fr]">
+      <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-0 hairline-b">
         {/* Brand column */}
-        <div className="p-12 md:p-16 hairline-r flex flex-col justify-between gap-10">
-          {/* Logo */}
+        <div className="p-10 md:p-14 lg:hairline-r flex flex-col justify-between gap-10">
           <div>
-            <div className="bg-foreground p-6 inline-flex mb-6">
+            <div className="bg-foreground rounded-xl p-5 inline-flex mb-5">
               <img
                 src={aieLogoLight}
                 alt="Aetheris Innovative Enterprises"
-                className="w-32 h-auto object-contain"
+                className="w-28 h-auto object-contain"
                 style={{ filter: "brightness(10)" }}
               />
             </div>
-            <p className="display-font text-xl font-semibold text-foreground tracking-tight">Nexus</p>
-            <p className="text-xs mono text-nexus-muted tracking-[0.15em] uppercase mt-1">
+            <p className="display-font text-xl font-bold text-foreground tracking-tight">Nexus</p>
+            <p className="text-xs text-nexus-muted tracking-wide uppercase mt-1">
               by Aetheris Innovative Enterprises Pvt Ltd
             </p>
           </div>
 
           <div>
-            <p className="text-sm text-nexus-muted leading-relaxed max-w-[42ch]">
+            <p className="text-sm text-nexus-muted leading-relaxed max-w-[40ch]">
               Zimbabwe's national competition infrastructure. Centralising tracking, broadcast,
               and registration for every discipline across every level.
             </p>
 
-            <div className="mt-6 flex flex-col gap-2">
-              <p className="text-xs mono tracking-widest uppercase text-nexus-muted">National Coverage</p>
-              <div className="flex flex-wrap gap-1 mt-2">
+            <div className="mt-6">
+              <p className="text-xs mono tracking-widest uppercase text-nexus-muted mb-3">National Coverage</p>
+              <div className="flex flex-wrap gap-2">
                 {["Harare", "Bulawayo", "Mutare", "Gweru", "Masvingo", "Bindura", "Chinhoyi", "Marondera", "Kariba", "Hwange"].map((city) => (
-                  <span key={city} className="text-xs mono text-nexus-muted hairline px-2 py-1">
+                  <span key={city} className="text-xs mono text-nexus-muted hairline px-2.5 py-1 rounded-md">
                     {city}
                   </span>
                 ))}
@@ -54,9 +53,9 @@ export function NexusFooter() {
           {Object.entries(FOOTER_LINKS).map(([section, links], i) => (
             <div
               key={section}
-              className={`p-10 flex flex-col gap-5 ${i < Object.keys(FOOTER_LINKS).length - 1 ? "hairline-r" : ""} hairline-b`}
+              className={`p-10 flex flex-col gap-5 ${i < Object.keys(FOOTER_LINKS).length - 1 ? "hairline-r" : ""}`}
             >
-              <p className="text-xs mono tracking-[0.2em] uppercase text-nexus-muted">{section}</p>
+              <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-semibold">{section}</p>
               <ul className="flex flex-col gap-3">
                 {links.map((link) => (
                   <li key={link}>
@@ -74,18 +73,17 @@ export function NexusFooter() {
         </div>
       </div>
 
-      {/* Sub-footer / Legal bar */}
-      <div className="hairline-t px-12 py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-        <div className="flex items-center gap-6">
+      {/* Sub-footer */}
+      <div className="max-w-[1400px] mx-auto px-10 py-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+        <div className="flex items-center gap-4 flex-wrap">
           <p className="text-xs mono text-nexus-muted">
             © {new Date().getFullYear()} Aetheris Innovative Enterprises Pvt Ltd. All rights reserved.
           </p>
-          <span className="hairline-l pl-6 text-xs mono text-nexus-muted hidden md:block">
-            Registered in Zimbabwe
-          </span>
+          <span className="text-xs mono text-nexus-muted hidden md:block">·</span>
+          <span className="text-xs mono text-nexus-muted hidden md:block">Registered in Zimbabwe</span>
         </div>
-        <div className="flex items-center gap-6">
-          <span className="text-xs mono text-nexus-muted hairline px-3 py-1.5">
+        <div className="flex items-center gap-3">
+          <span className="text-xs mono text-nexus-muted hairline px-3 py-1.5 rounded-md">
             Nexus v1.0
           </span>
           <span className="text-xs mono text-nexus-muted">
