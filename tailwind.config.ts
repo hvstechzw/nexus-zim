@@ -55,12 +55,12 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Nexus-specific palette
-        "nexus-slate": "hsl(222 47% 11%)",
-        "nexus-silver": "hsl(210 14% 89%)",
-        "nexus-muted": "hsl(215 20% 46%)",
-        "nexus-surface": "hsl(210 40% 96%)",
-        "nexus-live": "hsl(0 84% 60%)",
+        // Nexus-specific palette — strictly grayscale
+        "nexus-slate": "hsl(0 0% 9%)",
+        "nexus-silver": "hsl(0 0% 87%)",
+        "nexus-muted": "hsl(0 0% 44%)",
+        "nexus-surface": "hsl(0 0% 96%)",
+        "nexus-live": "hsl(0 0% 18%)",
       },
       borderRadius: {
         DEFAULT: "10px",
