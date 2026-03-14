@@ -6,70 +6,70 @@
 
 /*
   NEXUS by Aetheris — Design System
-  Philosophy: A high-frequency data engine disguised as a Swiss luxury timepiece.
-  All colors are HSL. Radii are 0 (sharp). Borders are hairline.
+  Philosophy: A high-precision competition intelligence platform.
+  Strictly grayscale HSL. Rounded, airy, and editorial.
 */
 
 @layer base {
   :root {
-    /* Surfaces */
+    /* Surfaces — pure grayscale */
     --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --foreground: 0 0% 9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 0 0% 9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 0 0% 9%;
 
-    /* Brand */
-    --primary: 222 47% 11%;
+    /* Brand — deep charcoal */
+    --primary: 0 0% 9%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 9%;
 
-    /* Muted / Silver */
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 20% 46%;
+    /* Muted */
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 44%;
 
-    --accent: 210 20% 90%;
-    --accent-foreground: 222 47% 11%;
+    --accent: 0 0% 92%;
+    --accent-foreground: 0 0% 9%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 0% 20%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Ultra-thin borders */
-    --border: 222 47% 11% / 0.08;
-    --input: 222 47% 11% / 0.12;
-    --ring: 222 47% 11%;
+    /* Borders — grayscale hairline */
+    --border: 0 0% 9% / 0.10;
+    --input: 0 0% 9% / 0.14;
+    --ring: 0 0% 9%;
 
-    /* Sharp corners everywhere */
-    --radius: 0px;
+    /* Radius — reference-matched rounded */
+    --radius: 10px;
 
-    /* Signal colors */
-    --live-red: 0 84% 60%;
-    --silver-mid: 215 20% 46%;
-    --silver-light: 210 40% 96%;
-    --silver-line: 210 14% 89%;
+    /* Signal colors — grayscale only */
+    --live-red: 0 0% 18%;
+    --silver-mid: 0 0% 44%;
+    --silver-light: 0 0% 95%;
+    --silver-line: 0 0% 87%;
 
-    /* Typography scale */
-    --font-display: 'Instrument Sans', sans-serif;
-    --font-mono: 'Geist Mono', monospace;
-    --font-body: 'Inter', sans-serif;
+    /* Typography */
+    --font-display: "Segoe UI", "Segoe UI Historic", system-ui, sans-serif;
+    --font-mono: "Geist Mono", Consolas, monospace;
+    --font-body: "Segoe UI", "Segoe UI Historic", system-ui, sans-serif;
 
     /* Motion */
     --precision-curve: cubic-bezier(0.16, 1, 0.3, 1);
 
     /* Sidebar */
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 222 47% 11%;
-    --sidebar-primary: 222 47% 11%;
+    --sidebar-foreground: 0 0% 9%;
+    --sidebar-primary: 0 0% 9%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 40% 96%;
-    --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 210 14% 89%;
-    --sidebar-ring: 222 47% 11%;
+    --sidebar-accent: 0 0% 95%;
+    --sidebar-accent-foreground: 0 0% 9%;
+    --sidebar-border: 0 0% 87%;
+    --sidebar-ring: 0 0% 9%;
   }
 }
 
@@ -88,12 +88,11 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 
   h1, h2, h3, h4, h5 {
     font-family: var(--font-display);
-    letter-spacing: -0.04em;
+    letter-spacing: -0.03em;
   }
 }
 
