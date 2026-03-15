@@ -55,12 +55,14 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
-        // Nexus-specific palette — strictly grayscale
-        "nexus-slate": "hsl(0 0% 9%)",
-        "nexus-silver": "hsl(0 0% 87%)",
-        "nexus-muted": "hsl(0 0% 44%)",
-        "nexus-surface": "hsl(0 0% 96%)",
-        "nexus-live": "hsl(0 0% 18%)",
+        // Nexus-specific palette — CSS var driven for dark mode
+        // Note: these are set as utility classes in index.css using CSS vars
+        // keeping these here as fallbacks
+        "nexus-slate": "hsl(var(--foreground))",
+        "nexus-silver": "hsl(var(--nexus-silver, 0 0% 87%))",
+        "nexus-muted": "hsl(var(--nexus-muted-fg, 0 0% 44%))",
+        "nexus-surface": "hsl(var(--nexus-surface, 0 0% 96%))",
+        "nexus-live": "hsl(var(--nexus-live, 0 0% 18%))",
       },
       borderRadius: {
         DEFAULT: "10px",
