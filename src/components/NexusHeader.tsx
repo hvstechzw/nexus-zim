@@ -74,12 +74,6 @@ export function NexusHeader() {
                 {link.label}
               </a>
             ))}
-            <a
-              href="/admin"
-              className="px-4 h-9 flex items-center text-xs tracking-wide font-medium rounded-md transition-colors duration-200 text-nexus-muted hover:text-foreground hover:bg-nexus-surface"
-            >
-              Admin
-            </a>
           </nav>
 
           {/* Right actions */}
