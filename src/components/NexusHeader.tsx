@@ -11,6 +11,8 @@ const NAV_LINKS = [
   { label: "Standings", href: "#standings" },
   { label: "Register", href: "#register" },
   { label: "Broadcast", href: "#broadcast" },
+  { label: "Competitions", href: "/competitions" },
+  { label: "Scoring", href: "/scoring" },
 ];
 
 export function NexusHeader() {
