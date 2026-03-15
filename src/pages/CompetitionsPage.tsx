@@ -17,7 +17,7 @@ export default function CompetitionsPage() {
     queryKey: ["competitions-page", filterLevel, filterDiscipline],
     queryFn: async () => {
       let query = supabase.from("competitions").select("*").order("created_at", { ascending: false });
-      if (filterLevel !== "all") query = query.eq("level", filterLevel);
+      if (filterLevel !== "all") query = query.eq("level", filterLevel as "primary_school" | "secondary_school" | "club_academy" | "provincial" | "national_league" | "national_cup" | "international");
       if (filterDiscipline !== "all") query = query.eq("discipline", filterDiscipline);
       const { data } = await query;
       return data || [];
