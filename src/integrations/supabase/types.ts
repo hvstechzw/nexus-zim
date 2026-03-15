@@ -14,16 +14,1489 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      athlete_transfers: {
+        Row: {
+          approved_by: string | null
+          athlete_id: string
+          created_at: string
+          from_division: string | null
+          from_team_id: string | null
+          id: string
+          reason: string | null
+          status: string | null
+          to_division: string | null
+          to_team_id: string | null
+          transfer_date: string | null
+        }
+        Insert: {
+          approved_by?: string | null
+          athlete_id: string
+          created_at?: string
+          from_division?: string | null
+          from_team_id?: string | null
+          id?: string
+          reason?: string | null
+          status?: string | null
+          to_division?: string | null
+          to_team_id?: string | null
+          transfer_date?: string | null
+        }
+        Update: {
+          approved_by?: string | null
+          athlete_id?: string
+          created_at?: string
+          from_division?: string | null
+          from_team_id?: string | null
+          id?: string
+          reason?: string | null
+          status?: string | null
+          to_division?: string | null
+          to_team_id?: string | null
+          transfer_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "athlete_transfers_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "athlete_transfers_from_team_id_fkey"
+            columns: ["from_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "athlete_transfers_to_team_id_fkey"
+            columns: ["to_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      athletes: {
+        Row: {
+          club_name: string | null
+          created_at: string
+          date_of_birth: string | null
+          disciplines: string[]
+          display_name: string | null
+          first_name: string
+          gender: string | null
+          id: string
+          id_card_number: string | null
+          is_active: boolean | null
+          is_suspended: boolean | null
+          last_name: string
+          medical_waiver_date: string | null
+          medical_waiver_signed: boolean | null
+          nfc_tag: string | null
+          personal_bests: Json | null
+          photo_url: string | null
+          province: string
+          qr_code: string | null
+          school_name: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          club_name?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          disciplines: string[]
+          display_name?: string | null
+          first_name: string
+          gender?: string | null
+          id?: string
+          id_card_number?: string | null
+          is_active?: boolean | null
+          is_suspended?: boolean | null
+          last_name: string
+          medical_waiver_date?: string | null
+          medical_waiver_signed?: boolean | null
+          nfc_tag?: string | null
+          personal_bests?: Json | null
+          photo_url?: string | null
+          province: string
+          qr_code?: string | null
+          school_name?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          club_name?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          disciplines?: string[]
+          display_name?: string | null
+          first_name?: string
+          gender?: string | null
+          id?: string
+          id_card_number?: string | null
+          is_active?: boolean | null
+          is_suspended?: boolean | null
+          last_name?: string
+          medical_waiver_date?: string | null
+          medical_waiver_signed?: boolean | null
+          nfc_tag?: string | null
+          personal_bests?: Json | null
+          photo_url?: string | null
+          province?: string
+          qr_code?: string | null
+          school_name?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      broadcasts: {
+        Row: {
+          commentary_enabled: boolean | null
+          competition_id: string | null
+          created_at: string
+          created_by: string | null
+          ended_at: string | null
+          fixture_id: string | null
+          graphics_data: Json | null
+          id: string
+          is_live: boolean | null
+          platform: string | null
+          quality: string | null
+          started_at: string | null
+          stream_url: string | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          viewer_count: number | null
+        }
+        Insert: {
+          commentary_enabled?: boolean | null
+          competition_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          ended_at?: string | null
+          fixture_id?: string | null
+          graphics_data?: Json | null
+          id?: string
+          is_live?: boolean | null
+          platform?: string | null
+          quality?: string | null
+          started_at?: string | null
+          stream_url?: string | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          viewer_count?: number | null
+        }
+        Update: {
+          commentary_enabled?: boolean | null
+          competition_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          ended_at?: string | null
+          fixture_id?: string | null
+          graphics_data?: Json | null
+          id?: string
+          is_live?: boolean | null
+          platform?: string | null
+          quality?: string | null
+          started_at?: string | null
+          stream_url?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          viewer_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broadcasts_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "broadcasts_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competitions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          discipline: string
+          end_date: string | null
+          entry_fee: number | null
+          format: Database["public"]["Enums"]["bracket_format"]
+          id: string
+          is_broadcast: boolean | null
+          level: Database["public"]["Enums"]["competition_level"]
+          logo_url: string | null
+          max_participants: number | null
+          name: string
+          parent_id: string | null
+          prize_pool: number | null
+          province: string | null
+          registration_deadline: string | null
+          rules: Json | null
+          season: string | null
+          slug: string | null
+          sponsor: string | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["competition_status"]
+          updated_at: string
+          venue_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discipline: string
+          end_date?: string | null
+          entry_fee?: number | null
+          format?: Database["public"]["Enums"]["bracket_format"]
+          id?: string
+          is_broadcast?: boolean | null
+          level: Database["public"]["Enums"]["competition_level"]
+          logo_url?: string | null
+          max_participants?: number | null
+          name: string
+          parent_id?: string | null
+          prize_pool?: number | null
+          province?: string | null
+          registration_deadline?: string | null
+          rules?: Json | null
+          season?: string | null
+          slug?: string | null
+          sponsor?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["competition_status"]
+          updated_at?: string
+          venue_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discipline?: string
+          end_date?: string | null
+          entry_fee?: number | null
+          format?: Database["public"]["Enums"]["bracket_format"]
+          id?: string
+          is_broadcast?: boolean | null
+          level?: Database["public"]["Enums"]["competition_level"]
+          logo_url?: string | null
+          max_participants?: number | null
+          name?: string
+          parent_id?: string | null
+          prize_pool?: number | null
+          province?: string | null
+          registration_deadline?: string | null
+          rules?: Json | null
+          season?: string | null
+          slug?: string | null
+          sponsor?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["competition_status"]
+          updated_at?: string
+          venue_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competitions_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competitions_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      disciplinary_records: {
+        Row: {
+          appeal_status: string | null
+          athlete_id: string | null
+          competition_id: string | null
+          created_at: string
+          description: string | null
+          fixture_id: string | null
+          id: string
+          is_active: boolean | null
+          issued_by: string | null
+          official_id: string | null
+          reason: string
+          severity: Database["public"]["Enums"]["disciplinary_severity"]
+          suspension_games: number | null
+          suspension_until: string | null
+          team_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          appeal_status?: string | null
+          athlete_id?: string | null
+          competition_id?: string | null
+          created_at?: string
+          description?: string | null
+          fixture_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          issued_by?: string | null
+          official_id?: string | null
+          reason: string
+          severity: Database["public"]["Enums"]["disciplinary_severity"]
+          suspension_games?: number | null
+          suspension_until?: string | null
+          team_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          appeal_status?: string | null
+          athlete_id?: string | null
+          competition_id?: string | null
+          created_at?: string
+          description?: string | null
+          fixture_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          issued_by?: string | null
+          official_id?: string | null
+          reason?: string
+          severity?: Database["public"]["Enums"]["disciplinary_severity"]
+          suspension_games?: number | null
+          suspension_until?: string | null
+          team_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "disciplinary_records_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disciplinary_records_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disciplinary_records_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disciplinary_records_official_id_fkey"
+            columns: ["official_id"]
+            isOneToOne: false
+            referencedRelation: "officials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "disciplinary_records_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fixtures: {
+        Row: {
+          away_athlete_id: string | null
+          away_score: number | null
+          away_team_id: string | null
+          broadcast_url: string | null
+          competition_id: string
+          created_at: string
+          ended_at: string | null
+          extra_time_score: Json | null
+          home_athlete_id: string | null
+          home_score: number | null
+          home_team_id: string | null
+          id: string
+          is_broadcast: boolean | null
+          match_data: Json | null
+          penalties_score: Json | null
+          period_scores: Json | null
+          referee_id: string | null
+          round_label: string | null
+          round_number: number | null
+          scheduled_at: string | null
+          scorer_id: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["match_status"]
+          updated_at: string
+          venue_id: string | null
+          winner_id: string | null
+        }
+        Insert: {
+          away_athlete_id?: string | null
+          away_score?: number | null
+          away_team_id?: string | null
+          broadcast_url?: string | null
+          competition_id: string
+          created_at?: string
+          ended_at?: string | null
+          extra_time_score?: Json | null
+          home_athlete_id?: string | null
+          home_score?: number | null
+          home_team_id?: string | null
+          id?: string
+          is_broadcast?: boolean | null
+          match_data?: Json | null
+          penalties_score?: Json | null
+          period_scores?: Json | null
+          referee_id?: string | null
+          round_label?: string | null
+          round_number?: number | null
+          scheduled_at?: string | null
+          scorer_id?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["match_status"]
+          updated_at?: string
+          venue_id?: string | null
+          winner_id?: string | null
+        }
+        Update: {
+          away_athlete_id?: string | null
+          away_score?: number | null
+          away_team_id?: string | null
+          broadcast_url?: string | null
+          competition_id?: string
+          created_at?: string
+          ended_at?: string | null
+          extra_time_score?: Json | null
+          home_athlete_id?: string | null
+          home_score?: number | null
+          home_team_id?: string | null
+          id?: string
+          is_broadcast?: boolean | null
+          match_data?: Json | null
+          penalties_score?: Json | null
+          period_scores?: Json | null
+          referee_id?: string | null
+          round_label?: string | null
+          round_number?: number | null
+          scheduled_at?: string | null
+          scorer_id?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["match_status"]
+          updated_at?: string
+          venue_id?: string | null
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fixtures_away_athlete_id_fkey"
+            columns: ["away_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixtures_away_team_id_fkey"
+            columns: ["away_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixtures_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixtures_home_athlete_id_fkey"
+            columns: ["home_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixtures_home_team_id_fkey"
+            columns: ["home_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixtures_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      judge_scores: {
+        Row: {
+          athlete_id: string | null
+          created_at: string
+          fixture_id: string
+          id: string
+          is_anonymous: boolean | null
+          judge_id: string
+          notes: string | null
+          rubric: Json
+          team_id: string | null
+          total_score: number | null
+        }
+        Insert: {
+          athlete_id?: string | null
+          created_at?: string
+          fixture_id: string
+          id?: string
+          is_anonymous?: boolean | null
+          judge_id: string
+          notes?: string | null
+          rubric?: Json
+          team_id?: string | null
+          total_score?: number | null
+        }
+        Update: {
+          athlete_id?: string | null
+          created_at?: string
+          fixture_id?: string
+          id?: string
+          is_anonymous?: boolean | null
+          judge_id?: string
+          notes?: string | null
+          rubric?: Json
+          team_id?: string | null
+          total_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "judge_scores_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "judge_scores_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "judge_scores_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          data: Json | null
+          id: string
+          is_read: boolean | null
+          title: string
+          type: string
+          user_id: string | null
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          data?: Json | null
+          id?: string
+          is_read?: boolean | null
+          title: string
+          type: string
+          user_id?: string | null
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          data?: Json | null
+          id?: string
+          is_read?: boolean | null
+          title?: string
+          type?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      official_assignments: {
+        Row: {
+          competition_id: string | null
+          created_at: string
+          fixture_id: string | null
+          id: string
+          official_id: string
+          payment_status: string | null
+          role: string
+          status: string | null
+          stipend: number | null
+        }
+        Insert: {
+          competition_id?: string | null
+          created_at?: string
+          fixture_id?: string | null
+          id?: string
+          official_id: string
+          payment_status?: string | null
+          role: string
+          status?: string | null
+          stipend?: number | null
+        }
+        Update: {
+          competition_id?: string | null
+          created_at?: string
+          fixture_id?: string | null
+          id?: string
+          official_id?: string
+          payment_status?: string | null
+          role?: string
+          status?: string | null
+          stipend?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "official_assignments_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "official_assignments_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "official_assignments_official_id_fkey"
+            columns: ["official_id"]
+            isOneToOne: false
+            referencedRelation: "officials"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      officials: {
+        Row: {
+          bank_account: Json | null
+          certification_level: string | null
+          created_at: string
+          disciplines: string[]
+          first_name: string
+          id: string
+          is_active: boolean | null
+          last_name: string
+          performance_rating: number | null
+          province: string | null
+          qualifications: string[] | null
+          role: string
+          total_matches: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bank_account?: Json | null
+          certification_level?: string | null
+          created_at?: string
+          disciplines: string[]
+          first_name: string
+          id?: string
+          is_active?: boolean | null
+          last_name: string
+          performance_rating?: number | null
+          province?: string | null
+          qualifications?: string[] | null
+          role: string
+          total_matches?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bank_account?: Json | null
+          certification_level?: string | null
+          created_at?: string
+          disciplines?: string[]
+          first_name?: string
+          id?: string
+          is_active?: boolean | null
+          last_name?: string
+          performance_rating?: number | null
+          province?: string | null
+          qualifications?: string[] | null
+          role?: string
+          total_matches?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      poll_votes: {
+        Row: {
+          created_at: string
+          id: string
+          option_index: number
+          poll_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_index: number
+          poll_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_index?: number
+          poll_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      polls: {
+        Row: {
+          competition_id: string | null
+          created_at: string
+          created_by: string | null
+          ends_at: string | null
+          fixture_id: string | null
+          id: string
+          is_active: boolean | null
+          options: Json
+          question: string
+        }
+        Insert: {
+          competition_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          fixture_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          options?: Json
+          question: string
+        }
+        Update: {
+          competition_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string | null
+          fixture_id?: string | null
+          id?: string
+          is_active?: boolean | null
+          options?: Json
+          question?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "polls_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "polls_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          date_of_birth: string | null
+          display_name: string | null
+          first_name: string | null
+          id: string
+          last_name: string | null
+          phone: string | null
+          province: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          display_name?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          province?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          display_name?: string | null
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          phone?: string | null
+          province?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      records: {
+        Row: {
+          achieved_at: string | null
+          age_group: string | null
+          athlete_id: string | null
+          competition_id: string | null
+          created_at: string
+          discipline: string
+          event_name: string
+          fixture_id: string | null
+          gender: string | null
+          id: string
+          is_verified: boolean | null
+          previous_record: string | null
+          province: string | null
+          record_type: string
+          team_id: string | null
+          unit: string | null
+          value: string
+          verified_by: string | null
+        }
+        Insert: {
+          achieved_at?: string | null
+          age_group?: string | null
+          athlete_id?: string | null
+          competition_id?: string | null
+          created_at?: string
+          discipline: string
+          event_name: string
+          fixture_id?: string | null
+          gender?: string | null
+          id?: string
+          is_verified?: boolean | null
+          previous_record?: string | null
+          province?: string | null
+          record_type: string
+          team_id?: string | null
+          unit?: string | null
+          value: string
+          verified_by?: string | null
+        }
+        Update: {
+          achieved_at?: string | null
+          age_group?: string | null
+          athlete_id?: string | null
+          competition_id?: string | null
+          created_at?: string
+          discipline?: string
+          event_name?: string
+          fixture_id?: string | null
+          gender?: string | null
+          id?: string
+          is_verified?: boolean | null
+          previous_record?: string | null
+          province?: string | null
+          record_type?: string
+          team_id?: string | null
+          unit?: string | null
+          value?: string
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "records_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "records_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "records_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "records_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      registrations: {
+        Row: {
+          athlete_id: string | null
+          competition_id: string
+          created_at: string
+          division: string | null
+          id: string
+          notes: string | null
+          payment_status: string | null
+          registration_type: string
+          reviewed_by: string | null
+          seed_number: number | null
+          status: Database["public"]["Enums"]["registration_status"]
+          submitted_by: string | null
+          team_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          athlete_id?: string | null
+          competition_id: string
+          created_at?: string
+          division?: string | null
+          id?: string
+          notes?: string | null
+          payment_status?: string | null
+          registration_type: string
+          reviewed_by?: string | null
+          seed_number?: number | null
+          status?: Database["public"]["Enums"]["registration_status"]
+          submitted_by?: string | null
+          team_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          athlete_id?: string | null
+          competition_id?: string
+          created_at?: string
+          division?: string | null
+          id?: string
+          notes?: string | null
+          payment_status?: string | null
+          registration_type?: string
+          reviewed_by?: string | null
+          seed_number?: number | null
+          status?: Database["public"]["Enums"]["registration_status"]
+          submitted_by?: string | null
+          team_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "registrations_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registrations_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registrations_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      score_entries: {
+        Row: {
+          athlete_id: string | null
+          created_at: string
+          event_type: string
+          fixture_id: string
+          id: string
+          metadata: Json | null
+          minute: number | null
+          period: string | null
+          scorer_id: string | null
+          team_id: string | null
+          value: number | null
+        }
+        Insert: {
+          athlete_id?: string | null
+          created_at?: string
+          event_type: string
+          fixture_id: string
+          id?: string
+          metadata?: Json | null
+          minute?: number | null
+          period?: string | null
+          scorer_id?: string | null
+          team_id?: string | null
+          value?: number | null
+        }
+        Update: {
+          athlete_id?: string | null
+          created_at?: string
+          event_type?: string
+          fixture_id?: string
+          id?: string
+          metadata?: Json | null
+          minute?: number | null
+          period?: string | null
+          scorer_id?: string | null
+          team_id?: string | null
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "score_entries_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "score_entries_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "score_entries_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sponsorships: {
+        Row: {
+          amount: number | null
+          billboard_slots: Json | null
+          competition_id: string | null
+          contract_end: string | null
+          contract_start: string | null
+          created_at: string
+          id: string
+          sponsor_logo: string | null
+          sponsor_name: string
+          tier: string | null
+        }
+        Insert: {
+          amount?: number | null
+          billboard_slots?: Json | null
+          competition_id?: string | null
+          contract_end?: string | null
+          contract_start?: string | null
+          created_at?: string
+          id?: string
+          sponsor_logo?: string | null
+          sponsor_name: string
+          tier?: string | null
+        }
+        Update: {
+          amount?: number | null
+          billboard_slots?: Json | null
+          competition_id?: string | null
+          contract_end?: string | null
+          contract_start?: string | null
+          created_at?: string
+          id?: string
+          sponsor_logo?: string | null
+          sponsor_name?: string
+          tier?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsorships_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      standings: {
+        Row: {
+          athlete_id: string | null
+          bonus_points: number | null
+          competition_id: string
+          drawn: number | null
+          form: string[] | null
+          id: string
+          lost: number | null
+          played: number | null
+          points: number | null
+          position: number | null
+          score_against: number | null
+          score_diff: number | null
+          score_for: number | null
+          team_id: string | null
+          updated_at: string
+          won: number | null
+        }
+        Insert: {
+          athlete_id?: string | null
+          bonus_points?: number | null
+          competition_id: string
+          drawn?: number | null
+          form?: string[] | null
+          id?: string
+          lost?: number | null
+          played?: number | null
+          points?: number | null
+          position?: number | null
+          score_against?: number | null
+          score_diff?: number | null
+          score_for?: number | null
+          team_id?: string | null
+          updated_at?: string
+          won?: number | null
+        }
+        Update: {
+          athlete_id?: string | null
+          bonus_points?: number | null
+          competition_id?: string
+          drawn?: number | null
+          form?: string[] | null
+          id?: string
+          lost?: number | null
+          played?: number | null
+          points?: number | null
+          position?: number | null
+          score_against?: number | null
+          score_diff?: number | null
+          score_for?: number | null
+          team_id?: string | null
+          updated_at?: string
+          won?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "standings_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "standings_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "standings_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          club_name: string | null
+          created_at: string
+          discipline: string
+          founded_year: number | null
+          id: string
+          is_active: boolean | null
+          kit_colors: string[] | null
+          level: Database["public"]["Enums"]["competition_level"] | null
+          logo_url: string | null
+          manager_id: string | null
+          name: string
+          province: string | null
+          school_name: string | null
+          short_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          club_name?: string | null
+          created_at?: string
+          discipline: string
+          founded_year?: number | null
+          id?: string
+          is_active?: boolean | null
+          kit_colors?: string[] | null
+          level?: Database["public"]["Enums"]["competition_level"] | null
+          logo_url?: string | null
+          manager_id?: string | null
+          name: string
+          province?: string | null
+          school_name?: string | null
+          short_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          club_name?: string | null
+          created_at?: string
+          discipline?: string
+          founded_year?: number | null
+          id?: string
+          is_active?: boolean | null
+          kit_colors?: string[] | null
+          level?: Database["public"]["Enums"]["competition_level"] | null
+          logo_url?: string | null
+          manager_id?: string | null
+          name?: string
+          province?: string | null
+          school_name?: string | null
+          short_name?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          granted_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      venue_bookings: {
+        Row: {
+          booked_by: string | null
+          competition_id: string | null
+          created_at: string
+          end_time: string
+          fixture_id: string | null
+          id: string
+          notes: string | null
+          start_time: string
+          status: string | null
+          venue_id: string
+        }
+        Insert: {
+          booked_by?: string | null
+          competition_id?: string | null
+          created_at?: string
+          end_time: string
+          fixture_id?: string | null
+          id?: string
+          notes?: string | null
+          start_time: string
+          status?: string | null
+          venue_id: string
+        }
+        Update: {
+          booked_by?: string | null
+          competition_id?: string | null
+          created_at?: string
+          end_time?: string
+          fixture_id?: string | null
+          id?: string
+          notes?: string | null
+          start_time?: string
+          status?: string | null
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_bookings_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venue_bookings_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venue_bookings_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      venues: {
+        Row: {
+          address: string | null
+          capacity: number | null
+          city: string
+          created_at: string
+          equipment_inventory: Json | null
+          facilities: string[] | null
+          id: string
+          is_active: boolean | null
+          lat: number | null
+          lng: number | null
+          name: string
+          province: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          capacity?: number | null
+          city: string
+          created_at?: string
+          equipment_inventory?: Json | null
+          facilities?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          name: string
+          province: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          capacity?: number | null
+          city?: string
+          created_at?: string
+          equipment_inventory?: Json | null
+          facilities?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          province?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role:
+        | "super_admin"
+        | "admin"
+        | "federation_official"
+        | "referee"
+        | "scorer"
+        | "broadcaster"
+        | "athlete"
+        | "team_manager"
+        | "school_coordinator"
+        | "viewer"
+      bracket_format:
+        | "round_robin"
+        | "single_elimination"
+        | "double_elimination"
+        | "swiss"
+        | "league"
+        | "ladder"
+        | "custom_heats"
+      competition_level:
+        | "primary_school"
+        | "secondary_school"
+        | "club_academy"
+        | "provincial"
+        | "national_league"
+        | "national_cup"
+        | "international"
+      competition_status:
+        | "draft"
+        | "registration_open"
+        | "registration_closed"
+        | "ongoing"
+        | "completed"
+        | "cancelled"
+      disciplinary_severity:
+        | "warning"
+        | "yellow_card"
+        | "red_card"
+        | "suspension"
+        | "ban"
+        | "lifetime_ban"
+      match_status:
+        | "scheduled"
+        | "live"
+        | "completed"
+        | "postponed"
+        | "cancelled"
+        | "awarded"
+      registration_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "withdrawn"
+        | "suspended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +1623,68 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: [
+        "super_admin",
+        "admin",
+        "federation_official",
+        "referee",
+        "scorer",
+        "broadcaster",
+        "athlete",
+        "team_manager",
+        "school_coordinator",
+        "viewer",
+      ],
+      bracket_format: [
+        "round_robin",
+        "single_elimination",
+        "double_elimination",
+        "swiss",
+        "league",
+        "ladder",
+        "custom_heats",
+      ],
+      competition_level: [
+        "primary_school",
+        "secondary_school",
+        "club_academy",
+        "provincial",
+        "national_league",
+        "national_cup",
+        "international",
+      ],
+      competition_status: [
+        "draft",
+        "registration_open",
+        "registration_closed",
+        "ongoing",
+        "completed",
+        "cancelled",
+      ],
+      disciplinary_severity: [
+        "warning",
+        "yellow_card",
+        "red_card",
+        "suspension",
+        "ban",
+        "lifetime_ban",
+      ],
+      match_status: [
+        "scheduled",
+        "live",
+        "completed",
+        "postponed",
+        "cancelled",
+        "awarded",
+      ],
+      registration_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "withdrawn",
+        "suspended",
+      ],
+    },
   },
 } as const
