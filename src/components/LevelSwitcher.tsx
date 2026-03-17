@@ -1,14 +1,18 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
-const LEVELS = [
-  { id: "primary", label: "Primary Schools", count: 1840 },
-  { id: "secondary", label: "Secondary Schools", count: 924 },
-  { id: "club", label: "Club / Academy", count: 613 },
-  { id: "provincial", label: "Provincial", count: 210 },
-  { id: "national", label: "National League", count: 48 },
-  { id: "cups", label: "Cups & Knockouts", count: 72 },
-];
+const LEVEL_MAP: Record<string, string> = {
+  all: "All Levels",
+  primary_school: "Primary Schools",
+  secondary_school: "Secondary Schools",
+  club_academy: "Club / Academy",
+  provincial: "Provincial",
+  national_league: "National League",
+  national_cup: "Cups & Knockouts",
+  international: "International",
+};
 
 const SPORTS = [
   "All", "Football", "Rugby", "Cricket", "Athletics", "Swimming",
@@ -22,8 +26,28 @@ interface LevelSwitcherProps {
 }
 
 export function LevelSwitcher({ onLevelChange, onSportChange }: LevelSwitcherProps) {
-  const [activeLevel, setActiveLevel] = useState("national");
+  const [activeLevel, setActiveLevel] = useState("all");
   const [activeSport, setActiveSport] = useState("All");
+
+  // Fetch live counts from database grouped by level
+  const { data: levelCounts = {} } = useQuery({
+    queryKey: ["level-counts"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("competitions")
+        .select("level")
+        .neq("status", "cancelled");
+      if (!data) return {};
+      const counts: Record<string, number> = { all: data.length };
+      data.forEach(row => {
+        counts[row.level] = (counts[row.level] || 0) + 1;
+      });
+      return counts;
+    },
+    refetchInterval: 30000,
+  });
+
+  const LEVELS = Object.keys(LEVEL_MAP);
 
   const handleLevel = (id: string) => {
     setActiveLevel(id);
@@ -37,37 +61,32 @@ export function LevelSwitcher({ onLevelChange, onSportChange }: LevelSwitcherPro
 
   return (
     <div className="hairline-b">
-      {/* Section label */}
       <div className="px-8 py-4 hairline-b">
         <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">Filter by Level & Discipline</p>
       </div>
 
-      {/* Level pills */}
+      {/* Level pills — live counts */}
       <div className="overflow-x-auto hairline-b">
         <div className="flex min-w-max px-5 py-4 gap-2">
-          {LEVELS.map((level) => (
-            <button
-              key={level.id}
-              onClick={() => handleLevel(level.id)}
-              className={`relative px-5 py-3 flex flex-col items-start gap-0.5 rounded-xl transition-all duration-200 btn-click
-                ${activeLevel === level.id
-                  ? "bg-foreground shadow-sm"
-                  : "bg-nexus-surface hover:bg-nexus-silver/60"}`}
-            >
-              <span
-                className={`text-[10px] tracking-[0.12em] uppercase font-medium transition-colors duration-200
-                  ${activeLevel === level.id ? "text-primary-foreground/70" : "text-nexus-muted"}`}
+          {LEVELS.map((level) => {
+            const count = levelCounts[level] ?? 0;
+            const active = activeLevel === level;
+            return (
+              <button
+                key={level}
+                onClick={() => handleLevel(level)}
+                className={`relative px-5 py-3 flex flex-col items-start gap-0.5 rounded-xl transition-all duration-200 btn-click
+                  ${active ? "bg-foreground shadow-sm" : "bg-nexus-surface hover:bg-nexus-silver/60"}`}
               >
-                {level.label}
-              </span>
-              <span
-                className={`mono text-base font-bold transition-colors duration-200
-                  ${activeLevel === level.id ? "text-primary-foreground" : "text-foreground"}`}
-              >
-                {level.count.toLocaleString()}
-              </span>
-            </button>
-          ))}
+                <span className={`text-[10px] tracking-[0.12em] uppercase font-medium transition-colors duration-200 ${active ? "text-primary-foreground/70" : "text-nexus-muted"}`}>
+                  {LEVEL_MAP[level]}
+                </span>
+                <span className={`mono text-base font-bold transition-colors duration-200 ${active ? "text-primary-foreground" : "text-foreground"}`}>
+                  {count > 0 ? count.toLocaleString() : "—"}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
