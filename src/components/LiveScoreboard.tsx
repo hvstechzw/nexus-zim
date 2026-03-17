@@ -68,7 +68,7 @@ export function LiveScoreboard() {
         </div>
         <div className="flex flex-col items-center justify-center py-24 text-center px-8">
           <p className="text-nexus-muted mono text-sm">No live or scheduled fixtures at this time.</p>
-          <p className="text-nexus-muted mono text-xs mt-2">Create fixtures in the Admin Dashboard to see them here.</p>
+          <p className="text-nexus-muted mono text-xs mt-2">Fixtures will appear here once competitions and matches are created.</p>
         </div>
       </section>
     );
