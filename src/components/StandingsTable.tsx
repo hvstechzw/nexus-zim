@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 export function StandingsTable() {
-  const [activeCompId, setActiveCompId] = useState<string | null>(null);
+  const [activeCompId, setActiveCompId] = useState<string>("");
 
   const { data: competitions = [] } = useQuery({
     queryKey: ["standings-competitions"],
