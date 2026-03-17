@@ -90,10 +90,10 @@ export default function FixturesPage() {
       if (!selectedCompId) return [];
       const { data } = await supabase
         .from("fixtures")
-        .select("*, home_team:home_team_id(name), away_team:away_team_id(name), venue:venue_id(name, city)")
+        .select("id, home_team_id, away_team_id, venue_id, scheduled_at, round_label, status")
         .eq("competition_id", selectedCompId)
         .order("round_number", { ascending: true });
-      return (data || []) as Fixture[];
+      return (data || []) as unknown as Fixture[];
     },
     enabled: !!selectedCompId,
   });
