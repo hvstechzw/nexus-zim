@@ -9,6 +9,7 @@ import Index from "./pages/Index.tsx";
 import AdminDashboard from "./pages/AdminDashboard.tsx";
 import CompetitionsPage from "./pages/CompetitionsPage.tsx";
 import ScoringPage from "./pages/ScoringPage.tsx";
+import FixturesPage from "./pages/FixturesPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
