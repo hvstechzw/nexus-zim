@@ -233,6 +233,10 @@
     animation: flip-number 300ms var(--precision-curve);
   }
 
+  /* Hide scrollbar for filter rows */
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
   /* Scrollbar — minimal */
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: hsl(var(--background)); }
