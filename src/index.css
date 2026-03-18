@@ -264,4 +264,44 @@
   .text-nexus-live  { color: hsl(var(--nexus-live)); }
   .bg-nexus-live    { background-color: hsl(var(--nexus-live)); }
   .border-nexus-silver { border-color: hsl(var(--nexus-silver)); }
+
+  /* Score sizes */
+  .text-score-lg { font-size: clamp(52px, 8vw, 88px); line-height: 1; }
+  .text-score-md { font-size: clamp(28px, 4vw, 44px); line-height: 1; }
+  .text-score-sm { font-size: clamp(18px, 2.5vw, 28px); line-height: 1; }
+  .text-display-lg { font-size: clamp(26px, 4vw, 48px); line-height: 1.1; }
+
+  /* Gradient shimmer for live events */
+  @keyframes shimmer {
+    0% { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+  }
+  .shimmer-live {
+    background: linear-gradient(90deg, hsl(var(--nexus-surface)) 25%, hsl(var(--nexus-silver)) 50%, hsl(var(--nexus-surface)) 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.8s infinite linear;
+  }
+
+  /* Subtle neon glow for live indicator */
+  .glow-live {
+    box-shadow: 0 0 10px 2px hsl(var(--nexus-live) / 0.4);
+  }
+
+  /* Score pop animation */
+  @keyframes score-pop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.25); }
+    70% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+  }
+  .score-pop {
+    animation: score-pop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Mobile tap targets */
+  @media (max-width: 640px) {
+    .hairline { border-radius: 8px; }
+    .text-score-lg { font-size: 48px; }
+    .text-display-lg { font-size: 24px; }
+  }
 }
