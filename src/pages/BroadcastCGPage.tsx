@@ -375,12 +375,13 @@ function FixtureSelector() {
     queryFn: async () => {
       const { data } = await supabase.from("fixtures")
         .select(`id, status, round_label, home_score, away_score,
-          home_team:home_team_id(name), away_team:away_team_id(name),
+          home_team:home_team_id!fixtures_home_team_id_fkey(name),
+          away_team:away_team_id!fixtures_away_team_id_fkey(name),
           competition:competition_id(name, discipline)`)
         .in("status", ["live", "scheduled"])
         .order("scheduled_at", { ascending: true })
         .limit(30);
-      return data || [];
+      return (data || []) as unknown[];
     },
   });
 
