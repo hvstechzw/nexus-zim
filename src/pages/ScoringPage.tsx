@@ -8,16 +8,18 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
 const SCORING_MODULES = [
-  { id: "football", label: "Football / Soccer", events: ["Goal","Yellow Card","Red Card","Substitution","Penalty","Own Goal","Corner","Offside"], periods: ["1st Half","2nd Half","Extra Time AET","Penalties"] },
-  { id: "rugby", label: "Rugby Union", events: ["Try (5pts)","Conversion (2pts)","Penalty Kick (3pts)","Drop Goal (3pts)","Yellow Card","Red Card"], periods: ["1st Half","2nd Half","Extra Time"] },
-  { id: "cricket", label: "Cricket", events: ["Wicket","No Ball","Wide","Boundary 4","Six","Dot Ball","LBW","Run Out","Catch Out"], periods: ["1st Innings","2nd Innings","Super Over"] },
-  { id: "basketball", label: "Basketball", events: ["2-Point Field Goal","3-Point Field Goal","Free Throw (1pt)","Foul","Technical Foul","Timeout","Substitution"], periods: ["Q1","Q2","Q3","Q4","OT"] },
-  { id: "quiz", label: "Quiz / Academic", events: ["Correct Answer (+10)","Buzzer First (+5)","Wrong Answer (−5)","Bonus Question (+20)","Pass","Timeout"], periods: ["Round 1","Round 2","Round 3","Final Round","Tie-breaker"] },
-  { id: "debate", label: "Debate / Arts", events: ["Point Awarded","POI Accepted","POI Rejected","Time Warning","Motion Win","Style Mark","Substance Mark"], periods: ["Opening","Rebuttal","Summary","Floor Questions"] },
-  { id: "athletics", label: "Athletics", events: ["False Start","DNS","DNF","Record Set","Lane Violation","Finish Recorded","DQ"], periods: ["Heat 1","Heat 2","Semi-Final","Final"] },
-  { id: "chess", label: "Chess", events: ["Win (1pt)","Draw (0.5pt)","Loss (0pt)","Time Forfeit","Illegal Move","Resignation"], periods: ["Round 1","Round 2","Round 3","Round 4","Round 5","Final Round"] },
-  { id: "swimming", label: "Swimming", events: ["False Start","DQ","DNS","DNF","Record Set","Finish Recorded"], periods: ["Heat","Semi-Final","Final"] },
-  { id: "netball", label: "Netball", events: ["Goal","Turnover","Foul","Substitution","Penalty"], periods: ["Q1","Q2","Q3","Q4"] },
+  { id: "football", label: "Football / Soccer", icon: "⚽", events: ["Goal","Yellow Card","Red Card","Substitution","Penalty","Own Goal","Corner","Offside"], periods: ["1st Half","2nd Half","Extra Time AET","Penalties"] },
+  { id: "rugby", label: "Rugby Union", icon: "🏉", events: ["Try (5pts)","Conversion (2pts)","Penalty Kick (3pts)","Drop Goal (3pts)","Yellow Card","Red Card"], periods: ["1st Half","2nd Half","Extra Time"] },
+  { id: "cricket", label: "Cricket", icon: "🏏", events: ["Wicket","No Ball","Wide","Boundary 4","Six","Dot Ball","LBW","Run Out","Catch Out"], periods: ["1st Innings","2nd Innings","Super Over"] },
+  { id: "basketball", label: "Basketball", icon: "🏀", events: ["2-Point Field Goal","3-Point Field Goal","Free Throw (1pt)","Foul","Technical Foul","Timeout","Substitution"], periods: ["Q1","Q2","Q3","Q4","OT"] },
+  { id: "volleyball", label: "Volleyball", icon: "🏐", events: ["Point","Ace (Service Point)","Attack Kill","Block Kill","Opponent Error","Substitution","Timeout","Set Won"], periods: ["Set 1","Set 2","Set 3","Set 4","Set 5 (Tie-break)"] },
+  { id: "netball", label: "Netball", icon: "🥅", events: ["Goal","Turnover","Foul","Obstruction","Substitution","Penalty"], periods: ["Q1","Q2","Q3","Q4"] },
+  { id: "quiz", label: "Quiz / Academic", icon: "🧠", events: ["Correct Answer (+10)","Buzzer First (+5)","Wrong Answer (−5)","Bonus Question (+20)","Pass","Timeout"], periods: ["Round 1","Round 2","Round 3","Final Round","Tie-breaker"] },
+  { id: "debate", label: "Debate / Arts", icon: "🎤", events: ["Point Awarded","POI Accepted","POI Rejected","Time Warning","Motion Win","Style Mark","Substance Mark"], periods: ["Opening","Rebuttal","Summary","Floor Questions"] },
+  { id: "athletics", label: "Athletics", icon: "🏃", events: ["False Start","DNS","DNF","Record Set","Lane Violation","Finish Recorded","DQ"], periods: ["Heat 1","Heat 2","Semi-Final","Final"] },
+  { id: "chess", label: "Chess", icon: "♟️", events: ["Win (1pt)","Draw (0.5pt)","Loss (0pt)","Time Forfeit","Illegal Move","Resignation"], periods: ["Round 1","Round 2","Round 3","Round 4","Round 5","Final Round"] },
+  { id: "swimming", label: "Swimming", icon: "🏊", events: ["False Start","DQ","DNS","DNF","Record Set","Finish Recorded"], periods: ["Heat","Semi-Final","Final"] },
+  { id: "hockey", label: "Field Hockey", icon: "🏑", events: ["Goal","Penalty Corner","Penalty Stroke","Yellow Card","Red Card","Green Card","Substitution"], periods: ["1st Half","2nd Half","Extra Time","Shootout"] },
 ];
 
 const SCORE_EVENTS: Record<string, Record<string, number>> = {
@@ -25,10 +27,13 @@ const SCORE_EVENTS: Record<string, Record<string, number>> = {
   rugby: { "Try (5pts)": 5, "Conversion (2pts)": 2, "Penalty Kick (3pts)": 3, "Drop Goal (3pts)": 3 },
   cricket: { "Boundary 4": 4, "Six": 6, "Wicket": 0, "No Ball": 1, "Wide": 1 },
   basketball: { "2-Point Field Goal": 2, "3-Point Field Goal": 3, "Free Throw (1pt)": 1 },
+  volleyball: { "Point": 1, "Ace (Service Point)": 1, "Attack Kill": 1, "Block Kill": 1, "Opponent Error": 1, "Set Won": 0 },
+  netball: { "Goal": 1 },
   quiz: { "Correct Answer (+10)": 10, "Buzzer First (+5)": 5, "Wrong Answer (−5)": -5, "Bonus Question (+20)": 20 },
   debate: { "Point Awarded": 1, "Motion Win": 3, "Style Mark": 1, "Substance Mark": 1 },
   chess: { "Win (1pt)": 1, "Draw (0.5pt)": 0.5 },
-  athletics: {}, swimming: {}, netball: { "Goal": 1 },
+  athletics: {}, swimming: {},
+  hockey: { "Goal": 1, "Penalty Stroke": 1 },
 };
 
 interface ScoreLog { id: number; event: string; team: "home"|"away"; period: string; minute?: number; time: string; }
