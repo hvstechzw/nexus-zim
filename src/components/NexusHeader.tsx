@@ -12,7 +12,9 @@ const NAV_LINKS = [
   { label: "Fixtures", href: "/fixtures" },
   { label: "Competitions", href: "/competitions" },
   { label: "Scoring", href: "/scoring" },
-  { label: "Broadcast", href: "#broadcast" },
+  { label: "ID Cards", href: "/athletes/id-cards" },
+  { label: "Broadcast CG", href: "/broadcast" },
+  { label: "Admin", href: "/admin" },
 ];
 
 export function NexusHeader() {
