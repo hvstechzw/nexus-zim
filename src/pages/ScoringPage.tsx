@@ -8,16 +8,18 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
 const SCORING_MODULES = [
-  { id: "football", label: "Football / Soccer", events: ["Goal","Yellow Card","Red Card","Substitution","Penalty","Own Goal","Corner","Offside"], periods: ["1st Half","2nd Half","Extra Time AET","Penalties"] },
-  { id: "rugby", label: "Rugby Union", events: ["Try (5pts)","Conversion (2pts)","Penalty Kick (3pts)","Drop Goal (3pts)","Yellow Card","Red Card"], periods: ["1st Half","2nd Half","Extra Time"] },
-  { id: "cricket", label: "Cricket", events: ["Wicket","No Ball","Wide","Boundary 4","Six","Dot Ball","LBW","Run Out","Catch Out"], periods: ["1st Innings","2nd Innings","Super Over"] },
-  { id: "basketball", label: "Basketball", events: ["2-Point Field Goal","3-Point Field Goal","Free Throw (1pt)","Foul","Technical Foul","Timeout","Substitution"], periods: ["Q1","Q2","Q3","Q4","OT"] },
-  { id: "quiz", label: "Quiz / Academic", events: ["Correct Answer (+10)","Buzzer First (+5)","Wrong Answer (−5)","Bonus Question (+20)","Pass","Timeout"], periods: ["Round 1","Round 2","Round 3","Final Round","Tie-breaker"] },
-  { id: "debate", label: "Debate / Arts", events: ["Point Awarded","POI Accepted","POI Rejected","Time Warning","Motion Win","Style Mark","Substance Mark"], periods: ["Opening","Rebuttal","Summary","Floor Questions"] },
-  { id: "athletics", label: "Athletics", events: ["False Start","DNS","DNF","Record Set","Lane Violation","Finish Recorded","DQ"], periods: ["Heat 1","Heat 2","Semi-Final","Final"] },
-  { id: "chess", label: "Chess", events: ["Win (1pt)","Draw (0.5pt)","Loss (0pt)","Time Forfeit","Illegal Move","Resignation"], periods: ["Round 1","Round 2","Round 3","Round 4","Round 5","Final Round"] },
-  { id: "swimming", label: "Swimming", events: ["False Start","DQ","DNS","DNF","Record Set","Finish Recorded"], periods: ["Heat","Semi-Final","Final"] },
-  { id: "netball", label: "Netball", events: ["Goal","Turnover","Foul","Substitution","Penalty"], periods: ["Q1","Q2","Q3","Q4"] },
+  { id: "football", label: "Football / Soccer", icon: "⚽", events: ["Goal","Yellow Card","Red Card","Substitution","Penalty","Own Goal","Corner","Offside"], periods: ["1st Half","2nd Half","Extra Time AET","Penalties"] },
+  { id: "rugby", label: "Rugby Union", icon: "🏉", events: ["Try (5pts)","Conversion (2pts)","Penalty Kick (3pts)","Drop Goal (3pts)","Yellow Card","Red Card"], periods: ["1st Half","2nd Half","Extra Time"] },
+  { id: "cricket", label: "Cricket", icon: "🏏", events: ["Wicket","No Ball","Wide","Boundary 4","Six","Dot Ball","LBW","Run Out","Catch Out"], periods: ["1st Innings","2nd Innings","Super Over"] },
+  { id: "basketball", label: "Basketball", icon: "🏀", events: ["2-Point Field Goal","3-Point Field Goal","Free Throw (1pt)","Foul","Technical Foul","Timeout","Substitution"], periods: ["Q1","Q2","Q3","Q4","OT"] },
+  { id: "volleyball", label: "Volleyball", icon: "🏐", events: ["Point","Ace (Service Point)","Attack Kill","Block Kill","Opponent Error","Substitution","Timeout","Set Won"], periods: ["Set 1","Set 2","Set 3","Set 4","Set 5 (Tie-break)"] },
+  { id: "netball", label: "Netball", icon: "🥅", events: ["Goal","Turnover","Foul","Obstruction","Substitution","Penalty"], periods: ["Q1","Q2","Q3","Q4"] },
+  { id: "quiz", label: "Quiz / Academic", icon: "🧠", events: ["Correct Answer (+10)","Buzzer First (+5)","Wrong Answer (−5)","Bonus Question (+20)","Pass","Timeout"], periods: ["Round 1","Round 2","Round 3","Final Round","Tie-breaker"] },
+  { id: "debate", label: "Debate / Arts", icon: "🎤", events: ["Point Awarded","POI Accepted","POI Rejected","Time Warning","Motion Win","Style Mark","Substance Mark"], periods: ["Opening","Rebuttal","Summary","Floor Questions"] },
+  { id: "athletics", label: "Athletics", icon: "🏃", events: ["False Start","DNS","DNF","Record Set","Lane Violation","Finish Recorded","DQ"], periods: ["Heat 1","Heat 2","Semi-Final","Final"] },
+  { id: "chess", label: "Chess", icon: "♟️", events: ["Win (1pt)","Draw (0.5pt)","Loss (0pt)","Time Forfeit","Illegal Move","Resignation"], periods: ["Round 1","Round 2","Round 3","Round 4","Round 5","Final Round"] },
+  { id: "swimming", label: "Swimming", icon: "🏊", events: ["False Start","DQ","DNS","DNF","Record Set","Finish Recorded"], periods: ["Heat","Semi-Final","Final"] },
+  { id: "hockey", label: "Field Hockey", icon: "🏑", events: ["Goal","Penalty Corner","Penalty Stroke","Yellow Card","Red Card","Green Card","Substitution"], periods: ["1st Half","2nd Half","Extra Time","Shootout"] },
 ];
 
 const SCORE_EVENTS: Record<string, Record<string, number>> = {
@@ -25,10 +27,13 @@ const SCORE_EVENTS: Record<string, Record<string, number>> = {
   rugby: { "Try (5pts)": 5, "Conversion (2pts)": 2, "Penalty Kick (3pts)": 3, "Drop Goal (3pts)": 3 },
   cricket: { "Boundary 4": 4, "Six": 6, "Wicket": 0, "No Ball": 1, "Wide": 1 },
   basketball: { "2-Point Field Goal": 2, "3-Point Field Goal": 3, "Free Throw (1pt)": 1 },
+  volleyball: { "Point": 1, "Ace (Service Point)": 1, "Attack Kill": 1, "Block Kill": 1, "Opponent Error": 1, "Set Won": 0 },
+  netball: { "Goal": 1 },
   quiz: { "Correct Answer (+10)": 10, "Buzzer First (+5)": 5, "Wrong Answer (−5)": -5, "Bonus Question (+20)": 20 },
   debate: { "Point Awarded": 1, "Motion Win": 3, "Style Mark": 1, "Substance Mark": 1 },
   chess: { "Win (1pt)": 1, "Draw (0.5pt)": 0.5 },
-  athletics: {}, swimming: {}, netball: { "Goal": 1 },
+  athletics: {}, swimming: {},
+  hockey: { "Goal": 1, "Penalty Stroke": 1 },
 };
 
 interface ScoreLog { id: number; event: string; team: "home"|"away"; period: string; minute?: number; time: string; }
@@ -133,19 +138,25 @@ export default function ScoringPage() {
         </div>
 
         {!selectedModule ? (
-          <div className="p-8">
+          <div className="p-4 sm:p-8">
             <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted mb-5">Select Scoring Module</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-              {SCORING_MODULES.map((mod) => (
-                <button
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {SCORING_MODULES.map((mod, i) => (
+                <motion.button
                   key={mod.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.04, duration: 0.3 }}
                   onClick={() => setSelectedModule(mod.id)}
-                  className="hairline rounded-xl p-5 text-left flex flex-col gap-2 hover:bg-nexus-surface/70 transition-colors btn-click card-shadow bg-background"
+                  className="hairline rounded-2xl p-5 text-left flex flex-col gap-3 hover:bg-nexus-surface/70 hover:scale-[1.02] transition-all duration-200 btn-click card-shadow bg-background group"
                 >
-                  <span className="display-font text-sm font-semibold text-foreground">{mod.label}</span>
-                  <span className="text-[11px] mono text-nexus-muted">{mod.events.length} event types</span>
-                  <span className="text-[10px] mono text-nexus-muted">{mod.periods.length} periods</span>
-                </button>
+                  <span className="text-3xl group-hover:scale-110 transition-transform duration-200 block">{mod.icon}</span>
+                  <span className="display-font text-sm font-bold text-foreground leading-tight">{mod.label}</span>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] mono text-nexus-muted">{mod.events.length} events</span>
+                    <span className="text-[10px] mono text-nexus-muted">{mod.periods.length} periods</span>
+                  </div>
+                </motion.button>
               ))}
             </div>
           </div>
