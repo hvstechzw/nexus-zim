@@ -138,19 +138,25 @@ export default function ScoringPage() {
         </div>
 
         {!selectedModule ? (
-          <div className="p-8">
+          <div className="p-4 sm:p-8">
             <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted mb-5">Select Scoring Module</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-              {SCORING_MODULES.map((mod) => (
-                <button
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {SCORING_MODULES.map((mod, i) => (
+                <motion.button
                   key={mod.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.04, duration: 0.3 }}
                   onClick={() => setSelectedModule(mod.id)}
-                  className="hairline rounded-xl p-5 text-left flex flex-col gap-2 hover:bg-nexus-surface/70 transition-colors btn-click card-shadow bg-background"
+                  className="hairline rounded-2xl p-5 text-left flex flex-col gap-3 hover:bg-nexus-surface/70 hover:scale-[1.02] transition-all duration-200 btn-click card-shadow bg-background group"
                 >
-                  <span className="display-font text-sm font-semibold text-foreground">{mod.label}</span>
-                  <span className="text-[11px] mono text-nexus-muted">{mod.events.length} event types</span>
-                  <span className="text-[10px] mono text-nexus-muted">{mod.periods.length} periods</span>
-                </button>
+                  <span className="text-3xl group-hover:scale-110 transition-transform duration-200 block">{mod.icon}</span>
+                  <span className="display-font text-sm font-bold text-foreground leading-tight">{mod.label}</span>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] mono text-nexus-muted">{mod.events.length} events</span>
+                    <span className="text-[10px] mono text-nexus-muted">{mod.periods.length} periods</span>
+                  </div>
+                </motion.button>
               ))}
             </div>
           </div>
