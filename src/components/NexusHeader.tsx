@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
-import aieLogoLight from "@/assets/aie-logo-light.png";
+import nexusLogo from "@/assets/nexus-logo.png";
 import { AuthModal } from "@/components/AuthModal";
 
 const NAV_LINKS = [
@@ -30,7 +30,6 @@ export function NexusHeader() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Lock body scroll when mobile menu open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => { document.body.style.overflow = ""; };
@@ -51,18 +50,12 @@ export function NexusHeader() {
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 h-14 sm:h-16 flex items-center justify-between gap-4">
           {/* Brand */}
           <a href="/" className="flex items-center gap-2.5 flex-shrink-0">
-            <div className="bg-foreground rounded-lg p-1.5 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8">
-              <img
-                src={aieLogoLight}
-                alt="Aetheris"
-                className="w-4 h-4 sm:w-5 sm:h-5 object-contain"
-                style={{ filter: theme === "dark" ? "brightness(0.1)" : "brightness(10)" }}
-              />
-            </div>
-            <div className="flex flex-col leading-none">
-              <span className="display-font text-sm font-semibold tracking-tight text-foreground">Nexus</span>
-              <span className="text-[9px] text-nexus-muted tracking-wide uppercase hidden sm:block">by Aetheris</span>
-            </div>
+            <img
+              src={nexusLogo}
+              alt="Nexus"
+              className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
+              style={{ filter: theme === "dark" ? "invert(1)" : "none" }}
+            />
           </a>
 
           {/* Desktop Navigation */}
