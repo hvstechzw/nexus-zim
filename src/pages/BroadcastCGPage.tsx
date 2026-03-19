@@ -32,7 +32,7 @@ interface ScoreEntry {
   metadata: Record<string, unknown> | null;
 }
 
-// ─── Score Bug (bottom-left overlay) ────────────────────────────────────────
+// ─── Score Bug ────────────────────────────────────────────────────────────────
 function ScoreBug({ fixture, isLive, elapsed }: { fixture: FixtureState; isLive: boolean; elapsed: number }) {
   const home = fixture.home_team?.name || "HOME";
   const away = fixture.away_team?.name || "AWAY";
@@ -47,14 +47,12 @@ function ScoreBug({ fixture, isLive, elapsed }: { fixture: FixtureState; isLive:
       className="flex items-stretch rounded-xl overflow-hidden shadow-2xl"
       style={{ minWidth: 340 }}
     >
-      {/* Live pill */}
       {isLive && (
         <div className="bg-red-600 text-white flex items-center px-3 gap-1.5">
           <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
           <span className="text-[10px] font-black tracking-[0.2em] uppercase">Live</span>
         </div>
       )}
-      {/* Scores */}
       <div className="bg-black/90 backdrop-blur-sm flex items-stretch">
         <div className="flex flex-col items-center justify-center px-5 py-3 gap-1 border-r border-white/10">
           <span className="text-[10px] text-white/50 tracking-[0.15em] uppercase font-semibold truncate max-w-[90px]">{home}</span>
@@ -66,6 +64,7 @@ function ScoreBug({ fixture, isLive, elapsed }: { fixture: FixtureState; isLive:
         <div className="flex flex-col items-center justify-center px-4 py-3 gap-0.5">
           <span className="text-[9px] text-white/30 font-mono tracking-widest">{fixture.round_label || fixture.competition?.discipline || "—"}</span>
           {isLive && <span className="text-[11px] font-mono text-white/60">{timeStr}</span>}
+          {!isLive && fixture.status === "completed" && <span className="text-[10px] font-mono text-white/40">FT</span>}
         </div>
         <div className="flex flex-col items-center justify-center px-5 py-3 gap-1 border-l border-white/10">
           <span className="text-[10px] text-white/50 tracking-[0.15em] uppercase font-semibold truncate max-w-[90px]">{away}</span>
@@ -116,31 +115,42 @@ function EventFlash({ event, visible }: { event: ScoreEntry | null; visible: boo
           className="bg-white text-black rounded-xl px-6 py-4 shadow-2xl text-center"
           style={{ minWidth: 180 }}
         >
-          <p className="text-3xl mb-1">
-            {event.event_type.includes("Goal") ? "⚽" :
-             event.event_type.includes("Try") ? "🏉" :
-             event.event_type.includes("Correct") ? "✅" :
-             event.event_type.includes("Six") ? "🏏" :
-             event.event_type.includes("Ace") ? "🏐" : "🎯"}
-          </p>
+          <div className="w-8 h-8 rounded-lg bg-black/10 flex items-center justify-center mx-auto mb-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+            </svg>
+          </div>
           <p className="font-black text-sm leading-tight">{event.event_type}</p>
-          {event.minute && <p className="text-xs text-black/40 mono mt-0.5">{event.minute}'</p>}
+          {event.minute !== null && <p className="text-xs text-black/40 mono mt-0.5">{event.minute}'</p>}
         </motion.div>
       )}
     </AnimatePresence>
   );
 }
 
-// ─── Full CG Control Panel (regular view) ────────────────────────────────────
-function CGControlPanel({ fixture, fixtureId, elapsed }: { fixture: FixtureState; fixtureId: string; elapsed: number }) {
+// ─── Full CG Control Panel ────────────────────────────────────────────────────
+function CGControlPanel({ fixture, fixtureId, elapsed, onElapsedChange }: {
+  fixture: FixtureState; fixtureId: string; elapsed: number;
+  onElapsedChange: (v: number) => void;
+}) {
   const [lt1, setLt1] = useState("");
   const [lt1sub, setLt1sub] = useState("");
   const [showLt1, setShowLt1] = useState(false);
   const [showScoreBug, setShowScoreBug] = useState(true);
   const [flashEvent, setFlashEvent] = useState<ScoreEntry | null>(null);
   const [showFlash, setShowFlash] = useState(false);
-  const [showLineup, setShowLineup] = useState(false);
+  const [timerRunning, setTimerRunning] = useState(fixture.status === "live");
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const overlayUrl = `${window.location.origin}/broadcast/${fixtureId}?overlay=1`;
+
+  useEffect(() => {
+    if (timerRunning) {
+      timerRef.current = setInterval(() => onElapsedChange(elapsed + 1), 1000);
+    } else {
+      if (timerRef.current) clearInterval(timerRef.current);
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [timerRunning, elapsed, onElapsedChange]);
 
   const { data: recentEvents = [] } = useQuery({
     queryKey: ["cg-events", fixtureId],
@@ -161,16 +171,42 @@ function CGControlPanel({ fixture, fixtureId, elapsed }: { fixture: FixtureState
     setTimeout(() => setShowFlash(false), 4000);
   };
 
+  const mins = Math.floor(elapsed / 60);
+  const secs = elapsed % 60;
+  const timeStr = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
       {/* Top bar */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <span className="text-[10px] tracking-[0.3em] uppercase text-white/40 font-semibold">NEXUS</span>
+          <Link to="/broadcast" className="text-[10px] tracking-[0.2em] uppercase text-white/40 hover:text-white/70 transition-colors font-semibold">
+            NEXUS
+          </Link>
           <span className="text-white/20">·</span>
           <span className="text-sm font-semibold text-white/80">Broadcast CG Control</span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          {/* Timer controls */}
+          <button
+            onClick={() => setTimerRunning(!timerRunning)}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${timerRunning ? "bg-red-600 text-white" : "bg-white/10 text-white/50 hover:bg-white/20"}`}
+          >
+            {timerRunning ? (
+              <>
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                {timeStr}
+              </>
+            ) : (
+              <>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                {timeStr}
+              </>
+            )}
+          </button>
+          <button onClick={() => onElapsedChange(0)} className="text-[10px] text-white/30 hover:text-white/60 transition-colors mono">
+            Reset
+          </button>
           <span className={`w-2 h-2 rounded-full ${fixture.status === "live" ? "bg-red-500 animate-pulse" : "bg-white/20"}`} />
           <span className="text-xs text-white/40 mono">{fixture.status.toUpperCase()}</span>
         </div>
@@ -181,26 +217,24 @@ function CGControlPanel({ fixture, fixtureId, elapsed }: { fixture: FixtureState
         <div className="w-80 border-r border-white/10 flex flex-col overflow-y-auto">
           <div className="p-5 border-b border-white/10">
             <p className="text-[10px] tracking-[0.2em] uppercase text-white/30 font-semibold mb-3">Score Bug</p>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setShowScoreBug(!showScoreBug)}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${showScoreBug ? "bg-red-600 text-white" : "bg-white/10 text-white/50"}`}
-              >
-                {showScoreBug ? "● ON AIR" : "○ OFF AIR"}
-              </button>
-            </div>
+            <button
+              onClick={() => setShowScoreBug(!showScoreBug)}
+              className={`w-full py-2 text-xs font-bold rounded-lg transition-all ${showScoreBug ? "bg-red-600 text-white" : "bg-white/10 text-white/50"}`}
+            >
+              {showScoreBug ? "ON AIR" : "OFF AIR"}
+            </button>
           </div>
 
           <div className="p-5 border-b border-white/10">
             <p className="text-[10px] tracking-[0.2em] uppercase text-white/30 font-semibold mb-3">Lower Third</p>
             <input
-              placeholder="Name / Title…"
+              placeholder="Name / Title"
               value={lt1}
               onChange={e => setLt1(e.target.value)}
               className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white mb-2 placeholder:text-white/20 focus:outline-none focus:border-white/30"
             />
             <input
-              placeholder="Subtitle / Role…"
+              placeholder="Subtitle / Role"
               value={lt1sub}
               onChange={e => setLt1sub(e.target.value)}
               className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white mb-3 placeholder:text-white/20 focus:outline-none focus:border-white/30"
@@ -210,12 +244,12 @@ function CGControlPanel({ fixture, fixtureId, elapsed }: { fixture: FixtureState
               disabled={!lt1}
               className={`w-full py-2 text-xs font-bold rounded-lg transition-all disabled:opacity-30 ${showLt1 ? "bg-red-600 text-white" : "bg-white/10 text-white/50 hover:bg-white/20"}`}
             >
-              {showLt1 ? "✕ Remove" : "↑ Go To Air"}
+              {showLt1 ? "Remove" : "Go To Air"}
             </button>
           </div>
 
           <div className="p-5 border-b border-white/10">
-            <p className="text-[10px] tracking-[0.2em] uppercase text-white/30 font-semibold mb-3">Event Flash (Instant Replay)</p>
+            <p className="text-[10px] tracking-[0.2em] uppercase text-white/30 font-semibold mb-3">Event Flash</p>
             <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto">
               {recentEvents.length === 0 ? (
                 <p className="text-xs text-white/20 mono">No events logged yet</p>
@@ -226,16 +260,22 @@ function CGControlPanel({ fixture, fixtureId, elapsed }: { fixture: FixtureState
                   className="flex items-center justify-between bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg px-3 py-2 text-xs text-white transition-all text-left"
                 >
                   <span className="font-semibold">{ev.event_type}</span>
-                  {ev.minute && <span className="text-white/30 mono">{ev.minute}'</span>}
+                  {ev.minute !== null && <span className="text-white/30 mono">{ev.minute}'</span>}
                 </button>
               ))}
             </div>
           </div>
 
           <div className="p-5">
-            <p className="text-[10px] tracking-[0.2em] uppercase text-white/30 font-semibold mb-3">OBS Source URL</p>
-            <div className="bg-white/5 border border-white/10 rounded-lg p-3 text-xs mono text-white/40 break-all select-all">{overlayUrl}</div>
-            <p className="text-[9px] text-white/20 mt-2">Add as Browser Source in OBS with transparent background</p>
+            <p className="text-[10px] tracking-[0.2em] uppercase text-white/30 font-semibold mb-3">OBS Browser Source</p>
+            <div className="bg-white/5 border border-white/10 rounded-lg p-3 text-xs mono text-white/40 break-all select-all mb-2">{overlayUrl}</div>
+            <button
+              onClick={() => navigator.clipboard.writeText(overlayUrl)}
+              className="w-full py-2 text-xs font-semibold bg-white/10 hover:bg-white/20 rounded-lg transition-all text-white/70"
+            >
+              Copy URL
+            </button>
+            <p className="text-[9px] text-white/20 mt-2">Add as Browser Source in OBS with chroma-key / transparent background enabled</p>
           </div>
         </div>
 
@@ -243,9 +283,18 @@ function CGControlPanel({ fixture, fixtureId, elapsed }: { fixture: FixtureState
         <div className="flex-1 flex flex-col items-center justify-end p-8 gap-6 relative"
           style={{ background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)" }}>
           
-          {/* Simulated stadium background text */}
           <div className="absolute inset-0 flex items-center justify-center opacity-5 select-none pointer-events-none">
             <p className="text-white font-black" style={{ fontSize: "clamp(60px, 15vw, 120px)", letterSpacing: "-0.05em" }}>PREVIEW</p>
+          </div>
+
+          {/* Score summary */}
+          <div className="absolute top-8 left-1/2 -translate-x-1/2">
+            <div className="bg-black/50 rounded-xl px-6 py-3 text-center">
+              <p className="text-white font-black text-2xl tracking-tight">
+                {fixture.home_team?.name || "Home"} {fixture.home_score ?? 0} — {fixture.away_score ?? 0} {fixture.away_team?.name || "Away"}
+              </p>
+              <p className="text-white/40 text-xs mono mt-1">{fixture.competition?.name}</p>
+            </div>
           </div>
 
           {/* Flash overlay (center) */}
@@ -253,14 +302,14 @@ function CGControlPanel({ fixture, fixtureId, elapsed }: { fixture: FixtureState
             <EventFlash event={flashEvent} visible={showFlash} />
           </div>
 
-          {/* Lower third (bottom-left area) */}
+          {/* Lower third */}
           <div className="w-full flex justify-start">
             <LowerThird text={lt1} sub={lt1sub} visible={showLt1 && !!lt1} />
           </div>
 
-          {/* Score bug (bottom-left) */}
+          {/* Score bug */}
           <div className="w-full flex justify-start">
-            {showScoreBug && <ScoreBug fixture={fixture} isLive={fixture.status === "live"} elapsed={elapsed} />}
+            {showScoreBug && <ScoreBug fixture={fixture} isLive={fixture.status === "live" || timerRunning} elapsed={elapsed} />}
           </div>
         </div>
       </div>
@@ -270,25 +319,11 @@ function CGControlPanel({ fixture, fixtureId, elapsed }: { fixture: FixtureState
 
 // ─── Pure overlay (for OBS) ──────────────────────────────────────────────────
 function PureOverlay({ fixture, elapsed }: { fixture: FixtureState; elapsed: number }) {
-  const [lastEvent, setLastEvent] = useState<ScoreEntry | null>(null);
-  const [showFlash, setShowFlash] = useState(false);
-  const prevHome = useRef(fixture.home_score);
-  const prevAway = useRef(fixture.away_score);
-
-  useEffect(() => {
-    if (fixture.home_score !== prevHome.current || fixture.away_score !== prevAway.current) {
-      prevHome.current = fixture.home_score;
-      prevAway.current = fixture.away_score;
-    }
-  }, [fixture.home_score, fixture.away_score]);
-
   return (
     <div className="fixed inset-0 pointer-events-none" style={{ background: "transparent" }}>
-      {/* Score bug — bottom left */}
       <div className="absolute bottom-8 left-8">
         <ScoreBug fixture={fixture} isLive={fixture.status === "live"} elapsed={elapsed} />
       </div>
-      {/* Competition name — top right */}
       <div className="absolute top-8 right-8">
         <div className="bg-black/60 backdrop-blur-sm rounded-xl px-4 py-2 text-right">
           <p className="text-white font-black text-sm tracking-tight">{fixture.competition?.name || "Match"}</p>
@@ -339,15 +374,12 @@ export default function BroadcastCGPage() {
     return () => { supabase.removeChannel(channel); };
   }, [fixtureId]);
 
-  // No fixture ID — show selector
-  if (!fixtureId) {
-    return <FixtureSelector />;
-  }
+  if (!fixtureId) return <FixtureSelector />;
 
   if (isLoading) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${isOverlay ? "" : "bg-black"}`}>
-        <p className="text-white/40 mono text-sm animate-pulse">Loading broadcast…</p>
+        <p className="text-white/40 mono text-sm animate-pulse">Loading broadcast</p>
       </div>
     );
   }
@@ -357,7 +389,7 @@ export default function BroadcastCGPage() {
       <div className="min-h-screen bg-black flex items-center justify-center">
         <div className="text-center">
           <p className="text-white/40 text-sm mb-4">Fixture not found</p>
-          <Link to="/broadcast" className="text-white/60 text-xs underline">← Back to Broadcast Hub</Link>
+          <Link to="/broadcast" className="text-white/60 text-xs underline">Back to Broadcast Hub</Link>
         </div>
       </div>
     );
@@ -365,10 +397,10 @@ export default function BroadcastCGPage() {
 
   if (isOverlay) return <PureOverlay fixture={fixture} elapsed={elapsed} />;
 
-  return <CGControlPanel fixture={fixture} fixtureId={fixtureId} elapsed={elapsed} />;
+  return <CGControlPanel fixture={fixture} fixtureId={fixtureId} elapsed={elapsed} onElapsedChange={setElapsed} />;
 }
 
-// ─── Fixture selector (no ID provided) ───────────────────────────────────────
+// ─── Fixture selector ─────────────────────────────────────────────────────────
 function FixtureSelector() {
   const { data: fixtures = [], isLoading } = useQuery({
     queryKey: ["cg-all-fixtures"],
@@ -378,8 +410,8 @@ function FixtureSelector() {
           home_team:home_team_id!fixtures_home_team_id_fkey(name),
           away_team:away_team_id!fixtures_away_team_id_fkey(name),
           competition:competition_id(name, discipline)`)
-        .in("status", ["live", "scheduled"])
-        .order("scheduled_at", { ascending: true })
+        .in("status", ["live", "scheduled", "completed"])
+        .order("scheduled_at", { ascending: false })
         .limit(30);
       return (data || []) as unknown[];
     },
@@ -396,7 +428,7 @@ function FixtureSelector() {
           </div>
         ) : fixtures.length === 0 ? (
           <div className="py-16 text-center border border-white/10 rounded-2xl">
-            <p className="text-white/30 text-sm">No live or scheduled fixtures found.</p>
+            <p className="text-white/30 text-sm">No fixtures found.</p>
             <p className="text-white/20 text-xs mt-2">Create fixtures in the Admin Dashboard first.</p>
           </div>
         ) : (
@@ -410,7 +442,9 @@ function FixtureSelector() {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-white font-black text-lg">{f.home_score ?? 0} — {f.away_score ?? 0}</span>
-                  <span className={`text-[10px] font-bold tracking-widest uppercase px-2 py-1 rounded ${f.status === "live" ? "bg-red-600 text-white" : "bg-white/10 text-white/40"}`}>{f.status}</span>
+                  <span className={`text-[10px] font-bold tracking-widest uppercase px-2 py-1 rounded ${f.status === "live" ? "bg-red-600 text-white" : f.status === "completed" ? "bg-white/20 text-white/60" : "bg-white/10 text-white/40"}`}>
+                    {f.status === "completed" ? "FT" : f.status}
+                  </span>
                 </div>
               </Link>
             ))}
