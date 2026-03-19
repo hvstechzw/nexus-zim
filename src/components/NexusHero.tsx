@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import aieLogoLight from "@/assets/aie-logo-light.png";
+import nexusLogo from "@/assets/nexus-logo.png";
 import { useTheme } from "@/context/ThemeContext";
 
 export function NexusHero() {
@@ -41,12 +41,13 @@ export function NexusHero() {
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           className="w-full max-w-3xl"
         >
+          {/* Logo card — using official Nexus logo */}
           <div className="bg-foreground rounded-2xl px-8 py-10 sm:px-12 sm:py-14 md:px-20 md:py-20 flex items-center justify-center card-shadow-md">
             <img
-              src={aieLogoLight}
-              alt="Aetheris Innovative Enterprises"
-              className="w-full max-w-xs sm:max-w-md md:max-w-xl h-auto object-contain"
-              style={{ filter: theme === "dark" ? "brightness(0.1)" : "brightness(10)" }}
+              src={nexusLogo}
+              alt="Nexus"
+              className="w-full max-w-[180px] sm:max-w-[240px] md:max-w-[280px] h-auto object-contain"
+              style={{ filter: theme === "dark" ? "brightness(0.08)" : "brightness(10)" }}
             />
           </div>
 
