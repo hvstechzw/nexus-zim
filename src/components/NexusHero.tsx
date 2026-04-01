@@ -2,11 +2,8 @@ import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import nexusLogo from "@/assets/nexus-logo.png";
-import { useTheme } from "@/context/ThemeContext";
 
 export function NexusHero() {
-  const { theme } = useTheme();
-
   const { data: stats } = useQuery({
     queryKey: ["hero-stats"],
     queryFn: async () => {
@@ -41,13 +38,12 @@ export function NexusHero() {
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           className="w-full max-w-3xl"
         >
-          {/* Logo card — using official Nexus logo */}
-          <div className="bg-foreground rounded-2xl px-8 py-10 sm:px-12 sm:py-14 md:px-20 md:py-20 flex items-center justify-center card-shadow-md">
+          {/* Logo card — white bg to match logo's white background */}
+          <div className="bg-white rounded-2xl px-8 py-10 sm:px-12 sm:py-14 md:px-20 md:py-20 flex items-center justify-center card-shadow-md">
             <img
               src={nexusLogo}
               alt="Nexus"
               className="w-full max-w-[180px] sm:max-w-[240px] md:max-w-[280px] h-auto object-contain"
-              style={{ filter: theme === "dark" ? "brightness(0.08)" : "brightness(10)" }}
             />
           </div>
 
@@ -83,11 +79,8 @@ export function NexusHero() {
               <span className="w-2 h-2 rounded-full bg-primary-foreground/60 animate-pulse" />
               View Live
             </a>
-            <a href="/competitions" className="flex items-center justify-center h-11 sm:h-12 px-7 bg-nexus-surface text-foreground text-sm font-medium rounded-xl hover:bg-nexus-silver transition-colors btn-click">
+            <a href="#events" className="flex items-center justify-center h-11 sm:h-12 px-7 bg-nexus-surface text-foreground text-sm font-medium rounded-xl hover:bg-nexus-silver transition-colors btn-click">
               Browse Events
-            </a>
-            <a href="/fixtures" className="flex items-center justify-center h-11 sm:h-12 px-7 bg-nexus-surface text-foreground text-sm font-medium rounded-xl hover:bg-nexus-silver transition-colors btn-click">
-              Fixture Generator
             </a>
           </div>
         </motion.div>
