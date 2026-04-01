@@ -236,7 +236,9 @@ export default function AthleteIDPage() {
             </div>
           ) : filtered.length === 0 ? (
             <div className="py-24 text-center">
-              <p className="text-4xl mb-4">🪪</p>
+              <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-nexus-surface flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-nexus-muted"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              </div>
               <p className="display-font text-xl font-bold text-foreground mb-2">No athletes found</p>
               <p className="text-sm text-nexus-muted max-w-sm mx-auto">
                 {athletes.length === 0
