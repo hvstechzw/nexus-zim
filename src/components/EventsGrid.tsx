@@ -1,22 +1,39 @@
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom";
 
 export function EventsGrid() {
-  const navigate = useNavigate();
-
   const { data: competitions = [], isLoading } = useQuery({
     queryKey: ["events-grid"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("competitions")
-        .select(`*, registrations(count)`)
+        .select("id, name, discipline, level, format, status, season, province, start_date, prize_pool, max_participants, logo_url")
         .in("status", ["registration_open", "ongoing", "registration_closed"])
         .order("start_date", { ascending: true })
         .limit(9);
+      if (error) console.error("EventsGrid query error:", error);
       return data || [];
     },
+  });
+
+  // Also fetch registration counts separately to avoid join issues
+  const compIds = competitions.map((c: any) => c.id);
+  const { data: regCounts = {} } = useQuery({
+    queryKey: ["events-grid-reg", compIds],
+    queryFn: async () => {
+      if (compIds.length === 0) return {};
+      const { data } = await supabase
+        .from("registrations")
+        .select("competition_id")
+        .in("competition_id", compIds);
+      const counts: Record<string, number> = {};
+      (data || []).forEach((r: any) => {
+        counts[r.competition_id] = (counts[r.competition_id] || 0) + 1;
+      });
+      return counts;
+    },
+    enabled: compIds.length > 0,
   });
 
   const STATUS_CONFIG: Record<string, { label: string; dot: boolean }> = {
@@ -32,12 +49,7 @@ export function EventsGrid() {
     <section id="events" className="hairline-b">
       <div className="px-8 py-5 hairline-b flex items-center justify-between">
         <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">Upcoming & Active Events</p>
-        <button
-          onClick={() => navigate("/competitions")}
-          className="text-xs font-semibold text-nexus-muted hover:text-foreground transition-colors flex items-center gap-1"
-        >
-          View All →
-        </button>
+        <span className="text-xs mono text-nexus-muted">{competitions.length} event{competitions.length !== 1 ? "s" : ""}</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 p-6 md:p-8">
@@ -49,9 +61,9 @@ export function EventsGrid() {
           </div>
         ))}
 
-        {!isLoading && competitions.map((comp, i) => {
+        {!isLoading && competitions.map((comp: any, i: number) => {
           const status = STATUS_CONFIG[comp.status] || { label: comp.status, dot: false };
-          const regCount = (comp as any).registrations?.[0]?.count || 0;
+          const regCount = (regCounts as any)[comp.id] || 0;
           const fillPct = comp.max_participants ? Math.min(100, Math.round((regCount / comp.max_participants) * 100)) : 0;
 
           return (
@@ -61,8 +73,7 @@ export function EventsGrid() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
               transition={{ duration: 0.3, delay: (i % 3) * 0.07, ease: [0.16, 1, 0.3, 1] }}
-              className="hairline rounded-xl p-6 flex flex-col gap-4 hover:bg-nexus-surface/50 transition-colors duration-200 cursor-pointer group card-shadow bg-background"
-              onClick={() => navigate("/competitions")}
+              className="hairline rounded-xl p-6 flex flex-col gap-4 hover:bg-nexus-surface/50 transition-colors duration-200 cursor-default group card-shadow bg-background"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">

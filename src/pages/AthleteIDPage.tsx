@@ -162,8 +162,9 @@ function AthleteIDCard({ athlete }: { athlete: Athlete }) {
 
       {/* Actions */}
       <div className="flex gap-2 mt-3">
-        <button onClick={handlePrint} className="flex-1 h-9 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 transition-opacity">
-          🖨 Print / Save PDF
+        <button onClick={handlePrint} className="flex-1 h-9 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 transition-opacity flex items-center justify-center gap-2">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print / Save PDF
         </button>
       </div>
     </motion.div>
@@ -235,7 +236,9 @@ export default function AthleteIDPage() {
             </div>
           ) : filtered.length === 0 ? (
             <div className="py-24 text-center">
-              <p className="text-4xl mb-4">🪪</p>
+              <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-nexus-surface flex items-center justify-center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-nexus-muted"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+              </div>
               <p className="display-font text-xl font-bold text-foreground mb-2">No athletes found</p>
               <p className="text-sm text-nexus-muted max-w-sm mx-auto">
                 {athletes.length === 0

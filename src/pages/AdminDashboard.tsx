@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { NexusHeader } from "@/components/NexusHeader";
 import { NexusFooter } from "@/components/NexusFooter";
 import { supabase } from "@/integrations/supabase/client";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
@@ -28,6 +28,7 @@ const PROVINCES = ["Harare","Bulawayo","Manicaland","Mashonaland Central","Masho
 const LEVELS = ["primary_school","secondary_school","club_academy","provincial","national_league","national_cup","international"] as const;
 const FORMATS = ["round_robin","single_elimination","double_elimination","swiss","league","ladder","custom_heats"] as const;
 const STATUSES = ["draft","registration_open","registration_closed","ongoing","completed","cancelled"] as const;
+const DISCIPLINES = ["Football","Rugby","Cricket","Athletics","Swimming","Basketball","Volleyball","Tennis","Chess","Debate","Quiz","Netball","Hockey","Boxing","Judo","Cycling","Other"];
 
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
@@ -39,10 +40,50 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub?: s
   );
 }
 
+// ── File upload helper ────────────────────────────────────────────
+async function uploadFile(file: File, folder: string): Promise<string | null> {
+  const ext = file.name.split(".").pop();
+  const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+  const { error } = await supabase.storage.from("nexus-media").upload(path, file, { upsert: true });
+  if (error) { console.error("Upload error:", error); return null; }
+  const { data } = supabase.storage.from("nexus-media").getPublicUrl(path);
+  return data.publicUrl;
+}
+
+function FileUploadField({ label, value, onChange, folder }: { label: string; value: string; onChange: (url: string) => void; folder: string }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    const url = await uploadFile(file, folder);
+    if (url) onChange(url);
+    setUploading(false);
+  };
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className={labelCls}>{label}</label>
+      <div className="flex gap-2">
+        <input value={value} onChange={e => onChange(e.target.value)} className={inputCls} placeholder="URL or upload..." />
+        <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
+        <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
+          className="flex-shrink-0 h-10 px-4 text-xs font-semibold rounded-lg bg-nexus-surface hover:bg-nexus-silver transition-colors disabled:opacity-50">
+          {uploading ? "..." : "Upload"}
+        </button>
+      </div>
+      {value && <img src={value} alt="" className="w-10 h-10 rounded-lg object-cover mt-1 bg-white" />}
+    </div>
+  );
+}
+
+// ── Competition Form ──────────────────────────────────────────────
 function CompetitionForm({ onSuccess, competitions }: { onSuccess: () => void; competitions: any[] }) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [form, setForm] = useState({ name: "", discipline: "", level: "national_league", format: "round_robin", status: "draft", season: new Date().getFullYear().toString(), province: "", description: "", start_date: "", end_date: "", registration_deadline: "", max_participants: "", entry_fee: "", prize_pool: "", sponsor: "", parent_id: "" });
+  const [form, setForm] = useState({ name: "", discipline: "", level: "national_league", format: "round_robin", status: "draft", season: new Date().getFullYear().toString(), province: "", description: "", start_date: "", end_date: "", registration_deadline: "", max_participants: "", entry_fee: "", prize_pool: "", sponsor: "", parent_id: "", logo_url: "" });
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,6 +100,7 @@ function CompetitionForm({ onSuccess, competitions }: { onSuccess: () => void; c
       entry_fee: form.entry_fee ? Number(form.entry_fee) : 0,
       prize_pool: form.prize_pool ? Number(form.prize_pool) : 0,
       sponsor: form.sponsor || null, parent_id: form.parent_id || null, created_by: user.id,
+      logo_url: form.logo_url || null,
     });
     setLoading(false);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
@@ -71,8 +113,8 @@ function CompetitionForm({ onSuccess, competitions }: { onSuccess: () => void; c
       <div className="flex flex-col gap-1.5 md:col-span-2"><label className={labelCls}>Name *</label><input required value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))} className={inputCls} placeholder="Premier Soccer League 2026" /></div>
       <div className="flex flex-col gap-1.5"><label className={labelCls}>Discipline *</label>
         <select required value={form.discipline} onChange={e => setForm(f => ({...f, discipline: e.target.value}))} className={inputCls + " cursor-pointer"}>
-          <option value="">Select…</option>
-          {["Football","Rugby","Cricket","Athletics","Swimming","Basketball","Volleyball","Tennis","Chess","Debate","Quiz","Netball","Hockey","Boxing","Judo","Cycling","Other"].map(d => <option key={d}>{d}</option>)}
+          <option value="">Select</option>
+          {DISCIPLINES.map(d => <option key={d}>{d}</option>)}
         </select>
       </div>
       <div className="flex flex-col gap-1.5"><label className={labelCls}>Level</label>
@@ -110,19 +152,23 @@ function CompetitionForm({ onSuccess, competitions }: { onSuccess: () => void; c
           {competitions.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       </div>
+      <div className="md:col-span-2">
+        <FileUploadField label="Competition Logo" value={form.logo_url} onChange={url => setForm(f => ({...f, logo_url: url}))} folder="competitions" />
+      </div>
       <div className="flex flex-col gap-1.5 md:col-span-2"><label className={labelCls}>Description</label><textarea value={form.description} onChange={e => setForm(f => ({...f, description: e.target.value}))} className={inputCls} rows={2} /></div>
-      <div className="md:col-span-2"><button type="submit" disabled={loading} className="h-11 px-8 text-sm font-semibold tracking-wide rounded-xl bg-foreground text-primary-foreground hover:opacity-85 transition-opacity btn-click disabled:opacity-50">{loading ? "Creating…" : "Create Competition"}</button></div>
+      <div className="md:col-span-2"><button type="submit" disabled={loading} className="h-11 px-8 text-sm font-semibold tracking-wide rounded-xl bg-foreground text-primary-foreground hover:opacity-85 transition-opacity btn-click disabled:opacity-50">{loading ? "Creating..." : "Create Competition"}</button></div>
     </form>
   );
 }
 
+// ── Fixture Form ──────────────────────────────────────────────────
 function FixtureForm({ onSuccess, competitions }: { onSuccess: () => void; competitions: any[] }) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [form, setForm] = useState({ competition_id: "", round_label: "", round_number: "", scheduled_at: "", home_team: "", away_team: "", venue_id: "" });
   const [loading, setLoading] = useState(false);
 
-  const { data: teams = [] } = useQuery({ queryKey: ["form-teams", form.competition_id], queryFn: async () => { const { data } = await supabase.from("teams").select("id, name").limit(100); return data || []; } });
+  const { data: teams = [] } = useQuery({ queryKey: ["form-teams"], queryFn: async () => { const { data } = await supabase.from("teams").select("id, name").limit(100); return data || []; } });
   const { data: venues = [] } = useQuery({ queryKey: ["form-venues"], queryFn: async () => { const { data } = await supabase.from("venues").select("id, name, city"); return data || []; } });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -153,7 +199,7 @@ function FixtureForm({ onSuccess, competitions }: { onSuccess: () => void; compe
           {competitions.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
       </div>
-      <div className="flex flex-col gap-1.5"><label className={labelCls}>Round Label</label><input value={form.round_label} onChange={e => setForm(f => ({...f, round_label: e.target.value}))} className={inputCls} placeholder="Quarter Final, Match Day 3…" /></div>
+      <div className="flex flex-col gap-1.5"><label className={labelCls}>Round Label</label><input value={form.round_label} onChange={e => setForm(f => ({...f, round_label: e.target.value}))} className={inputCls} placeholder="Quarter Final..." /></div>
       <div className="flex flex-col gap-1.5"><label className={labelCls}>Round Number</label><input type="number" value={form.round_number} onChange={e => setForm(f => ({...f, round_number: e.target.value}))} className={inputCls} /></div>
       <div className="flex flex-col gap-1.5"><label className={labelCls}>Scheduled Date & Time</label><input type="datetime-local" value={form.scheduled_at} onChange={e => setForm(f => ({...f, scheduled_at: e.target.value}))} className={inputCls} /></div>
       <div className="flex flex-col gap-1.5"><label className={labelCls}>Venue</label>
@@ -174,16 +220,16 @@ function FixtureForm({ onSuccess, competitions }: { onSuccess: () => void; compe
           {(teams as any[]).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
         </select>
       </div>
-      <div className="md:col-span-2"><button type="submit" disabled={loading} className="h-11 px-8 text-sm font-semibold tracking-wide rounded-xl bg-foreground text-primary-foreground hover:opacity-85 btn-click disabled:opacity-50">{loading ? "Creating…" : "Create Fixture"}</button></div>
+      <div className="md:col-span-2"><button type="submit" disabled={loading} className="h-11 px-8 text-sm font-semibold tracking-wide rounded-xl bg-foreground text-primary-foreground hover:opacity-85 btn-click disabled:opacity-50">{loading ? "Creating..." : "Create Fixture"}</button></div>
     </form>
   );
 }
 
+// ── Venue Form ────────────────────────────────────────────────────
 function VenueForm({ onSuccess }: { onSuccess: () => void }) {
   const { toast } = useToast();
   const [form, setForm] = useState({ name: "", type: "stadium", province: "Harare", city: "", address: "", capacity: "", facilities: "" });
   const [loading, setLoading] = useState(false);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -194,13 +240,11 @@ function VenueForm({ onSuccess }: { onSuccess: () => void }) {
     });
     setLoading(false);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
-    toast({ title: "Venue added" });
-    onSuccess();
+    toast({ title: "Venue added" }); onSuccess();
   };
-
   return (
     <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
-      <div className="flex flex-col gap-1.5 md:col-span-2"><label className={labelCls}>Venue Name *</label><input required value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))} className={inputCls} placeholder="National Sports Stadium" /></div>
+      <div className="flex flex-col gap-1.5 md:col-span-2"><label className={labelCls}>Venue Name *</label><input required value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))} className={inputCls} /></div>
       <div className="flex flex-col gap-1.5"><label className={labelCls}>Type</label>
         <select value={form.type} onChange={e => setForm(f => ({...f, type: e.target.value}))} className={inputCls + " cursor-pointer"}>
           {["stadium","court","pool","auditorium","lab","pitch","gym","arena","hall","other"].map(t => <option key={t}>{t}</option>)}
@@ -211,34 +255,35 @@ function VenueForm({ onSuccess }: { onSuccess: () => void }) {
           {PROVINCES.map(p => <option key={p}>{p}</option>)}
         </select>
       </div>
-      <div className="flex flex-col gap-1.5"><label className={labelCls}>City *</label><input required value={form.city} onChange={e => setForm(f => ({...f, city: e.target.value}))} className={inputCls} placeholder="Harare" /></div>
+      <div className="flex flex-col gap-1.5"><label className={labelCls}>City *</label><input required value={form.city} onChange={e => setForm(f => ({...f, city: e.target.value}))} className={inputCls} /></div>
       <div className="flex flex-col gap-1.5"><label className={labelCls}>Capacity</label><input type="number" value={form.capacity} onChange={e => setForm(f => ({...f, capacity: e.target.value}))} className={inputCls} /></div>
       <div className="flex flex-col gap-1.5 md:col-span-2"><label className={labelCls}>Address</label><input value={form.address} onChange={e => setForm(f => ({...f, address: e.target.value}))} className={inputCls} /></div>
-      <div className="flex flex-col gap-1.5 md:col-span-2"><label className={labelCls}>Facilities (comma-separated)</label><input value={form.facilities} onChange={e => setForm(f => ({...f, facilities: e.target.value}))} className={inputCls} placeholder="Floodlights, Changing Rooms, Medical Bay…" /></div>
-      <div className="md:col-span-2"><button type="submit" disabled={loading} className="h-11 px-8 text-sm font-semibold tracking-wide rounded-xl bg-foreground text-primary-foreground hover:opacity-85 btn-click disabled:opacity-50">{loading ? "Adding…" : "Add Venue"}</button></div>
+      <div className="flex flex-col gap-1.5 md:col-span-2"><label className={labelCls}>Facilities (comma-separated)</label><input value={form.facilities} onChange={e => setForm(f => ({...f, facilities: e.target.value}))} className={inputCls} /></div>
+      <div className="md:col-span-2"><button type="submit" disabled={loading} className="h-11 px-8 text-sm font-semibold tracking-wide rounded-xl bg-foreground text-primary-foreground hover:opacity-85 btn-click disabled:opacity-50">{loading ? "Adding..." : "Add Venue"}</button></div>
     </form>
   );
 }
 
+// ── Team Form ─────────────────────────────────────────────────────
 function TeamForm({ onSuccess }: { onSuccess: () => void }) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [form, setForm] = useState({ name: "", short_name: "", discipline: "", province: "Harare", school_name: "", club_name: "", level: "national_league", founded_year: "" });
+  const [form, setForm] = useState({ name: "", short_name: "", discipline: "", province: "Harare", school_name: "", club_name: "", level: "national_league", founded_year: "", logo_url: "" });
   const [loading, setLoading] = useState(false);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     const { error } = await supabase.from("teams").insert({
-      ...form, level: form.level as typeof LEVELS[number],
+      name: form.name, short_name: form.short_name || null, discipline: form.discipline,
+      province: form.province, level: form.level as typeof LEVELS[number],
       founded_year: form.founded_year ? Number(form.founded_year) : null,
       school_name: form.school_name || null, club_name: form.club_name || null,
-      short_name: form.short_name || null, manager_id: user?.id || null,
+      manager_id: user?.id || null, logo_url: form.logo_url || null,
     });
     setLoading(false);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Team created" }); onSuccess();
   };
-
   return (
     <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
       <div className="flex flex-col gap-1.5"><label className={labelCls}>Team Name *</label><input required value={form.name} onChange={e => setForm(f => ({...f, name: e.target.value}))} className={inputCls} /></div>
@@ -246,7 +291,7 @@ function TeamForm({ onSuccess }: { onSuccess: () => void }) {
       <div className="flex flex-col gap-1.5"><label className={labelCls}>Discipline *</label>
         <select required value={form.discipline} onChange={e => setForm(f => ({...f, discipline: e.target.value}))} className={inputCls + " cursor-pointer"}>
           <option value="">Select</option>
-          {["Football","Rugby","Cricket","Athletics","Swimming","Basketball","Volleyball","Tennis","Chess","Debate","Quiz","Netball","Hockey","Boxing","Judo","Cycling","Other"].map(d => <option key={d}>{d}</option>)}
+          {DISCIPLINES.map(d => <option key={d}>{d}</option>)}
         </select>
       </div>
       <div className="flex flex-col gap-1.5"><label className={labelCls}>Level</label>
@@ -259,59 +304,161 @@ function TeamForm({ onSuccess }: { onSuccess: () => void }) {
           {PROVINCES.map(p => <option key={p}>{p}</option>)}
         </select>
       </div>
-      <div className="flex flex-col gap-1.5"><label className={labelCls}>Founded Year</label><input type="number" value={form.founded_year} onChange={e => setForm(f => ({...f, founded_year: e.target.value}))} className={inputCls} placeholder="2000" /></div>
+      <div className="flex flex-col gap-1.5"><label className={labelCls}>Founded Year</label><input type="number" value={form.founded_year} onChange={e => setForm(f => ({...f, founded_year: e.target.value}))} className={inputCls} /></div>
       <div className="flex flex-col gap-1.5"><label className={labelCls}>School</label><input value={form.school_name} onChange={e => setForm(f => ({...f, school_name: e.target.value}))} className={inputCls} /></div>
       <div className="flex flex-col gap-1.5"><label className={labelCls}>Club</label><input value={form.club_name} onChange={e => setForm(f => ({...f, club_name: e.target.value}))} className={inputCls} /></div>
-      <div className="md:col-span-2"><button type="submit" disabled={loading} className="h-11 px-8 text-sm font-semibold tracking-wide rounded-xl bg-foreground text-primary-foreground hover:opacity-85 btn-click disabled:opacity-50">{loading ? "Creating…" : "Create Team"}</button></div>
+      <div className="md:col-span-2">
+        <FileUploadField label="Team Logo" value={form.logo_url} onChange={url => setForm(f => ({...f, logo_url: url}))} folder="teams" />
+      </div>
+      <div className="md:col-span-2"><button type="submit" disabled={loading} className="h-11 px-8 text-sm font-semibold tracking-wide rounded-xl bg-foreground text-primary-foreground hover:opacity-85 btn-click disabled:opacity-50">{loading ? "Creating..." : "Create Team"}</button></div>
     </form>
   );
 }
 
+// ── Sponsorship Form ──────────────────────────────────────────────
+function SponsorshipForm({ onSuccess, competitions }: { onSuccess: () => void; competitions: any[] }) {
+  const { toast } = useToast();
+  const [form, setForm] = useState({ sponsor_name: "", tier: "gold", amount: "", competition_id: "", contract_start: "", contract_end: "", sponsor_logo: "" });
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await supabase.from("sponsorships").insert({
+      sponsor_name: form.sponsor_name,
+      tier: form.tier || null,
+      amount: form.amount ? Number(form.amount) : null,
+      competition_id: form.competition_id || null,
+      contract_start: form.contract_start || null,
+      contract_end: form.contract_end || null,
+      sponsor_logo: form.sponsor_logo || null,
+    });
+    setLoading(false);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Sponsorship added" }); onSuccess();
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="flex flex-col gap-1.5 md:col-span-2"><label className={labelCls}>Sponsor Name *</label><input required value={form.sponsor_name} onChange={e => setForm(f => ({...f, sponsor_name: e.target.value}))} className={inputCls} placeholder="e.g. Econet Wireless" /></div>
+      <div className="flex flex-col gap-1.5"><label className={labelCls}>Tier</label>
+        <select value={form.tier} onChange={e => setForm(f => ({...f, tier: e.target.value}))} className={inputCls + " cursor-pointer"}>
+          {["platinum","gold","silver","bronze","media","in-kind"].map(t => <option key={t} value={t}>{t}</option>)}
+        </select>
+      </div>
+      <div className="flex flex-col gap-1.5"><label className={labelCls}>Amount (USD)</label><input type="number" value={form.amount} onChange={e => setForm(f => ({...f, amount: e.target.value}))} className={inputCls} /></div>
+      <div className="flex flex-col gap-1.5"><label className={labelCls}>Competition</label>
+        <select value={form.competition_id} onChange={e => setForm(f => ({...f, competition_id: e.target.value}))} className={inputCls + " cursor-pointer"}>
+          <option value="">General / All</option>
+          {competitions.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+      </div>
+      <div className="flex flex-col gap-1.5"><label className={labelCls}>Contract Start</label><input type="date" value={form.contract_start} onChange={e => setForm(f => ({...f, contract_start: e.target.value}))} className={inputCls} /></div>
+      <div className="flex flex-col gap-1.5"><label className={labelCls}>Contract End</label><input type="date" value={form.contract_end} onChange={e => setForm(f => ({...f, contract_end: e.target.value}))} className={inputCls} /></div>
+      <div className="md:col-span-2">
+        <FileUploadField label="Sponsor Logo" value={form.sponsor_logo} onChange={url => setForm(f => ({...f, sponsor_logo: url}))} folder="sponsors" />
+      </div>
+      <div className="md:col-span-2"><button type="submit" disabled={loading} className="h-11 px-8 text-sm font-semibold tracking-wide rounded-xl bg-foreground text-primary-foreground hover:opacity-85 btn-click disabled:opacity-50">{loading ? "Adding..." : "Add Sponsorship"}</button></div>
+    </form>
+  );
+}
+
+// ── Detail Slide Panel ────────────────────────────────────────────
+function DetailPanel({ open, onClose, title, children }: { open: boolean; onClose: () => void; title: string; children: React.ReactNode }) {
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-black/30 z-40" onClick={onClose} />
+          <motion.div
+            initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
+            transition={{ type: "spring", damping: 28, stiffness: 300 }}
+            className="fixed right-0 top-0 h-full w-full max-w-lg bg-background z-50 shadow-2xl overflow-y-auto hairline-l"
+          >
+            <div className="p-6 hairline-b flex items-center justify-between sticky top-0 bg-background/95 backdrop-blur-sm z-10">
+              <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-semibold">{title}</p>
+              <button onClick={onClose} className="w-8 h-8 rounded-lg bg-nexus-surface hover:bg-nexus-silver flex items-center justify-center transition-colors">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div className="p-6">{children}</div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
+// ── Detail Field ──────────────────────────────────────────────────
+function DetailField({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex flex-col gap-1 py-3 hairline-b last:border-0">
+      <p className="text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold">{label}</p>
+      <p className="text-sm text-foreground">{value || "—"}</p>
+    </div>
+  );
+}
+
+// ── Main Dashboard ────────────────────────────────────────────────
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [showForm, setShowForm] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [detailType, setDetailType] = useState("");
   const { user } = useAuth();
+  const { toast } = useToast();
+  const qc = useQueryClient();
 
-  const { data: competitions = [], refetch: refetchComp } = useQuery({ queryKey: ["admin-competitions"], queryFn: async () => { const { data } = await supabase.from("competitions").select("id, name, discipline, level, format, status, province, season, parent_id, created_at").order("created_at", { ascending: false }).limit(50); return data || []; } });
-  const { data: athletes = [] } = useQuery({ queryKey: ["admin-athletes"], queryFn: async () => { const { data } = await supabase.from("athletes").select("id, first_name, last_name, province, disciplines, id_card_number, is_active, is_suspended, created_at").order("created_at", { ascending: false }).limit(50); return data || []; } });
-  const { data: venues = [], refetch: refetchVenues } = useQuery({ queryKey: ["admin-venues"], queryFn: async () => { const { data } = await supabase.from("venues").select("id, name, type, city, province, capacity, is_active").order("created_at", { ascending: false }).limit(50); return data || []; } });
-  const { data: officials = [] } = useQuery({ queryKey: ["admin-officials"], queryFn: async () => { const { data } = await supabase.from("officials").select("id, first_name, last_name, role, disciplines, province, is_active, performance_rating").order("created_at", { ascending: false }).limit(50); return data || []; } });
-  const { data: teams = [], refetch: refetchTeams } = useQuery({ queryKey: ["admin-teams"], queryFn: async () => { const { data } = await supabase.from("teams").select("id, name, short_name, discipline, level, province, is_active, created_at").order("created_at", { ascending: false }).limit(50); return data || []; } });
-  const { data: fixtures = [], refetch: refetchFixtures } = useQuery({ queryKey: ["admin-fixtures"], queryFn: async () => { const { data } = await supabase.from("fixtures").select(`id, round_label, status, scheduled_at, home_score, away_score, competition_id, home_team:home_team_id(name), away_team:away_team_id(name), competition:competition_id(name)`).order("scheduled_at", { ascending: false }).limit(50); return data || []; } });
-  const { data: disciplinary = [] } = useQuery({ queryKey: ["admin-disciplinary"], queryFn: async () => { const { data } = await supabase.from("disciplinary_records").select("id, reason, severity, is_active, appeal_status, suspension_until, created_at, athlete:athlete_id(first_name, last_name)").order("created_at", { ascending: false }).limit(30); return data || []; } });
-  const { data: registrations = [] } = useQuery({ queryKey: ["admin-registrations"], queryFn: async () => { const { data } = await supabase.from("registrations").select(`id, registration_type, status, payment_status, created_at, competition:competition_id(name), athlete:athlete_id(first_name, last_name), team:team_id(name)`).order("created_at", { ascending: false }).limit(50); return data || []; } });
-  const { data: broadcasts = [] } = useQuery({ queryKey: ["admin-broadcasts"], queryFn: async () => { const { data } = await supabase.from("broadcasts").select("id, title, platform, is_live, viewer_count, quality, created_at, competition:competition_id(name)").order("created_at", { ascending: false }).limit(30); return data || []; } });
-  const { data: sponsorships = [] } = useQuery({ queryKey: ["admin-sponsorships"], queryFn: async () => { const { data } = await supabase.from("sponsorships").select("id, sponsor_name, tier, amount, contract_start, contract_end, competition:competition_id(name)").order("created_at", { ascending: false }).limit(30); return data || []; } });
+  const { data: competitions = [], refetch: refetchComp } = useQuery({ queryKey: ["admin-competitions"], queryFn: async () => { const { data } = await supabase.from("competitions").select("id, name, discipline, level, format, status, province, season, parent_id, created_at, description, start_date, end_date, max_participants, entry_fee, prize_pool, sponsor, logo_url").order("created_at", { ascending: false }).limit(100); return data || []; } });
+  const { data: athletes = [], refetch: refetchAthletes } = useQuery({ queryKey: ["admin-athletes"], queryFn: async () => { const { data } = await supabase.from("athletes").select("id, first_name, last_name, province, disciplines, id_card_number, is_active, is_suspended, created_at, date_of_birth, school_name, club_name, photo_url, gender").order("created_at", { ascending: false }).limit(100); return data || []; } });
+  const { data: venues = [], refetch: refetchVenues } = useQuery({ queryKey: ["admin-venues"], queryFn: async () => { const { data } = await supabase.from("venues").select("id, name, type, city, province, capacity, is_active, address, facilities").order("created_at", { ascending: false }).limit(100); return data || []; } });
+  const { data: officials = [] } = useQuery({ queryKey: ["admin-officials"], queryFn: async () => { const { data } = await supabase.from("officials").select("id, first_name, last_name, role, disciplines, province, is_active, performance_rating, certification_level, total_matches").order("created_at", { ascending: false }).limit(50); return data || []; } });
+  const { data: teams = [], refetch: refetchTeams } = useQuery({ queryKey: ["admin-teams"], queryFn: async () => { const { data } = await supabase.from("teams").select("id, name, short_name, discipline, level, province, is_active, created_at, school_name, club_name, logo_url, kit_colors, founded_year").order("created_at", { ascending: false }).limit(100); return data || []; } });
+  const { data: fixtures = [], refetch: refetchFixtures } = useQuery({ queryKey: ["admin-fixtures"], queryFn: async () => { const { data } = await supabase.from("fixtures").select(`id, round_label, status, scheduled_at, home_score, away_score, competition_id, home_team:home_team_id(name), away_team:away_team_id(name), competition:competition_id(name, discipline)`).order("scheduled_at", { ascending: false }).limit(100); return data || []; } });
+  const { data: disciplinary = [] } = useQuery({ queryKey: ["admin-disciplinary"], queryFn: async () => { const { data } = await supabase.from("disciplinary_records").select("id, reason, severity, is_active, appeal_status, suspension_until, created_at, description, suspension_games, athlete:athlete_id(first_name, last_name)").order("created_at", { ascending: false }).limit(50); return data || []; } });
+  const { data: registrations = [] } = useQuery({ queryKey: ["admin-registrations"], queryFn: async () => { const { data } = await supabase.from("registrations").select(`id, registration_type, status, payment_status, created_at, division, notes, competition:competition_id(name), athlete:athlete_id(first_name, last_name), team:team_id(name)`).order("created_at", { ascending: false }).limit(100); return data || []; } });
+  const { data: broadcasts = [] } = useQuery({ queryKey: ["admin-broadcasts"], queryFn: async () => { const { data } = await supabase.from("broadcasts").select("id, title, platform, is_live, viewer_count, quality, created_at, stream_url, competition:competition_id(name)").order("created_at", { ascending: false }).limit(30); return data || []; } });
+  const { data: sponsorships = [], refetch: refetchSponsors } = useQuery({ queryKey: ["admin-sponsorships"], queryFn: async () => { const { data } = await supabase.from("sponsorships").select("id, sponsor_name, tier, amount, contract_start, contract_end, sponsor_logo, competition:competition_id(name)").order("created_at", { ascending: false }).limit(50); return data || []; } });
+
+  const openDetail = (item: any, type: string) => { setSelectedItem(item); setDetailType(type); };
 
   const sectionHeader = (title: string, action?: React.ReactNode) => (
-    <div className="px-8 py-5 hairline-b flex items-center justify-between">
+    <div className="px-4 sm:px-8 py-5 hairline-b flex items-center justify-between gap-3 flex-wrap">
       <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">{title}</p>
       {action}
     </div>
   );
 
   const tableHead = (...cols: string[]) => (
-    <thead><tr className="hairline-b">{cols.map(c => <th key={c} className="px-6 py-4 text-left text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold">{c}</th>)}</tr></thead>
+    <thead><tr className="hairline-b">{cols.map(c => <th key={c} className="px-4 sm:px-6 py-4 text-left text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold whitespace-nowrap">{c}</th>)}</tr></thead>
   );
 
   const EmptyState = ({ msg }: { msg: string }) => (
     <div className="py-12 text-center"><p className="text-nexus-muted mono text-sm">{msg}</p></div>
   );
 
+  const clickableRow = "hairline-b hover:bg-nexus-surface/60 transition-colors cursor-pointer";
+
+  const updateCompStatus = async (id: string, status: string) => {
+    const { error } = await supabase.from("competitions").update({ status: status as typeof STATUSES[number] }).eq("id", id);
+    if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
+    else { toast({ title: "Status updated" }); refetchComp(); }
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <NexusHeader />
       <div className="max-w-[1400px] mx-auto pt-20">
-        <div className="px-8 py-8 hairline-b">
+        <div className="px-4 sm:px-8 py-8 hairline-b">
           <p className="text-[10px] mono tracking-[0.25em] uppercase text-nexus-muted">Administration</p>
           <h1 className="display-font text-display-lg font-bold text-foreground mt-1">Nexus Admin Dashboard</h1>
-          {!user && <p className="text-sm text-nexus-muted mt-2 bg-nexus-surface hairline rounded-lg px-4 py-2.5 inline-block mt-3">⚠ Sign in with an admin account to manage data</p>}
+          {!user && <p className="text-sm text-nexus-muted mt-3 bg-nexus-surface hairline rounded-lg px-4 py-2.5 inline-block">Sign in with an admin account to manage data</p>}
         </div>
 
-        <div className="flex overflow-x-auto hairline-b">
+        <div className="flex overflow-x-auto hairline-b scrollbar-hide">
           {ADMIN_TABS.map((tab) => (
             <button key={tab.id} onClick={() => { setActiveTab(tab.id); setShowForm(false); }}
-              className={`px-6 py-4 text-xs font-semibold tracking-wide whitespace-nowrap flex-shrink-0 border-b-2 transition-all duration-200 btn-click
+              className={`px-4 sm:px-6 py-4 text-xs font-semibold tracking-wide whitespace-nowrap flex-shrink-0 border-b-2 transition-all duration-200 btn-click
                 ${activeTab === tab.id ? "border-foreground text-foreground" : "border-transparent text-nexus-muted hover:text-foreground"}`}>
               {tab.label}
             </button>
@@ -322,7 +469,7 @@ export default function AdminDashboard() {
 
           {/* OVERVIEW */}
           {activeTab === "overview" && (
-            <div className="p-8">
+            <div className="p-4 sm:p-8">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 <StatCard label="Competitions" value={String(competitions.length)} sub="total" />
                 <StatCard label="Teams" value={String(teams.length)} sub="registered" />
@@ -331,24 +478,7 @@ export default function AdminDashboard() {
                 <StatCard label="Fixtures" value={String(fixtures.length)} sub="scheduled" />
                 <StatCard label="Officials" value={String(officials.length)} sub="certified" />
                 <StatCard label="Registrations" value={String(registrations.length)} sub="submitted" />
-                <StatCard label="Broadcasts" value={String(broadcasts.length)} sub="created" />
-              </div>
-              <div className="hairline rounded-xl p-6 bg-nexus-surface/40">
-                <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Live Status</p>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  <div className="hairline rounded-lg p-4 bg-background">
-                    <p className="text-[10px] mono text-nexus-muted uppercase tracking-wider mb-1">Live Fixtures</p>
-                    <p className="score-display text-score-md text-foreground">{(fixtures as any[]).filter(f => f.status === "live").length}</p>
-                  </div>
-                  <div className="hairline rounded-lg p-4 bg-background">
-                    <p className="text-[10px] mono text-nexus-muted uppercase tracking-wider mb-1">Open Registrations</p>
-                    <p className="score-display text-score-md text-foreground">{(competitions as any[]).filter(c => c.status === "registration_open").length}</p>
-                  </div>
-                  <div className="hairline rounded-lg p-4 bg-background">
-                    <p className="text-[10px] mono text-nexus-muted uppercase tracking-wider mb-1">Active Disciplinary</p>
-                    <p className="score-display text-score-md text-foreground">{(disciplinary as any[]).filter(d => d.is_active).length}</p>
-                  </div>
-                </div>
+                <StatCard label="Sponsors" value={String(sponsorships.length)} sub="active" />
               </div>
             </div>
           )}
@@ -361,20 +491,30 @@ export default function AdminDashboard() {
                   {showForm ? "Cancel" : "+ New Competition"}
                 </button>
               ))}
-              {showForm && <div className="p-8 hairline-b"><CompetitionForm competitions={competitions as any[]} onSuccess={() => { setShowForm(false); refetchComp(); }} /></div>}
+              {showForm && <div className="p-4 sm:p-8 hairline-b"><CompetitionForm competitions={competitions as any[]} onSuccess={() => { setShowForm(false); refetchComp(); }} /></div>}
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[800px]">
-                  {tableHead("Name","Discipline","Level","Format","Status","Province","Season")}
+                  {tableHead("","Name","Discipline","Level","Status","Province","Season")}
                   <tbody>
                     {(competitions as any[]).map((comp) => (
-                      <tr key={comp.id} className="hairline-b hover:bg-nexus-surface/60 transition-colors">
-                        <td className="px-6 py-4 text-sm font-semibold text-foreground">{comp.name}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{comp.discipline}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{comp.level?.replace(/_/g," ")}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{comp.format?.replace(/_/g," ")}</td>
-                        <td className="px-6 py-4"><span className="text-[10px] mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2.5 py-1 rounded-full">{comp.status?.replace(/_/g," ")}</span></td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{comp.province || "National"}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{comp.season || "—"}</td>
+                      <tr key={comp.id} className={clickableRow} onClick={() => openDetail(comp, "competition")}>
+                        <td className="px-4 sm:px-6 py-4 w-10">{comp.logo_url ? <img src={comp.logo_url} className="w-8 h-8 rounded-lg object-cover bg-white" alt="" /> : <div className="w-8 h-8 rounded-lg bg-nexus-surface" />}</td>
+                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{comp.name}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{comp.discipline}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{comp.level?.replace(/_/g," ")}</td>
+                        <td className="px-4 sm:px-6 py-4">
+                          {user ? (
+                            <select value={comp.status} onChange={e => { e.stopPropagation(); updateCompStatus(comp.id, e.target.value); }}
+                              onClick={e => e.stopPropagation()}
+                              className="text-[10px] mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2.5 py-1 rounded-full border-0 focus:outline-none cursor-pointer">
+                              {STATUSES.map(s => <option key={s} value={s}>{s.replace(/_/g," ")}</option>)}
+                            </select>
+                          ) : (
+                            <span className="text-[10px] mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2.5 py-1 rounded-full">{comp.status?.replace(/_/g," ")}</span>
+                          )}
+                        </td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{comp.province || "National"}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{comp.season || "—"}</td>
                       </tr>
                     ))}
                     {competitions.length === 0 && <tr><td colSpan={7}><EmptyState msg="No competitions yet. Create one above." /></td></tr>}
@@ -392,22 +532,22 @@ export default function AdminDashboard() {
                   {showForm ? "Cancel" : "+ New Fixture"}
                 </button>
               ))}
-              {showForm && <div className="p-8 hairline-b"><FixtureForm competitions={competitions as any[]} onSuccess={() => { setShowForm(false); refetchFixtures(); }} /></div>}
+              {showForm && <div className="p-4 sm:p-8 hairline-b"><FixtureForm competitions={competitions as any[]} onSuccess={() => { setShowForm(false); refetchFixtures(); }} /></div>}
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[800px]">
                   {tableHead("Match","Competition","Round","Status","Score","Scheduled")}
                   <tbody>
                     {(fixtures as any[]).map((f) => (
-                      <tr key={f.id} className="hairline-b hover:bg-nexus-surface/60 transition-colors">
-                        <td className="px-6 py-4 text-sm font-semibold text-foreground">{f.home_team?.name || "TBD"} vs {f.away_team?.name || "TBD"}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{f.competition?.name || "—"}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{f.round_label || f.round_number || "—"}</td>
-                        <td className="px-6 py-4"><span className="text-[10px] mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2.5 py-1 rounded-full">{f.status}</span></td>
-                        <td className="px-6 py-4 text-sm mono font-semibold text-foreground">{f.home_score ?? 0} — {f.away_score ?? 0}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{f.scheduled_at ? new Date(f.scheduled_at).toLocaleString("en-ZW", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "TBD"}</td>
+                      <tr key={f.id} className={clickableRow} onClick={() => openDetail(f, "fixture")}>
+                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{f.home_team?.name || "TBD"} vs {f.away_team?.name || "TBD"}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{f.competition?.name || "—"}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{f.round_label || "—"}</td>
+                        <td className="px-4 sm:px-6 py-4"><span className="text-[10px] mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2.5 py-1 rounded-full">{f.status}</span></td>
+                        <td className="px-4 sm:px-6 py-4 text-sm mono font-semibold text-foreground">{f.home_score ?? 0} — {f.away_score ?? 0}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{f.scheduled_at ? new Date(f.scheduled_at).toLocaleString("en-ZW", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "TBD"}</td>
                       </tr>
                     ))}
-                    {fixtures.length === 0 && <tr><td colSpan={6}><EmptyState msg="No fixtures yet. Create one above." /></td></tr>}
+                    {fixtures.length === 0 && <tr><td colSpan={6}><EmptyState msg="No fixtures yet." /></td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -422,19 +562,19 @@ export default function AdminDashboard() {
                   {showForm ? "Cancel" : "+ New Team"}
                 </button>
               ))}
-              {showForm && <div className="p-8 hairline-b"><TeamForm onSuccess={() => { setShowForm(false); refetchTeams(); }} /></div>}
+              {showForm && <div className="p-4 sm:p-8 hairline-b"><TeamForm onSuccess={() => { setShowForm(false); refetchTeams(); }} /></div>}
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[640px]">
-                  {tableHead("Name","Short","Discipline","Level","Province","Status")}
+                  {tableHead("","Name","Discipline","Level","Province","Status")}
                   <tbody>
                     {(teams as any[]).map((t) => (
-                      <tr key={t.id} className="hairline-b hover:bg-nexus-surface/60 transition-colors">
-                        <td className="px-6 py-4 text-sm font-semibold text-foreground">{t.name}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{t.short_name || "—"}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{t.discipline}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{t.level?.replace(/_/g," ") || "—"}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{t.province || "—"}</td>
-                        <td className="px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${t.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{t.is_active ? "Active" : "Inactive"}</span></td>
+                      <tr key={t.id} className={clickableRow} onClick={() => openDetail(t, "team")}>
+                        <td className="px-4 sm:px-6 py-4 w-10">{t.logo_url ? <img src={t.logo_url} className="w-8 h-8 rounded-lg object-cover bg-white" alt="" /> : <div className="w-8 h-8 rounded-lg bg-nexus-surface flex items-center justify-center text-[9px] mono text-nexus-muted">{t.short_name?.slice(0,2) || t.name?.slice(0,2)}</div>}</td>
+                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{t.name}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{t.discipline}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{t.level?.replace(/_/g," ") || "—"}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{t.province || "—"}</td>
+                        <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${t.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{t.is_active ? "Active" : "Inactive"}</span></td>
                       </tr>
                     ))}
                     {teams.length === 0 && <tr><td colSpan={6}><EmptyState msg="No teams yet." /></td></tr>}
@@ -450,18 +590,19 @@ export default function AdminDashboard() {
               {sectionHeader("Athletes")}
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[640px]">
-                  {tableHead("Name","Province","Disciplines","ID Card","Status")}
+                  {tableHead("","Name","Province","Disciplines","ID Card","Status")}
                   <tbody>
                     {(athletes as any[]).map((a) => (
-                      <tr key={a.id} className="hairline-b hover:bg-nexus-surface/60 transition-colors">
-                        <td className="px-6 py-4 text-sm font-semibold text-foreground">{a.first_name} {a.last_name}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{a.province}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{a.disciplines?.join(", ")}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{a.id_card_number || "—"}</td>
-                        <td className="px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${a.is_suspended ? "bg-foreground text-primary-foreground" : a.is_active ? "bg-nexus-surface text-nexus-muted" : "bg-nexus-surface text-nexus-muted"}`}>{a.is_suspended ? "Suspended" : a.is_active ? "Active" : "Inactive"}</span></td>
+                      <tr key={a.id} className={clickableRow} onClick={() => openDetail(a, "athlete")}>
+                        <td className="px-4 sm:px-6 py-4 w-10">{a.photo_url ? <img src={a.photo_url} className="w-8 h-8 rounded-full object-cover" alt="" /> : <div className="w-8 h-8 rounded-full bg-nexus-surface flex items-center justify-center text-[9px] mono font-bold text-nexus-muted">{a.first_name?.[0]}{a.last_name?.[0]}</div>}</td>
+                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{a.first_name} {a.last_name}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{a.province}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{a.disciplines?.join(", ")}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{a.id_card_number || "—"}</td>
+                        <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${a.is_suspended ? "bg-foreground text-primary-foreground" : a.is_active ? "bg-nexus-surface text-nexus-muted" : "bg-nexus-surface text-nexus-muted"}`}>{a.is_suspended ? "Suspended" : a.is_active ? "Active" : "Inactive"}</span></td>
                       </tr>
                     ))}
-                    {athletes.length === 0 && <tr><td colSpan={5}><EmptyState msg="No athletes registered yet." /></td></tr>}
+                    {athletes.length === 0 && <tr><td colSpan={6}><EmptyState msg="No athletes registered yet." /></td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -477,13 +618,13 @@ export default function AdminDashboard() {
                   {tableHead("Name","Role","Disciplines","Province","Rating","Status")}
                   <tbody>
                     {(officials as any[]).map((o) => (
-                      <tr key={o.id} className="hairline-b hover:bg-nexus-surface/60 transition-colors">
-                        <td className="px-6 py-4 text-sm font-semibold text-foreground">{o.first_name} {o.last_name}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted capitalize">{o.role}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{o.disciplines?.join(", ")}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{o.province || "—"}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{o.performance_rating ? `${o.performance_rating}/5` : "—"}</td>
-                        <td className="px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${o.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{o.is_active ? "Active" : "Inactive"}</span></td>
+                      <tr key={o.id} className={clickableRow} onClick={() => openDetail(o, "official")}>
+                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{o.first_name} {o.last_name}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted capitalize">{o.role}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{o.disciplines?.join(", ")}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{o.province || "—"}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{o.performance_rating ? `${o.performance_rating}/5` : "—"}</td>
+                        <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${o.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{o.is_active ? "Active" : "Inactive"}</span></td>
                       </tr>
                     ))}
                     {officials.length === 0 && <tr><td colSpan={6}><EmptyState msg="No officials registered yet." /></td></tr>}
@@ -501,22 +642,22 @@ export default function AdminDashboard() {
                   {showForm ? "Cancel" : "+ Add Venue"}
                 </button>
               ))}
-              {showForm && <div className="p-8 hairline-b"><VenueForm onSuccess={() => { setShowForm(false); refetchVenues(); }} /></div>}
+              {showForm && <div className="p-4 sm:p-8 hairline-b"><VenueForm onSuccess={() => { setShowForm(false); refetchVenues(); }} /></div>}
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[640px]">
                   {tableHead("Name","Type","City","Province","Capacity","Status")}
                   <tbody>
                     {(venues as any[]).map((v) => (
-                      <tr key={v.id} className="hairline-b hover:bg-nexus-surface/60 transition-colors">
-                        <td className="px-6 py-4 text-sm font-semibold text-foreground">{v.name}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted capitalize">{v.type}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{v.city}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{v.province}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{v.capacity ? v.capacity.toLocaleString() : "—"}</td>
-                        <td className="px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${v.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{v.is_active ? "Active" : "Inactive"}</span></td>
+                      <tr key={v.id} className={clickableRow} onClick={() => openDetail(v, "venue")}>
+                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{v.name}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted capitalize">{v.type}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{v.city}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{v.province}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{v.capacity ? v.capacity.toLocaleString() : "—"}</td>
+                        <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${v.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{v.is_active ? "Active" : "Inactive"}</span></td>
                       </tr>
                     ))}
-                    {venues.length === 0 && <tr><td colSpan={6}><EmptyState msg="No venues yet. Add one above." /></td></tr>}
+                    {venues.length === 0 && <tr><td colSpan={6}><EmptyState msg="No venues yet." /></td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -532,13 +673,13 @@ export default function AdminDashboard() {
                   {tableHead("Athlete","Severity","Reason","Appeal","Suspension Until","Active")}
                   <tbody>
                     {(disciplinary as any[]).map((d) => (
-                      <tr key={d.id} className="hairline-b hover:bg-nexus-surface/60 transition-colors">
-                        <td className="px-6 py-4 text-sm font-semibold text-foreground">{d.athlete ? `${d.athlete.first_name} ${d.athlete.last_name}` : "—"}</td>
-                        <td className="px-6 py-4"><span className="text-[10px] mono px-2.5 py-1 rounded-full bg-nexus-surface text-nexus-muted uppercase tracking-widest">{d.severity?.replace(/_/g," ")}</span></td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted max-w-[200px] truncate">{d.reason}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{d.appeal_status || "none"}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{d.suspension_until || "—"}</td>
-                        <td className="px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${d.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{d.is_active ? "Active" : "Resolved"}</span></td>
+                      <tr key={d.id} className={clickableRow} onClick={() => openDetail(d, "disciplinary")}>
+                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{d.athlete ? `${d.athlete.first_name} ${d.athlete.last_name}` : "—"}</td>
+                        <td className="px-4 sm:px-6 py-4"><span className="text-[10px] mono px-2.5 py-1 rounded-full bg-nexus-surface text-nexus-muted uppercase tracking-widest">{d.severity?.replace(/_/g," ")}</span></td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted max-w-[200px] truncate">{d.reason}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{d.appeal_status || "none"}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{d.suspension_until || "—"}</td>
+                        <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${d.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{d.is_active ? "Active" : "Resolved"}</span></td>
                       </tr>
                     ))}
                     {disciplinary.length === 0 && <tr><td colSpan={6}><EmptyState msg="No disciplinary records." /></td></tr>}
@@ -568,13 +709,13 @@ export default function AdminDashboard() {
                   {tableHead("Registrant","Type","Competition","Status","Payment","Date")}
                   <tbody>
                     {(registrations as any[]).map((r) => (
-                      <tr key={r.id} className="hairline-b hover:bg-nexus-surface/60 transition-colors">
-                        <td className="px-6 py-4 text-sm font-semibold text-foreground">{r.athlete ? `${r.athlete.first_name} ${r.athlete.last_name}` : r.team?.name || "—"}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted capitalize">{r.registration_type}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{r.competition?.name || "—"}</td>
-                        <td className="px-6 py-4"><span className="text-[10px] mono px-2.5 py-1 rounded-full bg-nexus-surface text-nexus-muted">{r.status}</span></td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{r.payment_status}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{new Date(r.created_at).toLocaleDateString("en-ZW", { month: "short", day: "numeric" })}</td>
+                      <tr key={r.id} className={clickableRow} onClick={() => openDetail(r, "registration")}>
+                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{r.athlete ? `${r.athlete.first_name} ${r.athlete.last_name}` : r.team?.name || "—"}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted capitalize">{r.registration_type}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{r.competition?.name || "—"}</td>
+                        <td className="px-4 sm:px-6 py-4"><span className="text-[10px] mono px-2.5 py-1 rounded-full bg-nexus-surface text-nexus-muted">{r.status}</span></td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{r.payment_status}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{new Date(r.created_at).toLocaleDateString("en-ZW", { month: "short", day: "numeric" })}</td>
                       </tr>
                     ))}
                     {registrations.length === 0 && <tr><td colSpan={6}><EmptyState msg="No registrations yet." /></td></tr>}
@@ -593,13 +734,13 @@ export default function AdminDashboard() {
                   {tableHead("Title","Competition","Platform","Status","Viewers","Quality")}
                   <tbody>
                     {(broadcasts as any[]).map((b) => (
-                      <tr key={b.id} className="hairline-b hover:bg-nexus-surface/60 transition-colors">
-                        <td className="px-6 py-4 text-sm font-semibold text-foreground">{b.title}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{b.competition?.name || "—"}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{b.platform || "—"}</td>
-                        <td className="px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${b.is_live ? "bg-nexus-live text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{b.is_live ? "Live" : "Offline"}</span></td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{b.viewer_count?.toLocaleString() || "—"}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{b.quality || "HD"}</td>
+                      <tr key={b.id} className={clickableRow} onClick={() => openDetail(b, "broadcast")}>
+                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{b.title}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{b.competition?.name || "—"}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{b.platform || "—"}</td>
+                        <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${b.is_live ? "bg-nexus-live text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{b.is_live ? "Live" : "Offline"}</span></td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{b.viewer_count?.toLocaleString() || "—"}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{b.quality || "HD"}</td>
                       </tr>
                     ))}
                     {broadcasts.length === 0 && <tr><td colSpan={6}><EmptyState msg="No broadcasts yet." /></td></tr>}
@@ -612,22 +753,28 @@ export default function AdminDashboard() {
           {/* SPONSORSHIPS */}
           {activeTab === "sponsorships" && (
             <div>
-              {sectionHeader("Sponsorships")}
+              {sectionHeader("Sponsorships", user && (
+                <button onClick={() => setShowForm(!showForm)} className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click">
+                  {showForm ? "Cancel" : "+ Add Sponsor"}
+                </button>
+              ))}
+              {showForm && <div className="p-4 sm:p-8 hairline-b"><SponsorshipForm competitions={competitions as any[]} onSuccess={() => { setShowForm(false); refetchSponsors(); }} /></div>}
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[640px]">
-                  {tableHead("Sponsor","Competition","Tier","Amount","Start","End")}
+                  {tableHead("","Sponsor","Competition","Tier","Amount","Start","End")}
                   <tbody>
                     {(sponsorships as any[]).map((s) => (
-                      <tr key={s.id} className="hairline-b hover:bg-nexus-surface/60 transition-colors">
-                        <td className="px-6 py-4 text-sm font-semibold text-foreground">{s.sponsor_name}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{s.competition?.name || "—"}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted capitalize">{s.tier || "—"}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{s.amount ? `$${Number(s.amount).toLocaleString()}` : "—"}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{s.contract_start || "—"}</td>
-                        <td className="px-6 py-4 text-xs mono text-nexus-muted">{s.contract_end || "—"}</td>
+                      <tr key={s.id} className={clickableRow} onClick={() => openDetail(s, "sponsor")}>
+                        <td className="px-4 sm:px-6 py-4 w-10">{s.sponsor_logo ? <img src={s.sponsor_logo} className="w-8 h-8 rounded-lg object-contain bg-white p-0.5" alt="" /> : <div className="w-8 h-8 rounded-lg bg-nexus-surface" />}</td>
+                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{s.sponsor_name}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{s.competition?.name || "General"}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted capitalize">{s.tier || "—"}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{s.amount ? `$${Number(s.amount).toLocaleString()}` : "—"}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{s.contract_start || "—"}</td>
+                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{s.contract_end || "—"}</td>
                       </tr>
                     ))}
-                    {sponsorships.length === 0 && <tr><td colSpan={6}><EmptyState msg="No sponsorships yet." /></td></tr>}
+                    {sponsorships.length === 0 && <tr><td colSpan={7}><EmptyState msg="No sponsorships yet. Add one above." /></td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -636,6 +783,129 @@ export default function AdminDashboard() {
 
         </motion.div>
       </div>
+
+      {/* Detail Slide Panels */}
+      <DetailPanel open={!!selectedItem && detailType === "competition"} onClose={() => setSelectedItem(null)} title="Competition Details">
+        {selectedItem && detailType === "competition" && (
+          <div>
+            {selectedItem.logo_url && <img src={selectedItem.logo_url} className="w-16 h-16 rounded-xl object-cover bg-white mb-4" alt="" />}
+            <DetailField label="Name" value={selectedItem.name} />
+            <DetailField label="Discipline" value={selectedItem.discipline} />
+            <DetailField label="Level" value={selectedItem.level?.replace(/_/g," ")} />
+            <DetailField label="Format" value={selectedItem.format?.replace(/_/g," ")} />
+            <DetailField label="Status" value={selectedItem.status?.replace(/_/g," ")} />
+            <DetailField label="Season" value={selectedItem.season} />
+            <DetailField label="Province" value={selectedItem.province || "National"} />
+            <DetailField label="Start Date" value={selectedItem.start_date} />
+            <DetailField label="End Date" value={selectedItem.end_date} />
+            <DetailField label="Max Participants" value={selectedItem.max_participants} />
+            <DetailField label="Entry Fee" value={selectedItem.entry_fee ? `$${selectedItem.entry_fee}` : null} />
+            <DetailField label="Prize Pool" value={selectedItem.prize_pool ? `$${Number(selectedItem.prize_pool).toLocaleString()}` : null} />
+            <DetailField label="Sponsor" value={selectedItem.sponsor} />
+            <DetailField label="Description" value={selectedItem.description} />
+          </div>
+        )}
+      </DetailPanel>
+
+      <DetailPanel open={!!selectedItem && detailType === "fixture"} onClose={() => setSelectedItem(null)} title="Fixture Details">
+        {selectedItem && detailType === "fixture" && (
+          <div>
+            <DetailField label="Match" value={`${selectedItem.home_team?.name || "TBD"} vs ${selectedItem.away_team?.name || "TBD"}`} />
+            <DetailField label="Competition" value={selectedItem.competition?.name} />
+            <DetailField label="Round" value={selectedItem.round_label} />
+            <DetailField label="Status" value={selectedItem.status} />
+            <DetailField label="Score" value={`${selectedItem.home_score ?? 0} — ${selectedItem.away_score ?? 0}`} />
+            <DetailField label="Scheduled" value={selectedItem.scheduled_at ? new Date(selectedItem.scheduled_at).toLocaleString() : "TBD"} />
+            <div className="mt-4 flex gap-2">
+              <a href={`/scoring`} className="h-9 px-4 text-xs font-semibold rounded-lg bg-foreground text-primary-foreground flex items-center hover:opacity-85 transition-opacity">Open in Scoring</a>
+              <a href={`/broadcast/${selectedItem.id}`} className="h-9 px-4 text-xs font-semibold rounded-lg bg-nexus-surface text-foreground flex items-center hover:bg-nexus-silver transition-colors">Broadcast CG</a>
+            </div>
+          </div>
+        )}
+      </DetailPanel>
+
+      <DetailPanel open={!!selectedItem && detailType === "team"} onClose={() => setSelectedItem(null)} title="Team Details">
+        {selectedItem && detailType === "team" && (
+          <div>
+            {selectedItem.logo_url && <img src={selectedItem.logo_url} className="w-16 h-16 rounded-xl object-cover bg-white mb-4" alt="" />}
+            <DetailField label="Name" value={selectedItem.name} />
+            <DetailField label="Short Name" value={selectedItem.short_name} />
+            <DetailField label="Discipline" value={selectedItem.discipline} />
+            <DetailField label="Level" value={selectedItem.level?.replace(/_/g," ")} />
+            <DetailField label="Province" value={selectedItem.province} />
+            <DetailField label="School" value={selectedItem.school_name} />
+            <DetailField label="Club" value={selectedItem.club_name} />
+            <DetailField label="Founded" value={selectedItem.founded_year} />
+            <DetailField label="Kit Colors" value={selectedItem.kit_colors?.join(", ")} />
+            <DetailField label="Status" value={selectedItem.is_active ? "Active" : "Inactive"} />
+          </div>
+        )}
+      </DetailPanel>
+
+      <DetailPanel open={!!selectedItem && detailType === "athlete"} onClose={() => setSelectedItem(null)} title="Athlete Details">
+        {selectedItem && detailType === "athlete" && (
+          <div>
+            {selectedItem.photo_url && <img src={selectedItem.photo_url} className="w-16 h-16 rounded-full object-cover mb-4" alt="" />}
+            <DetailField label="Name" value={`${selectedItem.first_name} ${selectedItem.last_name}`} />
+            <DetailField label="Province" value={selectedItem.province} />
+            <DetailField label="Gender" value={selectedItem.gender} />
+            <DetailField label="Date of Birth" value={selectedItem.date_of_birth} />
+            <DetailField label="Disciplines" value={selectedItem.disciplines?.join(", ")} />
+            <DetailField label="School" value={selectedItem.school_name} />
+            <DetailField label="Club" value={selectedItem.club_name} />
+            <DetailField label="ID Card" value={selectedItem.id_card_number} />
+            <DetailField label="Status" value={selectedItem.is_suspended ? "Suspended" : selectedItem.is_active ? "Active" : "Inactive"} />
+            <div className="mt-4">
+              <a href="/athletes/id-cards" className="h-9 px-4 text-xs font-semibold rounded-lg bg-foreground text-primary-foreground inline-flex items-center hover:opacity-85 transition-opacity">View ID Card</a>
+            </div>
+          </div>
+        )}
+      </DetailPanel>
+
+      <DetailPanel open={!!selectedItem && detailType === "official"} onClose={() => setSelectedItem(null)} title="Official Details">
+        {selectedItem && detailType === "official" && (
+          <div>
+            <DetailField label="Name" value={`${selectedItem.first_name} ${selectedItem.last_name}`} />
+            <DetailField label="Role" value={selectedItem.role} />
+            <DetailField label="Disciplines" value={selectedItem.disciplines?.join(", ")} />
+            <DetailField label="Province" value={selectedItem.province} />
+            <DetailField label="Certification" value={selectedItem.certification_level} />
+            <DetailField label="Rating" value={selectedItem.performance_rating ? `${selectedItem.performance_rating}/5` : null} />
+            <DetailField label="Total Matches" value={selectedItem.total_matches} />
+            <DetailField label="Status" value={selectedItem.is_active ? "Active" : "Inactive"} />
+          </div>
+        )}
+      </DetailPanel>
+
+      <DetailPanel open={!!selectedItem && detailType === "disciplinary"} onClose={() => setSelectedItem(null)} title="Disciplinary Record">
+        {selectedItem && detailType === "disciplinary" && (
+          <div>
+            <DetailField label="Athlete" value={selectedItem.athlete ? `${selectedItem.athlete.first_name} ${selectedItem.athlete.last_name}` : "—"} />
+            <DetailField label="Severity" value={selectedItem.severity?.replace(/_/g," ")} />
+            <DetailField label="Reason" value={selectedItem.reason} />
+            <DetailField label="Description" value={selectedItem.description} />
+            <DetailField label="Appeal Status" value={selectedItem.appeal_status} />
+            <DetailField label="Suspension Games" value={selectedItem.suspension_games} />
+            <DetailField label="Suspension Until" value={selectedItem.suspension_until} />
+            <DetailField label="Active" value={selectedItem.is_active ? "Yes" : "Resolved"} />
+          </div>
+        )}
+      </DetailPanel>
+
+      <DetailPanel open={!!selectedItem && detailType === "sponsor"} onClose={() => setSelectedItem(null)} title="Sponsor Details">
+        {selectedItem && detailType === "sponsor" && (
+          <div>
+            {selectedItem.sponsor_logo && <img src={selectedItem.sponsor_logo} className="w-16 h-16 rounded-xl object-contain bg-white p-1 mb-4" alt="" />}
+            <DetailField label="Sponsor" value={selectedItem.sponsor_name} />
+            <DetailField label="Competition" value={selectedItem.competition?.name || "General"} />
+            <DetailField label="Tier" value={selectedItem.tier} />
+            <DetailField label="Amount" value={selectedItem.amount ? `$${Number(selectedItem.amount).toLocaleString()}` : null} />
+            <DetailField label="Contract Start" value={selectedItem.contract_start} />
+            <DetailField label="Contract End" value={selectedItem.contract_end} />
+          </div>
+        )}
+      </DetailPanel>
+
       <NexusFooter />
     </div>
   );

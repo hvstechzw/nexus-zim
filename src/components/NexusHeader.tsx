@@ -5,15 +5,16 @@ import { useAuth } from "@/context/AuthContext";
 import nexusLogo from "@/assets/nexus-logo.png";
 import { AuthModal } from "@/components/AuthModal";
 
-const NAV_LINKS = [
+const PUBLIC_LINKS = [
   { label: "Live", href: "#live" },
   { label: "Events", href: "#events" },
   { label: "Standings", href: "#standings" },
-  { label: "Fixtures", href: "/fixtures" },
-  { label: "Competitions", href: "/competitions" },
+];
+
+const ADMIN_LINKS = [
   { label: "Scoring", href: "/scoring" },
   { label: "ID Cards", href: "/athletes/id-cards" },
-  { label: "Broadcast CG", href: "/broadcast" },
+  { label: "Broadcast", href: "/broadcast" },
   { label: "Admin", href: "/admin" },
 ];
 
@@ -23,6 +24,8 @@ export function NexusHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const { user, signOut } = useAuth();
+
+  const NAV_LINKS = [...PUBLIC_LINKS, ...(user ? ADMIN_LINKS : [])];
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 60);
@@ -48,14 +51,11 @@ export function NexusHeader() {
         }`}
       >
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 h-14 sm:h-16 flex items-center justify-between gap-4">
-          {/* Brand */}
+          {/* Brand — always white bg behind logo */}
           <a href="/" className="flex items-center gap-2.5 flex-shrink-0">
-            <img
-              src={nexusLogo}
-              alt="Nexus"
-              className="w-7 h-7 sm:w-8 sm:h-8 object-contain"
-              style={{ filter: theme === "dark" ? "invert(1)" : "none" }}
-            />
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-white flex items-center justify-center p-0.5">
+              <img src={nexusLogo} alt="Nexus" className="w-full h-full object-contain" />
+            </div>
           </a>
 
           {/* Desktop Navigation */}
