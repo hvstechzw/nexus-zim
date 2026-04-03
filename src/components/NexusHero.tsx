@@ -7,17 +7,21 @@ export function NexusHero() {
   const { data: stats } = useQuery({
     queryKey: ["hero-stats"],
     queryFn: async () => {
-      const [comps, athletes, venues, live] = await Promise.all([
+      const [comps, athletes, venues, live, teams, fixtures] = await Promise.all([
         supabase.from("competitions").select("id", { count: "exact", head: true }),
         supabase.from("athletes").select("id", { count: "exact", head: true }),
         supabase.from("venues").select("id", { count: "exact", head: true }),
         supabase.from("fixtures").select("id", { count: "exact", head: true }).eq("status", "live"),
+        supabase.from("teams").select("id", { count: "exact", head: true }),
+        supabase.from("fixtures").select("id", { count: "exact", head: true }),
       ]);
       return {
         competitions: comps.count || 0,
         athletes: athletes.count || 0,
         venues: venues.count || 0,
         live: live.count || 0,
+        teams: teams.count || 0,
+        fixtures: fixtures.count || 0,
       };
     },
   });
@@ -25,7 +29,9 @@ export function NexusHero() {
   const STAT_ITEMS = [
     { value: stats?.competitions ? `${stats.competitions}` : "—", label: "Competitions" },
     { value: stats?.athletes ? `${stats.athletes}` : "—", label: "Athletes" },
+    { value: stats?.teams ? `${stats.teams}` : "—", label: "Teams" },
     { value: stats?.venues ? `${stats.venues}` : "—", label: "Venues" },
+    { value: stats?.fixtures ? `${stats.fixtures}` : "—", label: "Fixtures" },
     { value: stats?.live ? `${stats.live}` : "0", label: "Live Now" },
   ];
 
@@ -38,13 +44,9 @@ export function NexusHero() {
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           className="w-full max-w-3xl"
         >
-          {/* Logo card — white bg to match logo's white background */}
+          {/* Logo card */}
           <div className="bg-white rounded-2xl px-8 py-10 sm:px-12 sm:py-14 md:px-20 md:py-20 flex items-center justify-center card-shadow-md">
-            <img
-              src={nexusLogo}
-              alt="Nexus"
-              className="w-full max-w-[180px] sm:max-w-[240px] md:max-w-[280px] h-auto object-contain"
-            />
+            <img src={nexusLogo} alt="Nexus" className="w-full max-w-[180px] sm:max-w-[240px] md:max-w-[280px] h-auto object-contain" />
           </div>
 
           <div className="mt-3 sm:mt-4 px-4 sm:px-6 py-4 sm:py-5 hairline bg-background rounded-xl flex items-center justify-between card-shadow">
@@ -71,7 +73,7 @@ export function NexusHero() {
           </p>
           <p className="mt-3 sm:mt-4 text-sm sm:text-base leading-relaxed text-nexus-muted max-w-[58ch]">
             Zimbabwe's centralised competition infrastructure — tracking, broadcasting, and registering every competitive
-            discipline across every level.
+            discipline across every level. From primary school inter-house galas to national league showdowns.
           </p>
 
           <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
@@ -83,6 +85,14 @@ export function NexusHero() {
               Browse Events
             </a>
           </div>
+
+          {/* Quick info chips */}
+          <div className="mt-6 flex flex-wrap gap-2">
+            {["Track & Field", "Football", "Cricket", "Chess", "Debate", "Swimming", "Rugby", "Netball", "Quiz"].map(d => (
+              <span key={d} className="text-[10px] sm:text-[11px] mono text-nexus-muted hairline px-2.5 py-1 rounded-full">{d}</span>
+            ))}
+            <span className="text-[10px] sm:text-[11px] mono text-nexus-muted hairline px-2.5 py-1 rounded-full">+more</span>
+          </div>
         </motion.div>
       </div>
 
@@ -92,15 +102,15 @@ export function NexusHero() {
         transition={{ delay: 0.5, duration: 0.5 }}
         className="hairline-t"
       >
-        <div className="max-w-[1400px] mx-auto grid grid-cols-2 sm:grid-cols-4">
+        <div className="max-w-[1400px] mx-auto grid grid-cols-3 sm:grid-cols-6">
           {STAT_ITEMS.map((stat, i) => (
             <div
               key={stat.label}
-              className={`px-4 sm:px-8 py-5 sm:py-7 stagger-item ${i < STAT_ITEMS.length - 1 ? "sm:hairline-r" : ""} ${i % 2 === 0 && i < 2 ? "hairline-r sm:hairline-r" : ""}`}
+              className={`px-3 sm:px-6 py-4 sm:py-6 stagger-item ${i < STAT_ITEMS.length - 1 ? "hairline-r" : ""}`}
               style={{ animationDelay: `${0.55 + i * 0.08}s` }}
             >
-              <p className="score-display text-xl sm:text-score-md text-foreground">{stat.value}</p>
-              <p className="text-[10px] sm:text-xs tracking-wide uppercase text-nexus-muted mt-1 font-medium">{stat.label}</p>
+              <p className="score-display text-lg sm:text-score-md text-foreground">{stat.value}</p>
+              <p className="text-[9px] sm:text-[10px] tracking-wide uppercase text-nexus-muted mt-0.5 font-medium">{stat.label}</p>
             </div>
           ))}
         </div>

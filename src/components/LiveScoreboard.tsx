@@ -11,6 +11,8 @@ interface LiveFixture {
   status: string;
   round_label: string | null;
   started_at: string | null;
+  ended_at: string | null;
+  scheduled_at: string | null;
   home_team: { name: string } | null;
   away_team: { name: string } | null;
   competition: { name: string; level: string; discipline: string } | null;
@@ -19,7 +21,7 @@ interface LiveFixture {
 
 export function LiveScoreboard() {
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"live" | "recent">("live");
+  const [activeTab, setActiveTab] = useState<"live" | "recent" | "upcoming">("live");
 
   const { data: liveFixtures = [], refetch: refetchLive } = useQuery({
     queryKey: ["live-fixtures"],
@@ -27,7 +29,7 @@ export function LiveScoreboard() {
       const { data } = await supabase
         .from("fixtures")
         .select(`
-          id, home_score, away_score, status, round_label, started_at, competition_id,
+          id, home_score, away_score, status, round_label, started_at, scheduled_at, competition_id,
           home_team:home_team_id(name),
           away_team:away_team_id(name),
           competition:competition_id(name, level, discipline),
@@ -47,7 +49,7 @@ export function LiveScoreboard() {
       const { data } = await supabase
         .from("fixtures")
         .select(`
-          id, home_score, away_score, status, round_label, ended_at, competition_id,
+          id, home_score, away_score, status, round_label, ended_at, scheduled_at, competition_id,
           home_team:home_team_id(name),
           away_team:away_team_id(name),
           competition:competition_id(name, level, discipline),
@@ -60,15 +62,33 @@ export function LiveScoreboard() {
     },
   });
 
-  const fixtures = activeTab === "live" ? liveFixtures : recentFixtures;
+  const { data: upcomingFixtures = [] } = useQuery({
+    queryKey: ["upcoming-fixtures"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("fixtures")
+        .select(`
+          id, home_score, away_score, status, round_label, scheduled_at, competition_id,
+          home_team:home_team_id(name),
+          away_team:away_team_id(name),
+          competition:competition_id(name, level, discipline),
+          venue:venue_id(name, city)
+        `)
+        .eq("status", "scheduled")
+        .gte("scheduled_at", new Date().toISOString())
+        .order("scheduled_at", { ascending: true })
+        .limit(12);
+      return (data || []) as unknown as LiveFixture[];
+    },
+  });
+
+  const fixtures = activeTab === "live" ? liveFixtures : activeTab === "recent" ? recentFixtures : upcomingFixtures;
 
   useEffect(() => {
     if (fixtures.length && !activeId) setActiveId(fixtures[0].id);
   }, [fixtures, activeId]);
 
-  useEffect(() => {
-    setActiveId(null);
-  }, [activeTab]);
+  useEffect(() => { setActiveId(null); }, [activeTab]);
 
   useEffect(() => {
     const channel = supabase
@@ -80,92 +100,95 @@ export function LiveScoreboard() {
 
   const featured = fixtures.find((f) => f.id === activeId) || fixtures[0];
   const liveCount = liveFixtures.filter((f) => f.status === "live").length;
+  const totalScheduled = liveFixtures.filter((f) => f.status === "scheduled").length;
 
   return (
     <section id="live" className="hairline-b">
-      <div className="px-4 sm:px-8 py-4 sm:py-5 hairline-b flex items-center justify-between">
+      <div className="px-4 sm:px-8 py-3 sm:py-5 hairline-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <div className="flex items-center gap-2 sm:gap-3">
           {liveCount > 0 && <span className="w-2 h-2 rounded-full bg-nexus-live animate-pulse" />}
-          <span className="text-[10px] sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">Scores</span>
+          <span className="text-[10px] sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">Scores & Schedule</span>
+          {liveCount > 0 && <span className="text-[10px] mono text-nexus-live">{liveCount} live</span>}
+          {totalScheduled > 0 && <span className="text-[10px] mono text-nexus-muted">{totalScheduled} upcoming</span>}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <div className="flex hairline rounded-lg overflow-hidden">
-            <button
-              onClick={() => setActiveTab("live")}
-              className={`px-3 py-1.5 text-[10px] mono font-semibold tracking-wide transition-colors ${activeTab === "live" ? "bg-foreground text-primary-foreground" : "bg-background text-nexus-muted hover:text-foreground"}`}
-            >
-              {liveCount > 0 ? `${liveCount} LIVE` : "LIVE"}
-            </button>
-            <button
-              onClick={() => setActiveTab("recent")}
-              className={`px-3 py-1.5 text-[10px] mono font-semibold tracking-wide transition-colors ${activeTab === "recent" ? "bg-foreground text-primary-foreground" : "bg-background text-nexus-muted hover:text-foreground"}`}
-            >
-              RECENT
-            </button>
+            {(["live", "recent", "upcoming"] as const).map(tab => (
+              <button key={tab} onClick={() => setActiveTab(tab)}
+                className={`px-2.5 sm:px-3 py-1.5 text-[9px] sm:text-[10px] mono font-semibold tracking-wide transition-colors ${activeTab === tab ? "bg-foreground text-primary-foreground" : "bg-background text-nexus-muted hover:text-foreground"}`}>
+                {tab === "live" ? (liveCount > 0 ? `${liveCount} LIVE` : "LIVE") : tab.toUpperCase()}
+              </button>
+            ))}
           </div>
         </div>
       </div>
 
       {fixtures.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 sm:py-24 text-center px-6 sm:px-8">
+        <div className="flex flex-col items-center justify-center py-12 sm:py-24 text-center px-6 sm:px-8">
           <div className="w-12 h-12 rounded-full bg-nexus-surface flex items-center justify-center mb-4">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-nexus-muted">
               <rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/>
             </svg>
           </div>
           <p className="text-nexus-muted text-sm font-medium">
-            {activeTab === "live" ? "No live fixtures right now" : "No completed matches yet"}
+            {activeTab === "live" ? "No live fixtures right now" : activeTab === "recent" ? "No completed matches yet" : "No upcoming fixtures"}
           </p>
           <p className="text-nexus-muted text-xs mt-1 max-w-[32ch]">
-            {activeTab === "live" ? "Matches will appear here once started." : "Results will appear here once matches complete."}
+            {activeTab === "live" ? "Matches will appear here once started." : activeTab === "recent" ? "Results will appear here once matches complete." : "Scheduled matches will show here."}
           </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px] xl:grid-cols-[1fr_380px]">
           {/* Featured */}
-          <div className="p-5 sm:p-8 md:p-12 lg:hairline-r flex flex-col justify-between min-h-[320px] sm:min-h-[440px]">
+          <div className="p-4 sm:p-8 md:p-12 lg:hairline-r flex flex-col justify-between min-h-[280px] sm:min-h-[440px]">
             <AnimatePresence mode="wait">
               {featured && (
-                <motion.div key={activeId} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.22 }} className="h-full flex flex-col gap-5 sm:gap-8">
+                <motion.div key={activeId} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.22 }} className="h-full flex flex-col gap-4 sm:gap-8">
                   <div className="flex items-center justify-between flex-wrap gap-2">
-                    <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                       {featured.status === "live" && (
-                        <span className="flex items-center gap-1.5 text-[10px] sm:text-xs mono tracking-widest uppercase text-nexus-live bg-nexus-surface px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full">
+                        <span className="flex items-center gap-1.5 text-[9px] sm:text-xs mono tracking-widest uppercase text-nexus-live bg-nexus-surface px-2 sm:px-3 py-1 sm:py-1.5 rounded-full">
                           <span className="w-1.5 h-1.5 rounded-full bg-nexus-live animate-pulse" />Live
                         </span>
                       )}
                       {featured.status === "completed" && (
-                        <span className="text-[10px] sm:text-xs mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full">
-                          FT
-                        </span>
+                        <span className="text-[9px] sm:text-xs mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2 sm:px-3 py-1 sm:py-1.5 rounded-full">FT</span>
                       )}
-                      <span className="text-[10px] sm:text-xs mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full">
+                      {featured.status === "scheduled" && (
+                        <span className="text-[9px] sm:text-xs mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2 sm:px-3 py-1 sm:py-1.5 rounded-full">Scheduled</span>
+                      )}
+                      <span className="text-[9px] sm:text-xs mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2 sm:px-3 py-1 sm:py-1.5 rounded-full">
                         {featured.competition?.discipline}
                       </span>
                     </div>
-                    <span className="text-[10px] sm:text-xs mono text-nexus-muted hidden sm:block">
+                    <span className="text-[9px] sm:text-xs mono text-nexus-muted hidden sm:block">
                       {featured.venue ? `${featured.venue.name}, ${featured.venue.city}` : "TBD"}
                     </span>
                   </div>
 
                   <div className="hairline rounded-xl overflow-hidden flex items-stretch">
-                    <div className="flex-1 p-5 sm:p-8 text-center hairline-r bg-background">
-                      <p className="text-[10px] sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted mb-3 sm:mb-4 truncate">
+                    <div className="flex-1 p-4 sm:p-8 text-center hairline-r bg-background">
+                      <p className="text-[9px] sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted mb-2 sm:mb-4 truncate">
                         {featured.home_team?.name || "Home"}
                       </p>
-                      <motion.p key={featured.home_score} className="score-display text-4xl sm:text-score-lg text-foreground" animate={{ opacity: [0.3, 1] }} transition={{ duration: 0.3 }}>
+                      <motion.p key={featured.home_score} className="score-display text-3xl sm:text-score-lg text-foreground" animate={{ opacity: [0.3, 1] }} transition={{ duration: 0.3 }}>
                         {featured.home_score ?? 0}
                       </motion.p>
                     </div>
                     <div className="px-3 sm:px-6 flex flex-col items-center justify-center gap-1 sm:gap-2 bg-nexus-surface/50">
                       <span className="score-display text-xl sm:text-2xl text-nexus-muted">:</span>
-                      <span className="text-[9px] sm:text-xs mono text-nexus-muted text-center">{featured.round_label || featured.status}</span>
+                      <span className="text-[8px] sm:text-xs mono text-nexus-muted text-center">{featured.round_label || featured.status}</span>
+                      {featured.scheduled_at && featured.status === "scheduled" && (
+                        <span className="text-[8px] sm:text-[10px] mono text-nexus-muted text-center">
+                          {new Date(featured.scheduled_at).toLocaleDateString("en-ZW", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      )}
                     </div>
-                    <div className="flex-1 p-5 sm:p-8 text-center hairline-l bg-background">
-                      <p className="text-[10px] sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted mb-3 sm:mb-4 truncate">
+                    <div className="flex-1 p-4 sm:p-8 text-center hairline-l bg-background">
+                      <p className="text-[9px] sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted mb-2 sm:mb-4 truncate">
                         {featured.away_team?.name || "Away"}
                       </p>
-                      <motion.p key={featured.away_score} className="score-display text-4xl sm:text-score-lg text-foreground" animate={{ opacity: [0.3, 1] }} transition={{ duration: 0.3 }}>
+                      <motion.p key={featured.away_score} className="score-display text-3xl sm:text-score-lg text-foreground" animate={{ opacity: [0.3, 1] }} transition={{ duration: 0.3 }}>
                         {featured.away_score ?? 0}
                       </motion.p>
                     </div>
@@ -173,6 +196,7 @@ export function LiveScoreboard() {
 
                   <div className="text-center">
                     <p className="text-[10px] sm:text-xs mono text-nexus-muted">{featured.competition?.name}</p>
+                    <p className="text-[9px] mono text-nexus-muted/60 mt-0.5">{featured.competition?.level?.replace(/_/g, " ")}</p>
                   </div>
                 </motion.div>
               )}
@@ -185,28 +209,33 @@ export function LiveScoreboard() {
               <button
                 key={match.id}
                 onClick={() => setActiveId(match.id)}
-                className={`px-4 sm:px-6 py-3 sm:py-5 text-left flex items-center justify-between transition-colors duration-200 btn-click ${
+                className={`px-3 sm:px-6 py-3 sm:py-5 text-left flex items-center justify-between transition-colors duration-200 btn-click ${
                   activeId === match.id ? "bg-nexus-surface" : "bg-background hover:bg-nexus-surface/60"
                 }`}
               >
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5 sm:mb-1">
+                  <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5">
                     {match.status === "live" && <span className="w-1.5 h-1.5 rounded-full bg-nexus-live flex-shrink-0 animate-pulse" />}
                     {match.status === "completed" && <span className="text-[8px] mono text-nexus-muted/60 tracking-widest">FT</span>}
-                    <span className="text-[9px] sm:text-[10px] mono tracking-widest uppercase text-nexus-muted truncate">
+                    <span className="text-[8px] sm:text-[10px] mono tracking-widest uppercase text-nexus-muted truncate">
                       {match.competition?.discipline}
                     </span>
                   </div>
-                  <p className="text-xs sm:text-sm display-font font-semibold text-foreground truncate">
+                  <p className="text-[11px] sm:text-sm display-font font-semibold text-foreground truncate">
                     {match.home_team?.name || "TBD"}
-                    <span className="mx-1 sm:mx-1.5 text-nexus-muted font-normal text-[10px] sm:text-xs">vs</span>
+                    <span className="mx-1 text-nexus-muted font-normal text-[10px] sm:text-xs">vs</span>
                     {match.away_team?.name || "TBD"}
                   </p>
+                  {match.scheduled_at && match.status === "scheduled" && (
+                    <p className="text-[8px] sm:text-[10px] mono text-nexus-muted/60 mt-0.5">
+                      {new Date(match.scheduled_at).toLocaleDateString("en-ZW", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  )}
                 </div>
-                <div className="flex items-center gap-1 ml-3 flex-shrink-0">
-                  <span className="score-display text-lg sm:text-xl text-foreground">{match.home_score ?? 0}</span>
-                  <span className="score-display text-xs sm:text-sm text-nexus-muted">–</span>
-                  <span className="score-display text-lg sm:text-xl text-foreground">{match.away_score ?? 0}</span>
+                <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+                  <span className="score-display text-base sm:text-xl text-foreground">{match.home_score ?? 0}</span>
+                  <span className="score-display text-xs sm:text-sm text-nexus-muted">-</span>
+                  <span className="score-display text-base sm:text-xl text-foreground">{match.away_score ?? 0}</span>
                 </div>
               </button>
             ))}

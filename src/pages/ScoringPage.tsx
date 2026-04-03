@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { NexusHeader } from "@/components/NexusHeader";
 import { NexusFooter } from "@/components/NexusFooter";
 import { supabase } from "@/integrations/supabase/client";
@@ -36,6 +36,21 @@ const SCORE_EVENTS: Record<string, Record<string, number>> = {
   hockey: { "Goal": 1, "Penalty Stroke": 1 },
 };
 
+const SPORT_ICONS: Record<string, string> = {
+  football: "M12 2a10 10 0 100 20 10 10 0 000-20z",
+  rugby: "M12 2c-2 0-6 4-6 10s4 10 6 10 6-4 6-10-4-10-6-10z",
+  cricket: "M12 2a10 10 0 100 20 10 10 0 000-20z",
+  basketball: "M12 2a10 10 0 100 20 10 10 0 000-20z",
+  volleyball: "M12 2a10 10 0 100 20 10 10 0 000-20z",
+  netball: "M12 2a10 10 0 100 20 10 10 0 000-20z",
+  quiz: "M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01",
+  debate: "M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z",
+  athletics: "M13 4h-2l-1 7h4l-1-7zM9 20l3-7 3 7",
+  chess: "M12 2l2 7h-4l2-7zM8 22h8l-1-5H9l-1 5z",
+  swimming: "M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0",
+  hockey: "M2 22L12 2l2 8h8",
+};
+
 interface ScoreLog { id: number; event: string; team: "home"|"away"; period: string; minute?: number; time: string; }
 
 export default function ScoringPage() {
@@ -49,14 +64,14 @@ export default function ScoringPage() {
   const [activeTeam, setActiveTeam] = useState<"home"|"away">("home");
   const [log, setLog] = useState<ScoreLog[]>([]);
   const [matchStarted, setMatchStarted] = useState(false);
-  const [matchTime, setMatchTime] = useState(0); // seconds
+  const [matchTime, setMatchTime] = useState(0);
   const [homeTeam, setHomeTeam] = useState("Home");
   const [awayTeam, setAwayTeam] = useState("Away");
+  const [sessionMode, setSessionMode] = useState<"official"|"friendly"|"local">("official");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const module = SCORING_MODULES.find(m => m.id === selectedModule);
 
-  // Auto-increment match time when started
   useEffect(() => {
     if (matchStarted) {
       timerRef.current = setInterval(() => setMatchTime(t => t + 1), 1000);
@@ -77,7 +92,7 @@ export default function ScoringPage() {
         .in("status", ["ongoing","registration_closed"]).order("name").limit(50);
       return data || [];
     },
-    enabled: !!selectedModule,
+    enabled: !!selectedModule && sessionMode === "official",
   });
 
   const [selectedCompId, setSelectedCompId] = useState<string>("");
@@ -94,14 +109,18 @@ export default function ScoringPage() {
         .order("scheduled_at");
       return data || [];
     },
-    enabled: !!selectedCompId,
+    enabled: !!selectedCompId && sessionMode === "official",
   });
+
+  const isDbMode = sessionMode === "official" && user && selectedFixtureId;
 
   const startMatch = async () => {
     setMatchStarted(true);
-    if (user && selectedFixtureId) {
+    if (isDbMode) {
       await supabase.from("fixtures").update({ status: "live", started_at: new Date().toISOString() }).eq("id", selectedFixtureId);
       toast({ title: "Match started", description: "Timer running. Events are now logged live." });
+    } else {
+      toast({ title: "Match started", description: sessionMode === "official" ? "Local mode — not saving to database." : `${sessionMode === "friendly" ? "Friendly" : "Local"} session started.` });
     }
   };
 
@@ -119,26 +138,26 @@ export default function ScoringPage() {
     };
     setLog(prev => [entry, ...prev].slice(0, 50));
 
-    if (user && selectedFixtureId) {
+    if (isDbMode) {
       try {
         const newHome = activeTeam === "home" ? homeScore + pts : homeScore;
         const newAway = activeTeam === "away" ? awayScore + pts : awayScore;
         await Promise.all([
           supabase.from("score_entries").insert({
-            fixture_id: selectedFixtureId,
+            fixture_id: selectedFixtureId!,
             event_type: event,
             team_id: null,
             value: pts || null,
             period: module!.periods[currentPeriod],
             minute: mins,
-            scorer_id: user.id,
+            scorer_id: user!.id,
             metadata: { team: activeTeam },
           }),
           supabase.from("fixtures").update({
             home_score: newHome,
             away_score: newAway,
             status: "live",
-          }).eq("id", selectedFixtureId),
+          }).eq("id", selectedFixtureId!),
         ]);
       } catch {}
     }
@@ -151,25 +170,50 @@ export default function ScoringPage() {
   };
 
   const finalizeMatch = async () => {
-    if (!selectedFixtureId || !user) return;
     setMatchStarted(false);
     if (timerRef.current) clearInterval(timerRef.current);
-    await supabase.from("fixtures").update({
-      status: "completed", home_score: homeScore, away_score: awayScore,
-      ended_at: new Date().toISOString()
-    }).eq("id", selectedFixtureId);
-    toast({ title: "Match finalized", description: `Final score: ${homeScore} – ${awayScore}` });
+    if (isDbMode) {
+      await supabase.from("fixtures").update({
+        status: "completed", home_score: homeScore, away_score: awayScore,
+        ended_at: new Date().toISOString()
+      }).eq("id", selectedFixtureId!);
+    }
+    toast({ title: "Match finalized", description: `Final score: ${homeScore} - ${awayScore}` });
   };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <NexusHeader />
-      <div className="max-w-[1400px] mx-auto pt-20">
-        <div className="px-6 sm:px-8 py-8 sm:py-10 hairline-b">
+      <div className="max-w-[1400px] mx-auto pt-16 sm:pt-20">
+        <div className="px-4 sm:px-8 py-6 sm:py-10 hairline-b">
           <p className="text-[10px] mono tracking-[0.25em] uppercase text-nexus-muted">Officials Portal</p>
-          <h1 className="display-font text-2xl sm:text-3xl font-bold text-foreground mt-1">Live Scoring Engine</h1>
-          <p className="text-sm text-nexus-muted mt-2">Select a discipline, start the match, and log events in real-time.</p>
-          {!user && (
+          <h1 className="display-font text-xl sm:text-3xl font-bold text-foreground mt-1">Live Scoring Engine</h1>
+          <p className="text-xs sm:text-sm text-nexus-muted mt-2 max-w-[60ch]">Select a discipline, choose your session mode, and log events in real-time.</p>
+
+          {/* Session Mode Selector */}
+          <div className="flex gap-1.5 p-1.5 bg-nexus-surface rounded-xl mt-4 w-fit">
+            {([
+              { id: "official" as const, label: "Official", desc: "Saves to database" },
+              { id: "friendly" as const, label: "Friendly", desc: "Not recorded" },
+              { id: "local" as const, label: "Local Use", desc: "Offline mode" },
+            ]).map(m => (
+              <button key={m.id} onClick={() => setSessionMode(m.id)}
+                className={`px-3 sm:px-4 py-2 text-xs tracking-wide font-semibold rounded-lg transition-all duration-200 btn-click
+                  ${sessionMode === m.id ? "bg-background text-foreground shadow-sm" : "text-nexus-muted hover:text-foreground"}`}
+                title={m.desc}>
+                {m.label}
+              </button>
+            ))}
+          </div>
+
+          {sessionMode !== "official" && (
+            <div className="mt-3 inline-flex items-center gap-2 text-xs mono text-nexus-muted bg-nexus-surface hairline rounded-lg px-4 py-2.5">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {sessionMode === "friendly" ? "Friendly match — scores will not be recorded in the database or affect standings." : "Local session — everything stays on your device. No sign-in needed."}
+            </div>
+          )}
+
+          {sessionMode === "official" && !user && (
             <p className="text-xs mono text-nexus-muted bg-nexus-surface hairline rounded-lg px-4 py-2.5 inline-block mt-3">
               Sign in as a scorer or referee to submit official scores to the database
             </p>
@@ -179,15 +223,15 @@ export default function ScoringPage() {
         {!selectedModule ? (
           <div className="p-4 sm:p-8">
             <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted mb-5">Select Scoring Module</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
               {SCORING_MODULES.map((mod, i) => (
                 <motion.button
                   key={mod.id}
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.04, duration: 0.3 }}
+                  transition={{ delay: i * 0.03, duration: 0.3 }}
                   onClick={() => setSelectedModule(mod.id)}
-                  className="hairline rounded-2xl p-5 text-left flex flex-col gap-3 hover:bg-nexus-surface/70 hover:scale-[1.02] transition-all duration-200 btn-click card-shadow bg-background group"
+                  className="hairline rounded-2xl p-4 sm:p-5 text-left flex flex-col gap-2 sm:gap-3 hover:bg-nexus-surface/70 hover:scale-[1.02] transition-all duration-200 btn-click card-shadow bg-background group"
                 >
                   <div className="w-8 h-8 rounded-lg bg-nexus-surface flex items-center justify-center flex-shrink-0 group-hover:bg-foreground transition-colors duration-200">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-nexus-muted group-hover:text-primary-foreground transition-colors">
@@ -195,7 +239,7 @@ export default function ScoringPage() {
                     </svg>
                   </div>
                   <div>
-                    <span className="display-font text-sm font-bold text-foreground leading-tight block">{mod.label}</span>
+                    <span className="display-font text-xs sm:text-sm font-bold text-foreground leading-tight block">{mod.label}</span>
                     {mod.sub && <span className="text-[10px] mono text-nexus-muted">{mod.sub}</span>}
                   </div>
                   <div className="flex flex-col gap-0.5">
@@ -207,34 +251,39 @@ export default function ScoringPage() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px]">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_340px]">
             {/* Main scoring panel */}
-            <div className="p-6 sm:p-8 hairline-r">
-              <div className="flex items-center justify-between mb-6">
+            <div className="p-4 sm:p-8 lg:hairline-r">
+              <div className="flex items-center justify-between mb-4 sm:mb-6 flex-wrap gap-2">
                 <div>
-                  <button onClick={() => { setSelectedModule(null); reset(); }} className="text-xs mono text-nexus-muted hover:text-foreground flex items-center gap-1.5 mb-2 transition-colors">
+                  <button onClick={() => { setSelectedModule(null); reset(); }} className="text-xs mono text-nexus-muted hover:text-foreground flex items-center gap-1.5 mb-1 transition-colors">
                     ← Change Module
                   </button>
-                  <p className="display-font text-xl font-bold text-foreground">{module?.label}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="display-font text-lg sm:text-xl font-bold text-foreground">{module?.label}</p>
+                    {sessionMode !== "official" && (
+                      <span className="text-[9px] mono tracking-widest uppercase px-2 py-0.5 rounded-full bg-nexus-surface text-nexus-muted">
+                        {sessionMode}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {selectedFixtureId && user && (
-                    <button onClick={finalizeMatch} className="h-9 px-4 text-xs font-semibold tracking-wide rounded-lg bg-nexus-surface text-foreground hover:bg-nexus-silver transition-colors btn-click">
-                      Finalize
-                    </button>
-                  )}
+                  <button onClick={finalizeMatch} className="h-8 sm:h-9 px-3 sm:px-4 text-xs font-semibold tracking-wide rounded-lg bg-nexus-surface text-foreground hover:bg-nexus-silver transition-colors btn-click">
+                    Finalize
+                  </button>
                   <button onClick={reset} className="text-xs mono text-nexus-muted hover:text-foreground hairline px-3 py-1.5 rounded-md transition-colors">Reset</button>
                 </div>
               </div>
 
-              {/* Fixture selector */}
-              {user && (
-                <div className="grid grid-cols-2 gap-3 mb-6">
+              {/* Fixture selector — only in official mode */}
+              {sessionMode === "official" && user && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 sm:mb-6">
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold">Competition</label>
                     <select value={selectedCompId} onChange={e => { setSelectedCompId(e.target.value); setSelectedFixtureId(null); }}
                       className="bg-nexus-surface hairline rounded-lg px-3 py-2.5 text-sm text-foreground focus:outline-none cursor-pointer">
-                      <option value="">— Select —</option>
+                      <option value="">-- Select --</option>
                       {(competitions as any[]).map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
                   </div>
@@ -251,7 +300,7 @@ export default function ScoringPage() {
                         }
                       }}
                       className="bg-nexus-surface hairline rounded-lg px-3 py-2.5 text-sm text-foreground focus:outline-none cursor-pointer">
-                      <option value="">— Select —</option>
+                      <option value="">-- Select --</option>
                       {(fixtures as any[]).map(f => (
                         <option key={f.id} value={f.id}>{f.home_team?.name || "TBD"} vs {f.away_team?.name || "TBD"} ({f.round_label || f.status})</option>
                       ))}
@@ -261,78 +310,81 @@ export default function ScoringPage() {
               )}
 
               {/* Team name inputs */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
                 <input value={homeTeam} onChange={e => setHomeTeam(e.target.value)}
-                  className="bg-nexus-surface hairline rounded-lg px-4 py-2.5 text-sm font-semibold text-foreground focus:outline-none text-center" />
+                  className="bg-nexus-surface hairline rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-foreground focus:outline-none text-center" />
                 <input value={awayTeam} onChange={e => setAwayTeam(e.target.value)}
-                  className="bg-nexus-surface hairline rounded-lg px-4 py-2.5 text-sm font-semibold text-foreground focus:outline-none text-center" />
+                  className="bg-nexus-surface hairline rounded-lg px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold text-foreground focus:outline-none text-center" />
               </div>
 
               {/* Scoreboard + Timer */}
-              <div className="hairline rounded-xl overflow-hidden mb-4">
+              <div className="hairline rounded-xl overflow-hidden mb-3 sm:mb-4">
                 <div className="grid grid-cols-[1fr_auto_1fr]">
                   <button onClick={() => setActiveTeam("home")}
-                    className={`p-6 sm:p-8 text-center transition-all duration-200 ${activeTeam === "home" ? "bg-foreground" : "bg-background hover:bg-nexus-surface/50"}`}>
-                    <p className={`text-[10px] mono tracking-[0.18em] uppercase mb-3 ${activeTeam === "home" ? "text-primary-foreground/60" : "text-nexus-muted"}`}>{homeTeam}</p>
-                    <motion.p key={homeScore} className={`score-display text-score-lg ${activeTeam === "home" ? "text-primary-foreground" : "text-foreground"}`} animate={{ scale: [1.15, 1] }} transition={{ duration: 0.2 }}>
+                    className={`p-4 sm:p-8 text-center transition-all duration-200 ${activeTeam === "home" ? "bg-foreground" : "bg-background hover:bg-nexus-surface/50"}`}>
+                    <p className={`text-[9px] sm:text-[10px] mono tracking-[0.18em] uppercase mb-2 sm:mb-3 truncate ${activeTeam === "home" ? "text-primary-foreground/60" : "text-nexus-muted"}`}>{homeTeam}</p>
+                    <motion.p key={homeScore} className={`score-display text-3xl sm:text-score-lg ${activeTeam === "home" ? "text-primary-foreground" : "text-foreground"}`} animate={{ scale: [1.15, 1] }} transition={{ duration: 0.2 }}>
                       {homeScore}
                     </motion.p>
-                    {activeTeam === "home" && <p className="text-[10px] mono mt-3 text-primary-foreground/50">Active</p>}
+                    {activeTeam === "home" && <p className="text-[9px] sm:text-[10px] mono mt-2 sm:mt-3 text-primary-foreground/50">Active</p>}
                   </button>
-                  <div className="px-4 sm:px-6 flex flex-col items-center justify-center bg-nexus-surface/50 gap-2 min-w-[80px]">
-                    <span className="score-display text-2xl text-nexus-muted">:</span>
-                    {/* Live timer */}
+                  <div className="px-3 sm:px-6 flex flex-col items-center justify-center bg-nexus-surface/50 gap-1 sm:gap-2 min-w-[60px] sm:min-w-[80px]">
+                    <span className="score-display text-xl sm:text-2xl text-nexus-muted">:</span>
                     <div className={`px-2 py-1 rounded-md text-center ${matchStarted ? "bg-foreground" : "bg-nexus-surface"}`}>
-                      <span className={`text-[11px] mono font-bold tracking-wider ${matchStarted ? "text-primary-foreground" : "text-nexus-muted"}`}>
+                      <span className={`text-[10px] sm:text-[11px] mono font-bold tracking-wider ${matchStarted ? "text-primary-foreground" : "text-nexus-muted"}`}>
                         {timeDisplay}
                       </span>
                     </div>
-                    <span className="text-[9px] mono text-nexus-muted text-center leading-tight">{module?.periods[currentPeriod]}</span>
+                    <span className="text-[8px] sm:text-[9px] mono text-nexus-muted text-center leading-tight">{module?.periods[currentPeriod]}</span>
                   </div>
                   <button onClick={() => setActiveTeam("away")}
-                    className={`p-6 sm:p-8 text-center transition-all duration-200 ${activeTeam === "away" ? "bg-foreground" : "bg-background hover:bg-nexus-surface/50"}`}>
-                    <p className={`text-[10px] mono tracking-[0.18em] uppercase mb-3 ${activeTeam === "away" ? "text-primary-foreground/60" : "text-nexus-muted"}`}>{awayTeam}</p>
-                    <motion.p key={awayScore} className={`score-display text-score-lg ${activeTeam === "away" ? "text-primary-foreground" : "text-foreground"}`} animate={{ scale: [1.15, 1] }} transition={{ duration: 0.2 }}>
+                    className={`p-4 sm:p-8 text-center transition-all duration-200 ${activeTeam === "away" ? "bg-foreground" : "bg-background hover:bg-nexus-surface/50"}`}>
+                    <p className={`text-[9px] sm:text-[10px] mono tracking-[0.18em] uppercase mb-2 sm:mb-3 truncate ${activeTeam === "away" ? "text-primary-foreground/60" : "text-nexus-muted"}`}>{awayTeam}</p>
+                    <motion.p key={awayScore} className={`score-display text-3xl sm:text-score-lg ${activeTeam === "away" ? "text-primary-foreground" : "text-foreground"}`} animate={{ scale: [1.15, 1] }} transition={{ duration: 0.2 }}>
                       {awayScore}
                     </motion.p>
-                    {activeTeam === "away" && <p className="text-[10px] mono mt-3 text-primary-foreground/50">Active</p>}
+                    {activeTeam === "away" && <p className="text-[9px] sm:text-[10px] mono mt-2 sm:mt-3 text-primary-foreground/50">Active</p>}
                   </button>
                 </div>
               </div>
 
               {/* Match Control Row */}
-              <div className="flex items-center gap-3 mb-5 flex-wrap">
+              <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-5 flex-wrap">
                 {!matchStarted ? (
                   <button onClick={startMatch}
-                    className="flex items-center gap-2 h-9 px-5 bg-foreground text-primary-foreground text-xs font-bold tracking-wide rounded-lg hover:opacity-85 transition-opacity btn-click">
+                    className="flex items-center gap-2 h-9 px-4 sm:px-5 bg-foreground text-primary-foreground text-xs font-bold tracking-wide rounded-lg hover:opacity-85 transition-opacity btn-click">
                     <span className="w-2 h-2 rounded-full bg-primary-foreground/70 animate-pulse" />
                     Start Match
                   </button>
                 ) : (
                   <button onClick={() => setMatchStarted(false)}
-                    className="flex items-center gap-2 h-9 px-5 bg-nexus-surface text-foreground text-xs font-bold tracking-wide rounded-lg hover:bg-nexus-silver transition-colors btn-click">
+                    className="flex items-center gap-2 h-9 px-4 sm:px-5 bg-nexus-surface text-foreground text-xs font-bold tracking-wide rounded-lg hover:bg-nexus-silver transition-colors btn-click">
                     <span className="w-2 h-2 rounded-full bg-nexus-live animate-pulse" />
                     Pause Timer
                   </button>
                 )}
                 <button onClick={() => matchStarted ? setMatchStarted(false) : setMatchStarted(true)}
                   className="h-9 w-9 flex items-center justify-center hairline rounded-lg text-nexus-muted hover:text-foreground transition-colors btn-click"
-                  title={matchStarted ? "Pause" : "Resume"}
-                >
+                  title={matchStarted ? "Pause" : "Resume"}>
                   {matchStarted ? (
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
                   ) : (
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   )}
                 </button>
-                <span className="text-[10px] mono text-nexus-muted ml-auto">{matchStarted ? "Live" : "Paused"}</span>
+                <span className="text-[10px] mono text-nexus-muted ml-auto flex items-center gap-1.5">
+                  {matchStarted && <span className="w-1.5 h-1.5 rounded-full bg-nexus-live animate-pulse" />}
+                  {matchStarted ? "Live" : "Paused"}
+                  {isDbMode && " · DB"}
+                  {!isDbMode && sessionMode !== "official" && ` · ${sessionMode}`}
+                </span>
               </div>
 
               {/* Period selector */}
-              <div className="flex gap-2 mb-5 overflow-x-auto pb-1">
+              <div className="flex gap-1.5 sm:gap-2 mb-4 sm:mb-5 overflow-x-auto pb-1 scrollbar-hide">
                 {module?.periods.map((period, i) => (
                   <button key={period} onClick={() => setCurrentPeriod(i)}
-                    className={`px-4 py-2 text-xs font-semibold tracking-wide rounded-lg whitespace-nowrap flex-shrink-0 btn-click transition-all
+                    className={`px-3 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-semibold tracking-wide rounded-lg whitespace-nowrap flex-shrink-0 btn-click transition-all
                       ${currentPeriod === i ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted hover:text-foreground"}`}>
                     {period}
                   </button>
@@ -340,30 +392,30 @@ export default function ScoringPage() {
               </div>
 
               {/* Team selector */}
-              <div className="flex gap-2 mb-5">
+              <div className="flex gap-2 mb-4 sm:mb-5">
                 <button onClick={() => setActiveTeam("home")}
-                  className={`flex-1 py-3 text-sm font-semibold rounded-xl btn-click transition-all ${activeTeam === "home" ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted hover:text-foreground"}`}>
+                  className={`flex-1 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold rounded-xl btn-click transition-all ${activeTeam === "home" ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted hover:text-foreground"}`}>
                   {homeTeam}
                 </button>
                 <button onClick={() => setActiveTeam("away")}
-                  className={`flex-1 py-3 text-sm font-semibold rounded-xl btn-click transition-all ${activeTeam === "away" ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted hover:text-foreground"}`}>
+                  className={`flex-1 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold rounded-xl btn-click transition-all ${activeTeam === "away" ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted hover:text-foreground"}`}>
                   {awayTeam}
                 </button>
               </div>
 
               {/* Events */}
-              <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted mb-3">
+              <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted mb-2 sm:mb-3">
                 Log Event — {activeTeam === "home" ? homeTeam : awayTeam}
               </p>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {module?.events.map((event) => {
-                  const pts = SCORE_EVENTS[selectedModule]?.[event];
+                  const pts = SCORE_EVENTS[selectedModule!]?.[event];
                   return (
                     <button key={event} onClick={() => logEvent(event)}
-                      className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold tracking-wide rounded-xl bg-nexus-surface hover:bg-foreground hover:text-primary-foreground text-foreground transition-all duration-200 btn-click hairline">
+                      className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 text-[10px] sm:text-xs font-semibold tracking-wide rounded-xl bg-nexus-surface hover:bg-foreground hover:text-primary-foreground text-foreground transition-all duration-200 btn-click hairline">
                       {event}
                       {pts !== undefined && pts !== 0 && (
-                        <span className={`text-[10px] mono rounded-md px-1.5 py-0.5 ${pts > 0 ? "bg-foreground/10 text-foreground group-hover:bg-primary-foreground/10" : "bg-foreground text-primary-foreground"}`}>
+                        <span className={`text-[9px] sm:text-[10px] mono rounded-md px-1 sm:px-1.5 py-0.5 ${pts > 0 ? "bg-foreground/10 text-foreground" : "bg-foreground text-primary-foreground"}`}>
                           {pts > 0 ? `+${pts}` : pts}
                         </span>
                       )}
@@ -375,36 +427,37 @@ export default function ScoringPage() {
 
             {/* Event log */}
             <div className="flex flex-col hairline-t lg:hairline-t-0">
-              <div className="px-6 py-5 hairline-b flex items-center justify-between">
+              <div className="px-4 sm:px-6 py-4 sm:py-5 hairline-b flex items-center justify-between">
                 <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">Event Log</p>
                 <div className="flex items-center gap-2">
                   {matchStarted && <span className="text-[10px] mono text-nexus-live flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-nexus-live animate-pulse" />Live</span>}
-                  {user && selectedFixtureId && <span className="text-[10px] mono text-nexus-muted">Saving to DB</span>}
+                  {isDbMode && <span className="text-[10px] mono text-nexus-muted">Saving to DB</span>}
+                  {!isDbMode && sessionMode !== "official" && <span className="text-[10px] mono text-nexus-muted">{sessionMode} session</span>}
                 </div>
               </div>
-              <div className="flex-1 overflow-y-auto max-h-[600px]">
+              <div className="flex-1 overflow-y-auto max-h-[500px] sm:max-h-[600px]">
                 {log.length === 0 ? (
-                  <div className="p-8 text-center"><p className="text-xs mono text-nexus-muted">Events will appear here as you score.</p></div>
+                  <div className="p-6 sm:p-8 text-center"><p className="text-xs mono text-nexus-muted">Events will appear here as you score.</p></div>
                 ) : (
                   <div className="flex flex-col divide-y" style={{ borderColor: "hsl(var(--silver-line))" }}>
                     {log.map((entry) => (
                       <motion.div key={entry.id} initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.18 }}
-                        className="px-6 py-4 flex items-center justify-between gap-4">
+                        className="px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-foreground truncate">{entry.event}</p>
-                          <p className="text-[10px] mono text-nexus-muted mt-0.5">
+                          <p className="text-xs sm:text-sm font-semibold text-foreground truncate">{entry.event}</p>
+                          <p className="text-[9px] sm:text-[10px] mono text-nexus-muted mt-0.5">
                             {entry.team === "home" ? homeTeam : awayTeam} · {entry.period}
                             {entry.minute !== undefined ? ` · ${String(entry.minute).padStart(2, "0")}'` : ""}
                           </p>
                         </div>
-                        <span className="text-[10px] mono text-nexus-muted flex-shrink-0">{entry.time}</span>
+                        <span className="text-[9px] sm:text-[10px] mono text-nexus-muted flex-shrink-0">{entry.time}</span>
                       </motion.div>
                     ))}
                   </div>
                 )}
               </div>
               {log.length > 0 && (
-                <div className="p-5 hairline-t">
+                <div className="p-4 sm:p-5 hairline-t">
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-xs mono text-nexus-muted">{log.length} events</p>
                     <button onClick={() => {
@@ -414,9 +467,9 @@ export default function ScoringPage() {
                       Export CSV
                     </button>
                   </div>
-                  <div className="hairline rounded-lg p-4 bg-nexus-surface/50 text-center">
-                    <p className="score-display text-score-md text-foreground">{homeScore} — {awayScore}</p>
-                    <p className="text-xs mono text-nexus-muted mt-1">{homeTeam} vs {awayTeam}</p>
+                  <div className="hairline rounded-lg p-3 sm:p-4 bg-nexus-surface/50 text-center">
+                    <p className="score-display text-2xl sm:text-score-md text-foreground">{homeScore} — {awayScore}</p>
+                    <p className="text-[10px] sm:text-xs mono text-nexus-muted mt-1">{homeTeam} vs {awayTeam}</p>
                   </div>
                 </div>
               )}
