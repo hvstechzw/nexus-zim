@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -85,13 +86,13 @@ export function EventsGrid() {
           const fillPct = comp.max_participants ? Math.min(100, Math.round((regCount / comp.max_participants) * 100)) : 0;
 
           return (
+            <Link to={`/competition/${comp.id}`} key={comp.id}>
             <motion.article
-              key={comp.id}
               initial={{ opacity: 0, y: 6 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-40px" }}
               transition={{ duration: 0.3, delay: (i % 3) * 0.07, ease: [0.16, 1, 0.3, 1] }}
-              className="hairline rounded-xl p-4 sm:p-6 flex flex-col gap-3 sm:gap-4 hover:bg-nexus-surface/50 transition-colors duration-200 cursor-default group card-shadow bg-background"
+              className="hairline rounded-xl p-4 sm:p-6 flex flex-col gap-3 sm:gap-4 hover:bg-nexus-surface/50 transition-colors duration-200 cursor-pointer group card-shadow bg-background"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
@@ -157,6 +158,7 @@ export function EventsGrid() {
                 )}
               </div>
             </motion.article>
+            </Link>
           );
         })}
 

@@ -128,6 +128,28 @@ function EventFlash({ event, visible }: { event: ScoreEntry | null; visible: boo
   );
 }
 
+// ─── Sponsor Ticker ───────────────────────────────────────────────────────────
+function SponsorTicker({ sponsors, visible }: { sponsors: { sponsor_name: string; sponsor_logo: string | null }[]; visible: boolean }) {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    if (!visible || sponsors.length <= 1) return;
+    const t = setInterval(() => setIdx(i => (i + 1) % sponsors.length), 5000);
+    return () => clearInterval(t);
+  }, [visible, sponsors.length]);
+
+  if (!visible || sponsors.length === 0) return null;
+  const s = sponsors[idx];
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div key={idx} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+        className="flex items-center gap-2.5 bg-black/80 backdrop-blur-sm rounded-xl px-4 py-2">
+        {s.sponsor_logo && <img src={s.sponsor_logo} className="w-6 h-6 rounded-md object-contain bg-white p-0.5" alt="" />}
+        <span className="text-[10px] text-white/60 tracking-[0.12em] uppercase font-semibold">{s.sponsor_name}</span>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 // ─── Full CG Control Panel ────────────────────────────────────────────────────
 function CGControlPanel({ fixture, fixtureId, elapsed, onElapsedChange }: {
   fixture: FixtureState; fixtureId: string; elapsed: number;
@@ -137,9 +159,13 @@ function CGControlPanel({ fixture, fixtureId, elapsed, onElapsedChange }: {
   const [lt1sub, setLt1sub] = useState("");
   const [showLt1, setShowLt1] = useState(false);
   const [showScoreBug, setShowScoreBug] = useState(true);
+  const [showSponsor, setShowSponsor] = useState(false);
   const [flashEvent, setFlashEvent] = useState<ScoreEntry | null>(null);
   const [showFlash, setShowFlash] = useState(false);
   const [timerRunning, setTimerRunning] = useState(fixture.status === "live");
+  const [customGraphic, setCustomGraphic] = useState<string | null>(null);
+  const [showCustom, setShowCustom] = useState(false);
+  const graphicRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const overlayUrl = `${window.location.origin}/broadcast/${fixtureId}?overlay=1`;
 
@@ -165,10 +191,25 @@ function CGControlPanel({ fixture, fixtureId, elapsed, onElapsedChange }: {
     refetchInterval: 3000,
   });
 
+  const { data: sponsors = [] } = useQuery({
+    queryKey: ["cg-sponsors"],
+    queryFn: async () => {
+      const { data } = await supabase.from("sponsorships").select("sponsor_name, sponsor_logo").limit(10);
+      return (data || []) as { sponsor_name: string; sponsor_logo: string | null }[];
+    },
+  });
+
   const triggerFlash = (ev: ScoreEntry) => {
     setFlashEvent(ev);
     setShowFlash(true);
     setTimeout(() => setShowFlash(false), 4000);
+  };
+
+  const handleGraphicUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    setCustomGraphic(url);
   };
 
   const mins = Math.floor(elapsed / 60);
@@ -187,7 +228,6 @@ function CGControlPanel({ fixture, fixtureId, elapsed, onElapsedChange }: {
           <span className="text-sm font-semibold text-white/80">Broadcast CG Control</span>
         </div>
         <div className="flex items-center gap-3">
-          {/* Timer controls */}
           <button
             onClick={() => setTimerRunning(!timerRunning)}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${timerRunning ? "bg-red-600 text-white" : "bg-white/10 text-white/50 hover:bg-white/20"}`}
@@ -248,6 +288,40 @@ function CGControlPanel({ fixture, fixtureId, elapsed, onElapsedChange }: {
             </button>
           </div>
 
+          {/* Sponsor Ticker */}
+          <div className="p-5 border-b border-white/10">
+            <p className="text-[10px] tracking-[0.2em] uppercase text-white/30 font-semibold mb-3">Sponsor Ticker</p>
+            <button
+              onClick={() => setShowSponsor(!showSponsor)}
+              disabled={sponsors.length === 0}
+              className={`w-full py-2 text-xs font-bold rounded-lg transition-all disabled:opacity-30 ${showSponsor ? "bg-red-600 text-white" : "bg-white/10 text-white/50 hover:bg-white/20"}`}
+            >
+              {showSponsor ? "Stop Rotation" : `Start (${sponsors.length} sponsors)`}
+            </button>
+          </div>
+
+          {/* Custom Graphic */}
+          <div className="p-5 border-b border-white/10">
+            <p className="text-[10px] tracking-[0.2em] uppercase text-white/30 font-semibold mb-3">Custom Graphic</p>
+            <input ref={graphicRef} type="file" accept="image/*,video/mp4,image/gif" className="hidden" onChange={handleGraphicUpload} />
+            <button onClick={() => graphicRef.current?.click()}
+              className="w-full py-2 text-xs font-semibold bg-white/10 hover:bg-white/20 rounded-lg transition-all text-white/70 mb-2">
+              Upload GIF / Image / MP4
+            </button>
+            {customGraphic && (
+              <div className="flex gap-2">
+                <button onClick={() => setShowCustom(!showCustom)}
+                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${showCustom ? "bg-red-600 text-white" : "bg-white/10 text-white/50 hover:bg-white/20"}`}>
+                  {showCustom ? "Hide" : "Show"}
+                </button>
+                <button onClick={() => { setCustomGraphic(null); setShowCustom(false); }}
+                  className="py-2 px-3 text-xs font-semibold bg-white/5 hover:bg-white/10 rounded-lg text-white/40">
+                  Clear
+                </button>
+              </div>
+            )}
+          </div>
+
           <div className="p-5 border-b border-white/10">
             <p className="text-[10px] tracking-[0.2em] uppercase text-white/30 font-semibold mb-3">Event Flash</p>
             <div className="flex flex-col gap-1.5 max-h-48 overflow-y-auto">
@@ -275,7 +349,7 @@ function CGControlPanel({ fixture, fixtureId, elapsed, onElapsedChange }: {
             >
               Copy URL
             </button>
-            <p className="text-[9px] text-white/20 mt-2">Add as Browser Source in OBS with chroma-key / transparent background enabled</p>
+            <p className="text-[9px] text-white/20 mt-2">Add as Browser Source in OBS with transparent background</p>
           </div>
         </div>
 
@@ -296,6 +370,25 @@ function CGControlPanel({ fixture, fixtureId, elapsed, onElapsedChange }: {
               <p className="text-white/40 text-xs mono mt-1">{fixture.competition?.name}</p>
             </div>
           </div>
+
+          {/* Sponsor ticker (top right) */}
+          <div className="absolute top-8 right-8">
+            <SponsorTicker sponsors={sponsors} visible={showSponsor} />
+          </div>
+
+          {/* Custom graphic overlay */}
+          <AnimatePresence>
+            {showCustom && customGraphic && (
+              <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }}
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+                {customGraphic.endsWith(".mp4") || customGraphic.includes("video") ? (
+                  <video src={customGraphic} autoPlay loop muted className="max-w-[400px] max-h-[300px] rounded-xl" />
+                ) : (
+                  <img src={customGraphic} alt="" className="max-w-[400px] max-h-[300px] rounded-xl" />
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Flash overlay (center) */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
