@@ -158,6 +158,7 @@ export function EventsGrid() {
                 )}
               </div>
             </motion.article>
+            </Link>
           );
         })}
 
