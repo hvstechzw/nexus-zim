@@ -480,6 +480,112 @@ export default function AdminDashboard() {
                 <StatCard label="Registrations" value={String(registrations.length)} sub="submitted" />
                 <StatCard label="Sponsors" value={String(sponsorships.length)} sub="active" />
               </div>
+
+              {/* Activity & Charts Section */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Status Breakdown */}
+                <div className="hairline rounded-xl p-6 bg-background card-shadow">
+                  <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Competition Status Breakdown</p>
+                  <div className="space-y-3">
+                    {["draft","registration_open","ongoing","completed","cancelled"].map(status => {
+                      const count = (competitions as any[]).filter(c => c.status === status).length;
+                      const pct = competitions.length > 0 ? (count / competitions.length) * 100 : 0;
+                      return (
+                        <div key={status} className="flex items-center gap-3">
+                          <span className="text-[10px] mono w-28 text-nexus-muted capitalize flex-shrink-0">{status.replace(/_/g," ")}</span>
+                          <div className="flex-1 h-2 rounded-full bg-nexus-surface overflow-hidden">
+                            <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.6, delay: 0.1 }} className="h-full rounded-full bg-foreground/60" />
+                          </div>
+                          <span className="text-xs mono font-semibold text-foreground w-6 text-right">{count}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Fixture Status */}
+                <div className="hairline rounded-xl p-6 bg-background card-shadow">
+                  <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Fixture Status</p>
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      { label: "Scheduled", status: "scheduled", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
+                      { label: "Live", status: "live", icon: "M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728M9.172 14.828a4 4 0 010-5.656m5.656 0a4 4 0 010 5.656M12 12h.01" },
+                      { label: "Completed", status: "completed", icon: "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" },
+                    ].map(({ label, status, icon }) => {
+                      const count = (fixtures as any[]).filter(f => f.status === status).length;
+                      return (
+                        <div key={status} className="hairline rounded-xl p-4 text-center hover:bg-nexus-surface/40 transition-colors">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="mx-auto mb-2 text-nexus-muted">
+                            <path d={icon} strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                          <p className="score-display text-xl text-foreground">{count}</p>
+                          <p className="text-[9px] mono text-nexus-muted mt-1 uppercase tracking-wider">{label}</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Discipline Distribution */}
+                <div className="hairline rounded-xl p-6 bg-background card-shadow">
+                  <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Discipline Distribution</p>
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(
+                      (competitions as any[]).reduce((acc: Record<string, number>, c) => {
+                        acc[c.discipline] = (acc[c.discipline] || 0) + 1;
+                        return acc;
+                      }, {})
+                    ).sort((a, b) => (b[1] as number) - (a[1] as number)).map(([disc, count]) => (
+                      <div key={disc} className="hairline rounded-lg px-3 py-2 flex items-center gap-2 hover:bg-nexus-surface/40 transition-colors">
+                        <span className="text-xs font-semibold text-foreground">{disc}</span>
+                        <span className="text-[10px] mono text-nexus-muted bg-nexus-surface px-1.5 py-0.5 rounded">{count as number}</span>
+                      </div>
+                    ))}
+                    {competitions.length === 0 && <p className="text-xs text-nexus-muted mono">No data</p>}
+                  </div>
+                </div>
+
+                {/* Recent Activity */}
+                <div className="hairline rounded-xl p-6 bg-background card-shadow">
+                  <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Recent Activity</p>
+                  <div className="space-y-3 max-h-48 overflow-y-auto">
+                    {(fixtures as any[]).slice(0, 8).map((f) => (
+                      <div key={f.id} className="flex items-center gap-3 py-1.5 hairline-b last:border-0">
+                        <span className={`w-2 h-2 rounded-full flex-shrink-0 ${f.status === "live" ? "bg-nexus-live animate-pulse" : f.status === "completed" ? "bg-foreground/40" : "bg-nexus-surface"}`} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold text-foreground truncate">{f.home_team?.name || "TBD"} vs {f.away_team?.name || "TBD"}</p>
+                          <p className="text-[10px] mono text-nexus-muted">{f.competition?.name || "—"}</p>
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          {f.status === "completed" ? (
+                            <span className="text-xs font-bold mono text-foreground">{f.home_score ?? 0} — {f.away_score ?? 0}</span>
+                          ) : (
+                            <span className="text-[9px] mono uppercase text-nexus-muted bg-nexus-surface px-2 py-0.5 rounded-full">{f.status}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    {fixtures.length === 0 && <p className="text-xs text-nexus-muted mono">No activity yet</p>}
+                  </div>
+                </div>
+
+                {/* Provincial Coverage */}
+                <div className="hairline rounded-xl p-6 bg-background card-shadow lg:col-span-2">
+                  <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Provincial Coverage</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    {PROVINCES.map(prov => {
+                      const teamCount = (teams as any[]).filter(t => t.province === prov).length;
+                      const compCount = (competitions as any[]).filter(c => c.province === prov).length;
+                      return (
+                        <div key={prov} className="hairline rounded-lg p-3 text-center hover:bg-nexus-surface/40 transition-colors">
+                          <p className="text-xs font-semibold text-foreground">{prov}</p>
+                          <p className="text-[9px] mono text-nexus-muted mt-1">{teamCount} teams · {compCount} comps</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
