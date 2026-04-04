@@ -346,10 +346,10 @@ export default function BroadcastCGPage() {
       if (!fixtureId) return null;
       const { data } = await supabase.from("fixtures")
         .select(`id, status, home_score, away_score, round_label, period_scores,
-          home_team:home_team_id!fixtures_home_team_id_fkey(name),
-          away_team:away_team_id!fixtures_away_team_id_fkey(name),
-          competition:competition_id(name, discipline, level),
-          venue:venue_id(name, city)`)
+          home_team:teams!fixtures_home_team_id_fkey(name),
+          away_team:teams!fixtures_away_team_id_fkey(name),
+          competition:competitions!fixtures_competition_id_fkey(name, discipline, level),
+          venue:venues!fixtures_venue_id_fkey(name, city)`)
         .eq("id", fixtureId)
         .single();
       return data as unknown as FixtureState | null;
