@@ -20,6 +20,7 @@ const ADMIN_TABS = [
   { id: "broadcasts", label: "Broadcasts" },
   { id: "registrations", label: "Registrations" },
   { id: "sponsorships", label: "Sponsorships" },
+  { id: "scholastic", label: "Scholastic Services" },
 ];
 
 const inputCls = "bg-nexus-surface hairline rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-nexus-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground/20 transition-all w-full";
