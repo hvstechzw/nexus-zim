@@ -20,6 +20,7 @@ const ADMIN_TABS = [
   { id: "broadcasts", label: "Broadcasts" },
   { id: "registrations", label: "Registrations" },
   { id: "sponsorships", label: "Sponsorships" },
+  { id: "scholastic", label: "Scholastic Services" },
 ];
 
 const inputCls = "bg-nexus-surface hairline rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-nexus-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground/20 transition-all w-full";
@@ -399,7 +400,207 @@ function DetailField({ label, value }: { label: string; value: React.ReactNode }
   );
 }
 
-// ── Main Dashboard ────────────────────────────────────────────────
+// ── Scholastic Services Integration Panel ─────────────────────────
+function ScholasticPanel({ user, toast, refetchTeams, refetchAthletes, refetchVenues }: {
+  user: any; toast: any; refetchTeams: () => void; refetchAthletes: () => void; refetchVenues: () => void;
+}) {
+  const [syncStatus, setSyncStatus] = useState<"idle"|"syncing"|"success"|"error">("idle");
+  const [discoverResult, setDiscoverResult] = useState<any>(null);
+  const [syncResult, setSyncResult] = useState<any>(null);
+  const [lastSynced, setLastSynced] = useState<string | null>(null);
+
+  const callSync = async (action: string) => {
+    if (!user) { toast({ title: "Sign in required", variant: "destructive" }); return; }
+    setSyncStatus("syncing");
+    setSyncResult(null);
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      if (!token) throw new Error("No session");
+
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const res = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/scholastic-sync?action=${action}`,
+        { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+      );
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Sync failed");
+
+      if (action === "discover") {
+        setDiscoverResult(data);
+      } else {
+        setSyncResult(data);
+        setLastSynced(new Date().toLocaleString());
+        refetchTeams();
+        refetchAthletes();
+        refetchVenues();
+      }
+      setSyncStatus("success");
+      toast({ title: action === "discover" ? "Schema discovered" : "Sync complete" });
+    } catch (err: any) {
+      setSyncStatus("error");
+      toast({ title: "Sync Error", description: err.message, variant: "destructive" });
+    }
+  };
+
+  return (
+    <div className="p-4 sm:p-8">
+      {/* Header */}
+      <div className="hairline rounded-xl p-6 sm:p-8 bg-background card-shadow mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-3 h-3 rounded-full bg-foreground/60 animate-pulse" />
+              <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium">
+                Linked to scholasticservices.online
+              </p>
+            </div>
+            <h2 className="display-font text-xl font-bold text-foreground">Scholastic Services Integration</h2>
+            <p className="text-sm text-nexus-muted mt-1">
+              Automatically sync schools and students from the Scholastic Services platform for vetting and registration.
+            </p>
+          </div>
+          <div className="flex-shrink-0 flex items-center gap-2">
+            <span className="text-[9px] mono uppercase tracking-widest px-3 py-1.5 rounded-full bg-foreground/10 text-foreground font-semibold">Connected</span>
+          </div>
+        </div>
+
+        {lastSynced && (
+          <p className="text-[10px] mono text-nexus-muted mb-4">Last synced: {lastSynced}</p>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <button onClick={() => callSync("discover")} disabled={syncStatus === "syncing"}
+            className="h-12 px-6 text-xs font-semibold tracking-wide rounded-xl bg-nexus-surface hover:bg-nexus-silver transition-colors btn-click disabled:opacity-50 flex items-center justify-center gap-2">
+            {syncStatus === "syncing" ? (
+              <span className="w-4 h-4 border-2 border-foreground/30 border-t-foreground rounded-full animate-spin" />
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            )}
+            Discover Schema
+          </button>
+          <button onClick={() => callSync("sync-schools")} disabled={syncStatus === "syncing"}
+            className="h-12 px-6 text-xs font-semibold tracking-wide rounded-xl bg-nexus-surface hover:bg-nexus-silver transition-colors btn-click disabled:opacity-50 flex items-center justify-center gap-2">
+            {syncStatus === "syncing" ? (
+              <span className="w-4 h-4 border-2 border-foreground/30 border-t-foreground rounded-full animate-spin" />
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0H5m14 0h2m-16 0H3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            )}
+            Sync Schools
+          </button>
+          <button onClick={() => callSync("sync-students")} disabled={syncStatus === "syncing"}
+            className="h-12 px-6 text-xs font-semibold tracking-wide rounded-xl bg-nexus-surface hover:bg-nexus-silver transition-colors btn-click disabled:opacity-50 flex items-center justify-center gap-2">
+            {syncStatus === "syncing" ? (
+              <span className="w-4 h-4 border-2 border-foreground/30 border-t-foreground rounded-full animate-spin" />
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zm14 10v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            )}
+            Sync Students
+          </button>
+        </div>
+      </div>
+
+      {/* Discover Results */}
+      {discoverResult && (
+        <div className="hairline rounded-xl p-6 bg-background card-shadow mb-6">
+          <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Discovered Tables</p>
+          {Object.keys(discoverResult.tables || {}).length === 0 ? (
+            <div className="py-8 text-center">
+              <p className="text-sm text-nexus-muted mb-2">No publicly accessible tables found.</p>
+              <p className="text-xs text-nexus-muted">The Scholastic Services database may require a service role key for full access. Contact the Scholastic Services administrator to enable read access for schools and students tables.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {Object.entries(discoverResult.tables).map(([table, info]: [string, any]) => (
+                <div key={table} className="hairline rounded-lg p-4">
+                  <p className="text-sm font-semibold text-foreground mb-1">{table}</p>
+                  <p className="text-[10px] mono text-nexus-muted">{info.columns?.length || 0} columns</p>
+                  {info.columns?.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {info.columns.slice(0, 8).map((col: string) => (
+                        <span key={col} className="text-[9px] mono px-2 py-0.5 rounded bg-nexus-surface text-nexus-muted">{col}</span>
+                      ))}
+                      {info.columns.length > 8 && <span className="text-[9px] mono text-nexus-muted">+{info.columns.length - 8} more</span>}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Sync Results */}
+      {syncResult && (
+        <div className="hairline rounded-xl p-6 bg-background card-shadow mb-6">
+          <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Sync Results</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {syncResult.schools && (
+              <div className="hairline rounded-lg p-4">
+                <p className="text-sm font-semibold text-foreground mb-2">Schools</p>
+                <div className="space-y-1">
+                  <p className="text-xs text-nexus-muted">Total found: <span className="font-semibold text-foreground">{syncResult.schools.total}</span></p>
+                  <p className="text-xs text-nexus-muted">Synced: <span className="font-semibold text-foreground">{syncResult.schools.synced}</span></p>
+                  <p className="text-xs text-nexus-muted">Skipped (existing): <span className="font-semibold text-foreground">{syncResult.schools.skipped}</span></p>
+                </div>
+              </div>
+            )}
+            {syncResult.students && (
+              <div className="hairline rounded-lg p-4">
+                <p className="text-sm font-semibold text-foreground mb-2">Students / Athletes</p>
+                <div className="space-y-1">
+                  <p className="text-xs text-nexus-muted">Total found: <span className="font-semibold text-foreground">{syncResult.students.total}</span></p>
+                  <p className="text-xs text-nexus-muted">Synced: <span className="font-semibold text-foreground">{syncResult.students.synced}</span></p>
+                  <p className="text-xs text-nexus-muted">Skipped (existing): <span className="font-semibold text-foreground">{syncResult.students.skipped}</span></p>
+                </div>
+              </div>
+            )}
+            {/* Single action results */}
+            {syncResult.source && (
+              <div className="hairline rounded-lg p-4">
+                <p className="text-sm font-semibold text-foreground mb-2 capitalize">{syncResult.source}</p>
+                <div className="space-y-1">
+                  <p className="text-xs text-nexus-muted">Total found: <span className="font-semibold text-foreground">{syncResult.total}</span></p>
+                  <p className="text-xs text-nexus-muted">Synced: <span className="font-semibold text-foreground">{syncResult.synced}</span></p>
+                  <p className="text-xs text-nexus-muted">Skipped (existing): <span className="font-semibold text-foreground">{syncResult.skipped}</span></p>
+                </div>
+                {syncResult.errors?.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-[10px] mono text-nexus-muted uppercase mb-1">Errors</p>
+                    {syncResult.errors.slice(0, 5).map((e: string, i: number) => (
+                      <p key={i} className="text-[10px] mono text-nexus-muted">{e}</p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Info Panel */}
+      <div className="hairline rounded-xl p-6 bg-background card-shadow">
+        <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">How It Works</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <p className="text-sm font-semibold text-foreground">1. Discover</p>
+            <p className="text-xs text-nexus-muted">Scans the Scholastic Services database to identify available tables and their structure.</p>
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm font-semibold text-foreground">2. Sync Schools</p>
+            <p className="text-xs text-nexus-muted">Imports school records as Teams and creates corresponding Venue entries with location data.</p>
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm font-semibold text-foreground">3. Sync Students</p>
+            <p className="text-xs text-nexus-muted">Imports student records as Athletes with school affiliation, discipline, and demographic data.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
   const [showForm, setShowForm] = useState(false);
@@ -885,6 +1086,11 @@ export default function AdminDashboard() {
                 </table>
               </div>
             </div>
+          )}
+
+          {/* SCHOLASTIC SERVICES */}
+          {activeTab === "scholastic" && (
+            <ScholasticPanel user={user} toast={toast} refetchTeams={refetchTeams} refetchAthletes={refetchAthletes} refetchVenues={refetchVenues} />
           )}
 
         </motion.div>
