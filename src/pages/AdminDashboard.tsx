@@ -888,6 +888,11 @@ export default function AdminDashboard() {
             </div>
           )}
 
+          {/* SCHOLASTIC SERVICES */}
+          {activeTab === "scholastic" && (
+            <ScholasticPanel user={user} toast={toast} refetchTeams={refetchTeams} refetchAthletes={refetchAthletes} refetchVenues={refetchVenues} />
+          )}
+
         </motion.div>
       </div>
 
