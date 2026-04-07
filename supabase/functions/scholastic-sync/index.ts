@@ -1,5 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2.49.1/cors";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
 const SCHOLASTIC_URL = Deno.env.get("SCHOLASTIC_SERVICES_SUPABASE_URL");
 const SCHOLASTIC_KEY = Deno.env.get("SCHOLASTIC_SERVICES_SUPABASE_ANON_KEY");
