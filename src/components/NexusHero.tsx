@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import nexusLogo from "@/assets/nexus-logo.png";
+import { ScholasticBadge } from "@/components/ScholasticBadge";
 
 export function NexusHero() {
   const { data: stats } = useQuery({
@@ -73,7 +74,9 @@ export function NexusHero() {
           </p>
           <p className="mt-3 sm:mt-4 text-sm sm:text-base leading-relaxed text-nexus-muted max-w-[58ch]">
             Zimbabwe's centralised competition infrastructure — tracking, broadcasting, and registering every competitive
-            discipline across every level. From primary school inter-house galas to national league showdowns.
+            discipline across every level. Exclusively integrated with{" "}
+            <a href="https://scholasticservices.online" target="_blank" rel="noopener noreferrer" className="text-foreground font-medium hover:opacity-70 transition-opacity">Scholastic Services</a>{" "}
+            for school vetting, student registration, and sports tracking.
           </p>
 
           <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
@@ -92,6 +95,12 @@ export function NexusHero() {
               <span key={d} className="text-[10px] sm:text-[11px] mono text-nexus-muted hairline px-2.5 py-1 rounded-full">{d}</span>
             ))}
             <span className="text-[10px] sm:text-[11px] mono text-nexus-muted hairline px-2.5 py-1 rounded-full">+more</span>
+          </div>
+
+          {/* Scholastic Services integration badge */}
+          <div className="mt-5 flex items-center gap-3">
+            <ScholasticBadge size="md" />
+            <span className="text-[10px] text-nexus-muted">Exclusive data partner for schools & student athletes</span>
           </div>
         </motion.div>
       </div>

@@ -23,7 +23,6 @@ Deno.serve(async (req) => {
       throw new Error("Nexus database credentials not configured");
     }
 
-    // Validate auth
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -48,15 +47,12 @@ Deno.serve(async (req) => {
     const action = url.searchParams.get("action") || "discover";
 
     if (action === "discover") {
-      // Try to discover available tables
       const results: Record<string, any> = {};
-      
       const tablesToTry = [
         "schools", "students", "learners", "pupils", "institutions",
         "users", "profiles", "classes", "grades", "teachers",
         "school_profiles", "student_profiles", "enrollments"
       ];
-
       for (const table of tablesToTry) {
         const { data, error } = await scholastic.from(table).select("*").limit(1);
         if (!error) {
@@ -67,82 +63,53 @@ Deno.serve(async (req) => {
           };
         }
       }
-
       return new Response(JSON.stringify({ tables: results }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     if (action === "sync-schools") {
-      // Fetch schools from Scholastic Services
-      const { data: schools, error: schErr } = await scholastic
-        .from("schools")
-        .select("*")
-        .limit(500);
-
+      const { data: schools, error: schErr } = await scholastic.from("schools").select("*").limit(500);
       if (schErr) {
-        // Try alternative table names
-        const { data: institutions, error: instErr } = await scholastic
-          .from("institutions")
-          .select("*")
-          .limit(500);
-
+        const { data: institutions, error: instErr } = await scholastic.from("institutions").select("*").limit(500);
         if (instErr) {
           return new Response(
             JSON.stringify({ error: "Could not find schools table", details: schErr.message }),
             { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
-
         return await syncSchoolData(nexus, institutions, "institutions");
       }
-
       return await syncSchoolData(nexus, schools, "schools");
     }
 
     if (action === "sync-students") {
-      // Fetch students from Scholastic Services
-      const { data: students, error: stuErr } = await scholastic
-        .from("students")
-        .select("*")
-        .limit(1000);
-
+      const { data: students, error: stuErr } = await scholastic.from("students").select("*").limit(1000);
       if (stuErr) {
-        const { data: learners, error: learnErr } = await scholastic
-          .from("learners")
-          .select("*")
-          .limit(1000);
-
+        const { data: learners, error: learnErr } = await scholastic.from("learners").select("*").limit(1000);
         if (learnErr) {
           return new Response(
             JSON.stringify({ error: "Could not find students table", details: stuErr.message }),
             { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
-
         return await syncStudentData(nexus, learners, "learners");
       }
-
       return await syncStudentData(nexus, students, "students");
     }
 
     if (action === "sync-all") {
       const syncResults: any = { schools: null, students: null };
-
-      // Sync schools
       const { data: schools } = await scholastic.from("schools").select("*").limit(500);
       if (schools?.length) {
         const schoolRes = await syncSchoolData(nexus, schools, "schools");
         syncResults.schools = await schoolRes.json();
       }
-
-      // Sync students
       const { data: students } = await scholastic.from("students").select("*").limit(1000);
       if (students?.length) {
         const studentRes = await syncStudentData(nexus, students, "students");
         syncResults.students = await studentRes.json();
       }
-
       return new Response(JSON.stringify(syncResults), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -165,54 +132,77 @@ async function syncSchoolData(nexus: any, schools: any[], sourceTable: string) {
   let synced = 0;
   let skipped = 0;
   const errors: string[] = [];
+  const accountsCreated: string[] = [];
 
   for (const school of schools) {
     const name = school.name || school.school_name || school.institution_name || "Unknown School";
     const province = school.province || school.state || school.region || "Unknown";
     const city = school.city || school.town || school.location || province;
     const level = inferLevel(school);
+    const email = school.email || school.contact_email || null;
 
-    // Check if team already exists with this school name
-    const { data: existing } = await nexus
-      .from("teams")
-      .select("id")
-      .eq("school_name", name)
-      .limit(1);
+    // Check if team already exists
+    const { data: existing } = await nexus.from("teams").select("id").eq("school_name", name).limit(1);
+    if (existing?.length) { skipped++; continue; }
 
-    if (existing?.length) {
-      skipped++;
-      continue;
+    // Create auth account for school if email exists
+    let schoolUserId: string | null = null;
+    if (email) {
+      const tempPassword = `SS-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      const { data: authData, error: authErr } = await nexus.auth.admin.createUser({
+        email,
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: {
+          display_name: name,
+          account_type: "school",
+          source: "scholastic_services",
+          scholastic_id: school.id || null,
+        },
+      });
+
+      if (!authErr && authData?.user) {
+        schoolUserId = authData.user.id;
+        accountsCreated.push(email);
+
+        // Create profile
+        await nexus.from("profiles").insert({
+          user_id: authData.user.id,
+          display_name: name,
+          province,
+          first_name: name,
+        });
+
+        // Assign school_coordinator role
+        await nexus.from("user_roles").insert({
+          user_id: authData.user.id,
+          role: "school_coordinator",
+        });
+      }
     }
 
-    // Create team entry for the school
+    // Create team
     const { error: teamErr } = await nexus.from("teams").insert({
-      name: name,
+      name,
       school_name: name,
       discipline: school.sport || school.discipline || "Multi-Sport",
-      province: province,
-      level: level,
+      province,
+      level,
       is_active: true,
+      manager_id: schoolUserId,
     });
 
-    if (teamErr) {
-      errors.push(`${name}: ${teamErr.message}`);
-      continue;
-    }
+    if (teamErr) { errors.push(`${name}: ${teamErr.message}`); continue; }
 
-    // Also create venue if school has location data
+    // Create venue
     if (school.address || school.city) {
-      const { data: existingVenue } = await nexus
-        .from("venues")
-        .select("id")
-        .eq("name", `${name} Grounds`)
-        .limit(1);
-
+      const { data: existingVenue } = await nexus.from("venues").select("id").eq("name", `${name} Grounds`).limit(1);
       if (!existingVenue?.length) {
         await nexus.from("venues").insert({
           name: `${name} Grounds`,
           type: "school",
-          city: city,
-          province: province,
+          city,
+          province,
           address: school.address || null,
           is_active: true,
         });
@@ -223,13 +213,7 @@ async function syncSchoolData(nexus: any, schools: any[], sourceTable: string) {
   }
 
   return new Response(
-    JSON.stringify({
-      source: sourceTable,
-      total: schools.length,
-      synced,
-      skipped,
-      errors: errors.length ? errors : undefined,
-    }),
+    JSON.stringify({ source: sourceTable, total: schools.length, synced, skipped, accounts_created: accountsCreated.length, errors: errors.length ? errors : undefined }),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
 }
@@ -238,6 +222,7 @@ async function syncStudentData(nexus: any, students: any[], sourceTable: string)
   let synced = 0;
   let skipped = 0;
   const errors: string[] = [];
+  const accountsCreated: string[] = [];
 
   for (const student of students) {
     const firstName = student.first_name || student.firstname || student.name?.split(" ")[0] || "Unknown";
@@ -246,48 +231,69 @@ async function syncStudentData(nexus: any, students: any[], sourceTable: string)
     const schoolName = student.school_name || student.school || student.institution || null;
     const dob = student.date_of_birth || student.dob || student.birth_date || null;
     const gender = student.gender || student.sex || null;
+    const email = student.email || student.contact_email || student.guardian_email || null;
 
     // Check if athlete already exists
-    const { data: existing } = await nexus
-      .from("athletes")
-      .select("id")
-      .eq("first_name", firstName)
-      .eq("last_name", lastName)
-      .eq("province", province)
-      .limit(1);
+    const { data: existing } = await nexus.from("athletes").select("id").eq("first_name", firstName).eq("last_name", lastName).eq("province", province).limit(1);
+    if (existing?.length) { skipped++; continue; }
 
-    if (existing?.length) {
-      skipped++;
-      continue;
+    // Create auth account for student if email exists
+    let studentUserId: string | null = null;
+    if (email) {
+      const tempPassword = `SS-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      const { data: authData, error: authErr } = await nexus.auth.admin.createUser({
+        email,
+        password: tempPassword,
+        email_confirm: true,
+        user_metadata: {
+          display_name: `${firstName} ${lastName}`,
+          account_type: "student_athlete",
+          source: "scholastic_services",
+          scholastic_id: student.id || null,
+        },
+      });
+
+      if (!authErr && authData?.user) {
+        studentUserId = authData.user.id;
+        accountsCreated.push(email);
+
+        // Create profile
+        await nexus.from("profiles").insert({
+          user_id: authData.user.id,
+          display_name: `${firstName} ${lastName}`,
+          first_name: firstName,
+          last_name: lastName,
+          province,
+          date_of_birth: dob,
+        });
+
+        // Assign athlete role
+        await nexus.from("user_roles").insert({
+          user_id: authData.user.id,
+          role: "athlete",
+        });
+      }
     }
 
+    // Create athlete record
     const { error: athErr } = await nexus.from("athletes").insert({
       first_name: firstName,
       last_name: lastName,
-      province: province,
+      province,
       school_name: schoolName,
       date_of_birth: dob,
-      gender: gender,
+      gender,
       disciplines: student.disciplines || student.sports || ["General"],
       is_active: true,
+      user_id: studentUserId,
     });
 
-    if (athErr) {
-      errors.push(`${firstName} ${lastName}: ${athErr.message}`);
-      continue;
-    }
-
+    if (athErr) { errors.push(`${firstName} ${lastName}: ${athErr.message}`); continue; }
     synced++;
   }
 
   return new Response(
-    JSON.stringify({
-      source: sourceTable,
-      total: students.length,
-      synced,
-      skipped,
-      errors: errors.length ? errors : undefined,
-    }),
+    JSON.stringify({ source: sourceTable, total: students.length, synced, skipped, accounts_created: accountsCreated.length, errors: errors.length ? errors : undefined }),
     { headers: { ...corsHeaders, "Content-Type": "application/json" } }
   );
 }
