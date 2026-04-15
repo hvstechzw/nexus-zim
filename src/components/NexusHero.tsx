@@ -74,7 +74,9 @@ export function NexusHero() {
           </p>
           <p className="mt-3 sm:mt-4 text-sm sm:text-base leading-relaxed text-nexus-muted max-w-[58ch]">
             Zimbabwe's centralised competition infrastructure — tracking, broadcasting, and registering every competitive
-            discipline across every level. From primary school inter-house galas to national league showdowns.
+            discipline across every level. Exclusively integrated with{" "}
+            <a href="https://scholasticservices.online" target="_blank" rel="noopener noreferrer" className="text-foreground font-medium hover:opacity-70 transition-opacity">Scholastic Services</a>{" "}
+            for school vetting, student registration, and sports tracking.
           </p>
 
           <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
