@@ -104,6 +104,11 @@ export function NexusHeader() {
               Register
             </a>
 
+            <a href="https://scholasticservices.online" target="_blank" rel="noopener noreferrer" className="hidden xl:flex items-center gap-1.5 h-8 px-3 text-[10px] mono tracking-wide font-medium rounded-lg bg-nexus-surface text-nexus-muted hover:text-foreground transition-colors">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              Scholastic Services
+            </a>
+
             {/* Mobile hamburger */}
             <button
               onClick={() => setMobileOpen(!mobileOpen)}

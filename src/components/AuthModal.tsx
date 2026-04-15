@@ -63,7 +63,7 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
               <h2 className="display-font text-xl font-bold text-foreground tracking-tight">
                 {mode === "signin" ? "Sign In" : "Create Account"}
               </h2>
-              <p className="text-xs text-nexus-muted mt-0.5">Nexus · Aetheris Platform</p>
+              <p className="text-xs text-nexus-muted mt-0.5">Nexus · Powered by <a href="https://scholasticservices.online" target="_blank" rel="noopener noreferrer" className="text-foreground hover:opacity-70">Scholastic Services</a></p>
             </div>
             <button
               onClick={onClose}

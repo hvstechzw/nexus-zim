@@ -1,4 +1,5 @@
 import aieLogoLight from "@/assets/aie-logo-light.png";
+import { ScholasticBadge } from "@/components/ScholasticBadge";
 
 const FOOTER_LINKS = {
   Platform: ["Live Scores", "Events Hub", "Standings", "Broadcast", "Results Archive"],
@@ -53,11 +54,23 @@ export function NexusFooter() {
         </div>
       </div>
 
+      {/* Scholastic Services integration strip */}
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-10 py-3 hairline-b flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
+          <span className="text-[10px] mono tracking-wide uppercase text-nexus-muted font-semibold">Exclusively integrated with</span>
+        </div>
+        <a href="https://scholasticservices.online" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-foreground hover:opacity-70 transition-opacity">
+          Scholastic Services
+        </a>
+        <span className="text-[10px] text-nexus-muted">School vetting · Student registration · Sports tracking</span>
+      </div>
+
       <div className="max-w-[1400px] mx-auto px-4 sm:px-10 py-4 sm:py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
         <p className="text-[10px] sm:text-xs mono text-nexus-muted">© {new Date().getFullYear()} Aetheris Innovative Enterprises Pvt Ltd</p>
         <div className="flex items-center gap-2 sm:gap-3">
+          <ScholasticBadge size="sm" />
           <span className="text-[10px] sm:text-xs mono text-nexus-muted hairline px-2 sm:px-3 py-1 sm:py-1.5 rounded-md">Nexus v1.0</span>
-          <span className="text-[10px] sm:text-xs mono text-nexus-muted hidden sm:block">Precision infrastructure for Zimbabwean sport</span>
         </div>
       </div>
     </footer>

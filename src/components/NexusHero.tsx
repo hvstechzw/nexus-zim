@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import nexusLogo from "@/assets/nexus-logo.png";
+import { ScholasticBadge } from "@/components/ScholasticBadge";
 
 export function NexusHero() {
   const { data: stats } = useQuery({
@@ -92,6 +93,12 @@ export function NexusHero() {
               <span key={d} className="text-[10px] sm:text-[11px] mono text-nexus-muted hairline px-2.5 py-1 rounded-full">{d}</span>
             ))}
             <span className="text-[10px] sm:text-[11px] mono text-nexus-muted hairline px-2.5 py-1 rounded-full">+more</span>
+          </div>
+
+          {/* Scholastic Services integration badge */}
+          <div className="mt-5 flex items-center gap-3">
+            <ScholasticBadge size="md" />
+            <span className="text-[10px] text-nexus-muted">Exclusive data partner for schools & student athletes</span>
           </div>
         </motion.div>
       </div>
