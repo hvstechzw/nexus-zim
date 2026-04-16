@@ -13,6 +13,11 @@ import ScoringPage from "./pages/ScoringPage.tsx";
 import FixturesPage from "./pages/FixturesPage.tsx";
 import AthleteIDPage from "./pages/AthleteIDPage.tsx";
 import BroadcastCGPage from "./pages/BroadcastCGPage.tsx";
+import SchoolsPage from "./pages/SchoolsPage.tsx";
+import SchoolProfilePage from "./pages/SchoolProfilePage.tsx";
+import InterSchoolPage from "./pages/InterSchoolPage.tsx";
+import SportsDayPage from "./pages/SportsDayPage.tsx";
+import PracticeScoringPage from "./pages/PracticeScoringPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -35,6 +40,11 @@ const App = () => (
               <Route path="/athletes/id-cards" element={<AthleteIDPage />} />
               <Route path="/broadcast" element={<BroadcastCGPage />} />
               <Route path="/broadcast/:fixtureId" element={<BroadcastCGPage />} />
+              <Route path="/schools" element={<SchoolsPage />} />
+              <Route path="/schools/:id" element={<SchoolProfilePage />} />
+              <Route path="/inter-school" element={<InterSchoolPage />} />
+              <Route path="/sports-day" element={<SportsDayPage />} />
+              <Route path="/practice" element={<PracticeScoringPage />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
