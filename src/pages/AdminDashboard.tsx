@@ -2,6 +2,10 @@ import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { NexusHeader } from "@/components/NexusHeader";
 import { NexusFooter } from "@/components/NexusFooter";
+import { ScholasticIntegrationBanner } from "@/components/ScholasticBadge";
+import { SyncStatusWidget } from "@/components/SyncStatusWidget";
+import { InterSchoolFixturesBuilder } from "@/components/InterSchoolFixturesBuilder";
+import { HouseCompetitionsPanel } from "@/components/HouseCompetitionsPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
@@ -671,15 +675,25 @@ export default function AdminDashboard() {
           {/* OVERVIEW */}
           {activeTab === "overview" && (
             <div className="p-4 sm:p-8">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <div className="mb-6 flex flex-col gap-4">
+                <ScholasticIntegrationBanner />
+                <SyncStatusWidget autoSyncIfEmpty={true} />
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <StatCard label="Schools" value={String(teams.length)} sub="Scholastic verified" />
+                <StatCard label="Students" value={String(athletes.length)} sub="from Scholastic" />
                 <StatCard label="Competitions" value={String(competitions.length)} sub="total" />
-                <StatCard label="Teams" value={String(teams.length)} sub="registered" />
-                <StatCard label="Athletes" value={String(athletes.length)} sub="registered" />
+                <StatCard label="Inter-School Fixtures" value={String(fixtures.length)} sub="scheduled" />
                 <StatCard label="Venues" value={String(venues.length)} sub="in system" />
-                <StatCard label="Fixtures" value={String(fixtures.length)} sub="scheduled" />
                 <StatCard label="Officials" value={String(officials.length)} sub="certified" />
                 <StatCard label="Registrations" value={String(registrations.length)} sub="submitted" />
                 <StatCard label="Sponsors" value={String(sponsorships.length)} sub="active" />
+              </div>
+
+              {/* Schools tooling */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                <InterSchoolFixturesBuilder />
+                <HouseCompetitionsPanel />
               </div>
 
               {/* Activity & Charts Section */}
