@@ -8,31 +8,31 @@ export function NexusHero() {
   const { data: stats } = useQuery({
     queryKey: ["hero-stats"],
     queryFn: async () => {
-      const [comps, athletes, venues, live, teams, fixtures] = await Promise.all([
+      const [comps, students, venues, live, schools, fixtures] = await Promise.all([
         supabase.from("competitions").select("id", { count: "exact", head: true }),
         supabase.from("athletes").select("id", { count: "exact", head: true }),
         supabase.from("venues").select("id", { count: "exact", head: true }),
         supabase.from("fixtures").select("id", { count: "exact", head: true }).eq("status", "live"),
-        supabase.from("teams").select("id", { count: "exact", head: true }),
+        supabase.from("teams").select("id", { count: "exact", head: true }).eq("is_active", true),
         supabase.from("fixtures").select("id", { count: "exact", head: true }),
       ]);
       return {
         competitions: comps.count || 0,
-        athletes: athletes.count || 0,
+        students: students.count || 0,
         venues: venues.count || 0,
         live: live.count || 0,
-        teams: teams.count || 0,
+        schools: schools.count || 0,
         fixtures: fixtures.count || 0,
       };
     },
   });
 
   const STAT_ITEMS = [
+    { value: stats?.schools ? `${stats.schools}` : "—", label: "Schools" },
+    { value: stats?.students ? `${stats.students}` : "—", label: "Students" },
     { value: stats?.competitions ? `${stats.competitions}` : "—", label: "Competitions" },
-    { value: stats?.athletes ? `${stats.athletes}` : "—", label: "Athletes" },
-    { value: stats?.teams ? `${stats.teams}` : "—", label: "Teams" },
+    { value: stats?.fixtures ? `${stats.fixtures}` : "—", label: "Inter-School Fixtures" },
     { value: stats?.venues ? `${stats.venues}` : "—", label: "Venues" },
-    { value: stats?.fixtures ? `${stats.fixtures}` : "—", label: "Fixtures" },
     { value: stats?.live ? `${stats.live}` : "0", label: "Live Now" },
   ];
 
@@ -68,15 +68,15 @@ export function NexusHero() {
           transition={{ delay: 0.25, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="w-full max-w-3xl mt-6 sm:mt-10 mb-4 sm:mb-8"
         >
-          <p className="text-xl sm:text-display-lg display-font font-semibold text-foreground max-w-[28ch] leading-snug">
-            The National Pulse.{" "}
-            <span className="text-nexus-muted font-normal">Every match, every move, every second.</span>
+          <p className="text-xl sm:text-display-lg display-font font-semibold text-foreground max-w-[30ch] leading-snug">
+            Nexus for Schools.{" "}
+            <span className="text-nexus-muted font-normal">Zimbabwe's inter-school competition network.</span>
           </p>
-          <p className="mt-3 sm:mt-4 text-sm sm:text-base leading-relaxed text-nexus-muted max-w-[58ch]">
-            Zimbabwe's centralised competition infrastructure — tracking, broadcasting, and registering every competitive
-            discipline across every level. Exclusively integrated with{" "}
-            <a href="https://scholasticservices.online" target="_blank" rel="noopener noreferrer" className="text-foreground font-medium hover:opacity-70 transition-opacity">Scholastic Services</a>{" "}
-            for school vetting, student registration, and sports tracking.
+          <p className="mt-3 sm:mt-4 text-sm sm:text-base leading-relaxed text-nexus-muted max-w-[60ch]">
+            A closed platform built exclusively for schools — every fixture, sports day, house competition, debate, olympiad and league between vetted Zimbabwean schools.
+            All schools and student athletes are sourced directly from{" "}
+            <a href="https://scholasticservices.online" target="_blank" rel="noopener noreferrer" className="text-foreground font-medium hover:opacity-70 transition-opacity">Scholastic Services</a>.
+            No public sign-ups.
           </p>
 
           <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
@@ -84,23 +84,23 @@ export function NexusHero() {
               <span className="w-2 h-2 rounded-full bg-primary-foreground/60 animate-pulse" />
               View Live
             </a>
-            <a href="#events" className="flex items-center justify-center h-11 sm:h-12 px-7 bg-nexus-surface text-foreground text-sm font-medium rounded-xl hover:bg-nexus-silver transition-colors btn-click">
-              Browse Events
+            <a href="#schools" className="flex items-center justify-center h-11 sm:h-12 px-7 bg-nexus-surface text-foreground text-sm font-medium rounded-xl hover:bg-nexus-silver transition-colors btn-click">
+              Browse Schools
             </a>
           </div>
 
           {/* Quick info chips */}
           <div className="mt-6 flex flex-wrap gap-2">
-            {["Track & Field", "Football", "Cricket", "Chess", "Debate", "Swimming", "Rugby", "Netball", "Quiz"].map(d => (
+            {["Athletics", "Football", "Rugby", "Cricket", "Netball", "Hockey", "Swimming", "Chess", "Debate", "Quiz", "Spelling Bee", "Sports Day", "House Comps"].map(d => (
               <span key={d} className="text-[10px] sm:text-[11px] mono text-nexus-muted hairline px-2.5 py-1 rounded-full">{d}</span>
             ))}
-            <span className="text-[10px] sm:text-[11px] mono text-nexus-muted hairline px-2.5 py-1 rounded-full">+more</span>
+            <span className="text-[10px] sm:text-[11px] mono text-nexus-muted hairline px-2.5 py-1 rounded-full">+50 more</span>
           </div>
 
           {/* Scholastic Services integration badge */}
           <div className="mt-5 flex items-center gap-3">
             <ScholasticBadge size="md" />
-            <span className="text-[10px] text-nexus-muted">Exclusive data partner for schools & student athletes</span>
+            <span className="text-[10px] text-nexus-muted">Exclusive data partner — schools, students & house rosters</span>
           </div>
         </motion.div>
       </div>

@@ -1,11 +1,12 @@
 import { NexusHeader } from "@/components/NexusHeader";
 import { NexusHero } from "@/components/NexusHero";
 import { LiveScoreboard } from "@/components/LiveScoreboard";
-import { LevelSwitcher } from "@/components/LevelSwitcher";
+import { SchoolTierSwitcher } from "@/components/SchoolTierSwitcher";
+import { SchoolsDirectory } from "@/components/SchoolsDirectory";
 import { EventsGrid } from "@/components/EventsGrid";
 import { StandingsTable } from "@/components/StandingsTable";
 import { BroadcastHub } from "@/components/BroadcastHub";
-import { RegistrationPanel } from "@/components/RegistrationPanel";
+import { ScholasticPartnerSection } from "@/components/ScholasticPartnerSection";
 import { NexusFooter } from "@/components/NexusFooter";
 
 const Index = () => {
@@ -16,11 +17,12 @@ const Index = () => {
       <main>
         <NexusHero />
         <LiveScoreboard />
-        <LevelSwitcher />
+        <SchoolTierSwitcher />
+        <SchoolsDirectory />
         <EventsGrid />
         <StandingsTable />
         <BroadcastHub />
-        <RegistrationPanel />
+        <ScholasticPartnerSection />
       </main>
 
       <NexusFooter />

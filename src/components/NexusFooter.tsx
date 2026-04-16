@@ -2,10 +2,10 @@ import aieLogoLight from "@/assets/aie-logo-light.png";
 import { ScholasticBadge } from "@/components/ScholasticBadge";
 
 const FOOTER_LINKS = {
-  Platform: ["Live Scores", "Events Hub", "Standings", "Broadcast", "Results Archive"],
-  Register: ["Athletes", "Teams & Clubs", "Officials", "School Programs", "League Entry"],
-  Disciplines: ["Track & Field", "Ball Sports", "Aquatics", "Combat Sports", "Academic"],
-  Support: ["Contact Us", "Documentation", "Federation Login", "Media & Press", "Privacy Policy"],
+  Platform: ["Schools", "Inter-School Fixtures", "Sports Day", "Standings", "Broadcast"],
+  Schools: ["Schools Directory", "School Profiles", "House Competitions", "Student Rosters", "Coordinator Login"],
+  Disciplines: ["Field & Track", "Ball Sports", "Aquatics", "Mind Sports", "Academic Olympiads"],
+  Support: ["Contact Us", "Documentation", "Federation Login", "Practice Scoring", "Privacy Policy"],
 };
 
 export function NexusFooter() {
@@ -18,13 +18,13 @@ export function NexusFooter() {
             <div className="bg-foreground rounded-xl p-4 sm:p-5 inline-flex mb-4 sm:mb-5">
               <img src={aieLogoLight} alt="Aetheris" className="w-20 sm:w-28 h-auto object-contain" style={{ filter: "brightness(10)" }} />
             </div>
-            <p className="display-font text-lg sm:text-xl font-bold text-foreground tracking-tight">Nexus</p>
+            <p className="display-font text-lg sm:text-xl font-bold text-foreground tracking-tight">Nexus for Schools</p>
             <p className="text-[10px] sm:text-xs text-nexus-muted tracking-wide uppercase mt-1">by Aetheris Innovative Enterprises</p>
           </div>
 
           <div>
             <p className="text-xs sm:text-sm text-nexus-muted leading-relaxed max-w-[40ch]">
-              Zimbabwe's national competition infrastructure. Centralising tracking, broadcast, and registration.
+              Zimbabwe's closed inter-school competition network — exclusively powered by Scholastic Services.
             </p>
             <div className="mt-4 sm:mt-6">
               <p className="text-[10px] sm:text-xs mono tracking-widest uppercase text-nexus-muted mb-2 sm:mb-3">Coverage</p>
