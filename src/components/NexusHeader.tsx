@@ -6,9 +6,11 @@ import nexusLogo from "@/assets/nexus-logo.png";
 import { AuthModal } from "@/components/AuthModal";
 
 const PUBLIC_LINKS = [
-  { label: "Live", href: "#live" },
-  { label: "Events", href: "#events" },
-  { label: "Standings", href: "#standings" },
+  { label: "Live", href: "/#live" },
+  { label: "Schools", href: "/schools" },
+  { label: "Inter-School", href: "/inter-school" },
+  { label: "Sports Day", href: "/sports-day" },
+  { label: "Practice", href: "/practice" },
 ];
 
 const ADMIN_LINKS = [
@@ -100,8 +102,8 @@ export function NexusHeader() {
               </button>
             )}
 
-            <a href="#register" className="hidden lg:flex items-center h-8 px-4 text-[11px] font-semibold tracking-wide bg-foreground text-primary-foreground rounded-lg hover:opacity-85 transition-opacity btn-click">
-              Register
+            <a href="https://scholasticservices.online" target="_blank" rel="noopener noreferrer" className="hidden lg:flex items-center h-8 px-4 text-[11px] font-semibold tracking-wide bg-foreground text-primary-foreground rounded-lg hover:opacity-85 transition-opacity btn-click">
+              Join via Scholastic
             </a>
 
             <a href="https://scholasticservices.online" target="_blank" rel="noopener noreferrer" className="hidden xl:flex items-center gap-1.5 h-8 px-3 text-[10px] mono tracking-wide font-medium rounded-lg bg-nexus-surface text-nexus-muted hover:text-foreground transition-colors">
@@ -161,8 +163,8 @@ export function NexusHeader() {
                     Sign In
                   </button>
                 )}
-                <a href="#register" onClick={() => setMobileOpen(false)} className="h-12 px-6 bg-foreground text-primary-foreground text-sm font-semibold rounded-xl btn-click flex items-center justify-center">
-                  Register Now
+                <a href="https://scholasticservices.online" target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)} className="h-12 px-6 bg-foreground text-primary-foreground text-sm font-semibold rounded-xl btn-click flex items-center justify-center">
+                  Join via Scholastic Services
                 </a>
               </div>
             </div>

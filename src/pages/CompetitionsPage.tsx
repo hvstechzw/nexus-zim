@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 export default function CompetitionsPage() {
   const navigate = useNavigate();
   useEffect(() => {
-    navigate("/admin", { replace: true });
+    navigate("/inter-school", { replace: true });
   }, [navigate]);
   return null;
 }

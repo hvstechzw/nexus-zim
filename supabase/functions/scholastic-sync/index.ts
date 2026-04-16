@@ -182,6 +182,8 @@ async function syncSchoolData(nexus: any, schools: any[], sourceTable: string) {
     }
 
     // Create team
+    const sportsOffered = school.sports_offered || school.sports || school.disciplines || [];
+    const logo = school.logo_url || school.logo || school.crest_url || school.badge_url || null;
     const { error: teamErr } = await nexus.from("teams").insert({
       name,
       school_name: name,
@@ -190,6 +192,8 @@ async function syncSchoolData(nexus: any, schools: any[], sourceTable: string) {
       level,
       is_active: true,
       manager_id: schoolUserId,
+      logo_url: logo,
+      sports_offered: Array.isArray(sportsOffered) ? sportsOffered : [],
     });
 
     if (teamErr) { errors.push(`${name}: ${teamErr.message}`); continue; }
