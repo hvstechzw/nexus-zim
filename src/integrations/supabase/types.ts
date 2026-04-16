@@ -87,6 +87,7 @@ export type Database = {
           display_name: string | null
           first_name: string
           gender: string | null
+          house: string | null
           id: string
           id_card_number: string | null
           is_active: boolean | null
@@ -111,6 +112,7 @@ export type Database = {
           display_name?: string | null
           first_name: string
           gender?: string | null
+          house?: string | null
           id?: string
           id_card_number?: string | null
           is_active?: boolean | null
@@ -135,6 +137,7 @@ export type Database = {
           display_name?: string | null
           first_name?: string
           gender?: string | null
+          house?: string | null
           id?: string
           id_card_number?: string | null
           is_active?: boolean | null
@@ -230,6 +233,7 @@ export type Database = {
       }
       competitions: {
         Row: {
+          age_group: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -239,6 +243,8 @@ export type Database = {
           format: Database["public"]["Enums"]["bracket_format"]
           id: string
           is_broadcast: boolean | null
+          is_house_competition: boolean | null
+          is_sports_day: boolean | null
           level: Database["public"]["Enums"]["competition_level"]
           logo_url: string | null
           max_participants: number | null
@@ -253,10 +259,12 @@ export type Database = {
           sponsor: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["competition_status"]
+          term: string | null
           updated_at: string
           venue_id: string | null
         }
         Insert: {
+          age_group?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -266,6 +274,8 @@ export type Database = {
           format?: Database["public"]["Enums"]["bracket_format"]
           id?: string
           is_broadcast?: boolean | null
+          is_house_competition?: boolean | null
+          is_sports_day?: boolean | null
           level: Database["public"]["Enums"]["competition_level"]
           logo_url?: string | null
           max_participants?: number | null
@@ -280,10 +290,12 @@ export type Database = {
           sponsor?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["competition_status"]
+          term?: string | null
           updated_at?: string
           venue_id?: string | null
         }
         Update: {
+          age_group?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -293,6 +305,8 @@ export type Database = {
           format?: Database["public"]["Enums"]["bracket_format"]
           id?: string
           is_broadcast?: boolean | null
+          is_house_competition?: boolean | null
+          is_sports_day?: boolean | null
           level?: Database["public"]["Enums"]["competition_level"]
           logo_url?: string | null
           max_participants?: number | null
@@ -307,6 +321,7 @@ export type Database = {
           sponsor?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["competition_status"]
+          term?: string | null
           updated_at?: string
           venue_id?: string | null
         }
@@ -1255,6 +1270,7 @@ export type Database = {
           province: string | null
           school_name: string | null
           short_name: string | null
+          sports_offered: string[] | null
           updated_at: string
         }
         Insert: {
@@ -1272,6 +1288,7 @@ export type Database = {
           province?: string | null
           school_name?: string | null
           short_name?: string | null
+          sports_offered?: string[] | null
           updated_at?: string
         }
         Update: {
@@ -1289,6 +1306,7 @@ export type Database = {
           province?: string | null
           school_name?: string | null
           short_name?: string | null
+          sports_offered?: string[] | null
           updated_at?: string
         }
         Relationships: []
