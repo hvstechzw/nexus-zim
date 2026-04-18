@@ -12,8 +12,11 @@ dist
 dist-ssr
 *.local
 
-# Local env files — use .env.example as template; never commit real secrets.
-.env
+# Local env files
+# `.env` holds PUBLIC Vite vars only (anon keys, public URLs) — safe to commit
+# so Lovable / CI builds have what they need. Real secrets (service_role,
+# edge-function creds, etc.) live in Supabase edge-function secrets, not here.
+# Put any developer-local overrides in `.env.local` (git-ignored below).
 .env.local
 .env.*.local
 
