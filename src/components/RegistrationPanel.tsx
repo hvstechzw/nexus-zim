@@ -4,11 +4,28 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { athleteSchema, teamSchema, officialSchema, ZIM_PROVINCES } from "@/schemas";
 
-const PROVINCES = [
-  "Harare", "Bulawayo", "Manicaland", "Mashonaland Central", "Mashonaland East",
-  "Mashonaland West", "Masvingo", "Matabeleland North", "Matabeleland South", "Midlands",
-];
+const PROVINCES = ZIM_PROVINCES;
+
+// Parse a textarea of "discipline: value (YYYY-MM-DD)" lines into an array of
+// { discipline, value, recorded_at } — tolerant of missing dates and extra whitespace.
+function parsePersonalBests(raw: string) {
+  if (!raw.trim()) return [];
+  return raw
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const dateMatch = line.match(/\((\d{4}-\d{2}-\d{2})\)\s*$/);
+      const recorded_at = dateMatch ? dateMatch[1] : null;
+      const body = dateMatch ? line.slice(0, line.length - dateMatch[0].length).trim() : line;
+      const [discipline, ...rest] = body.split(":");
+      const value = rest.join(":").trim();
+      return { discipline: discipline.trim(), value, recorded_at };
+    })
+    .filter((pb) => pb.discipline && pb.value);
+}
 
 export function RegistrationPanel() {
   const [tab, setTab] = useState<"athlete" | "team" | "official">("athlete");
@@ -45,9 +62,18 @@ export function RegistrationPanel() {
     },
   });
 
-  const [athleteForm, setAthleteForm] = useState({ first_name: "", last_name: "", discipline: "", province: "Harare", school_name: "", dob: "" });
-  const [teamForm, setTeamForm] = useState({ name: "", discipline: "", province: "Harare", school_name: "" });
-  const [officialForm, setOfficialForm] = useState({ first_name: "", last_name: "", role: "referee", discipline: "", province: "Harare" });
+  const [athleteForm, setAthleteForm] = useState({
+    first_name: "",
+    last_name: "",
+    discipline: "",
+    province: "Harare" as (typeof ZIM_PROVINCES)[number],
+    school_name: "",
+    dob: "",
+    medical_waiver_signed: false,
+    personal_bests_raw: "",
+  });
+  const [teamForm, setTeamForm] = useState({ name: "", discipline: "", province: "Harare" as (typeof ZIM_PROVINCES)[number], school_name: "" });
+  const [officialForm, setOfficialForm] = useState({ first_name: "", last_name: "", role: "referee", discipline: "", province: "Harare" as (typeof ZIM_PROVINCES)[number] });
 
   const inputCls = "bg-nexus-surface/60 hairline rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-nexus-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground/20 transition-all duration-200 w-full";
   const labelCls = "text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold";
@@ -61,32 +87,57 @@ export function RegistrationPanel() {
     setLoading(true);
     try {
       if (tab === "athlete") {
-        const { error } = await supabase.from("athletes").insert({
+        const personalBests = parsePersonalBests(athleteForm.personal_bests_raw);
+        const parsed = athleteSchema.safeParse({
           first_name: athleteForm.first_name,
           last_name: athleteForm.last_name,
           disciplines: [athleteForm.discipline],
           province: athleteForm.province,
           school_name: athleteForm.school_name || null,
           date_of_birth: athleteForm.dob || null,
+          medical_waiver_signed: athleteForm.medical_waiver_signed,
+          medical_waiver_date: athleteForm.medical_waiver_signed
+            ? new Date().toISOString().slice(0, 10)
+            : null,
+          personal_bests: personalBests,
+        });
+        if (!parsed.success) {
+          throw new Error(parsed.error.issues[0]?.message ?? "Invalid athlete data");
+        }
+        const { error } = await supabase.from("athletes").insert({
+          ...parsed.data,
           user_id: user.id,
         });
         if (error) throw error;
       } else if (tab === "team") {
-        const { error } = await supabase.from("teams").insert({
+        const parsed = teamSchema.safeParse({
           name: teamForm.name,
           discipline: teamForm.discipline,
+          level: "club_academy",
           province: teamForm.province,
           school_name: teamForm.school_name || null,
+        });
+        if (!parsed.success) {
+          throw new Error(parsed.error.issues[0]?.message ?? "Invalid team data");
+        }
+        const { error } = await supabase.from("teams").insert({
+          ...parsed.data,
           manager_id: user.id,
         });
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("officials").insert({
+        const parsed = officialSchema.safeParse({
           first_name: officialForm.first_name,
           last_name: officialForm.last_name,
           role: officialForm.role,
           disciplines: [officialForm.discipline],
           province: officialForm.province,
+        });
+        if (!parsed.success) {
+          throw new Error(parsed.error.issues[0]?.message ?? "Invalid official data");
+        }
+        const { error } = await supabase.from("officials").insert({
+          ...parsed.data,
           user_id: user.id,
         });
         if (error) throw error;
@@ -222,6 +273,29 @@ export function RegistrationPanel() {
                   <label className={labelCls}>School / Club Name</label>
                   <input value={athleteForm.school_name} onChange={e => setAthleteForm(f => ({...f, school_name: e.target.value}))} className={inputCls} placeholder="e.g. Churchill High School" />
                 </div>
+                <div className="flex flex-col gap-1.5">
+                  <label className={labelCls}>Personal Bests (optional)</label>
+                  <textarea
+                    rows={3}
+                    value={athleteForm.personal_bests_raw}
+                    onChange={e => setAthleteForm(f => ({...f, personal_bests_raw: e.target.value}))}
+                    className={inputCls}
+                    placeholder={"One per line — e.g.\n100m: 11.42 (2025-09-14)\nLong Jump: 6.10m"}
+                  />
+                  <p className="text-[10px] mono text-nexus-muted">Format: <span className="text-foreground">discipline: value (YYYY-MM-DD)</span>. Date optional.</p>
+                </div>
+                <label className="flex items-start gap-3 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={athleteForm.medical_waiver_signed}
+                    onChange={e => setAthleteForm(f => ({...f, medical_waiver_signed: e.target.checked}))}
+                    className="mt-1 w-4 h-4 accent-foreground"
+                  />
+                  <span className="text-xs text-foreground leading-relaxed">
+                    I confirm the athlete has signed the Nexus medical waiver and is cleared for competition.
+                    <span className="block text-[10px] mono text-nexus-muted mt-1">Today's date is auto-recorded on submit.</span>
+                  </span>
+                </label>
               </>
             )}
 

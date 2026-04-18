@@ -1,9 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+import { buildCorsHeaders } from "../_shared/cors.ts";
 
 const SCHOLASTIC_URL = Deno.env.get("SCHOLASTIC_SERVICES_SUPABASE_URL");
 const SCHOLASTIC_KEY = Deno.env.get("SCHOLASTIC_SERVICES_SUPABASE_ANON_KEY");
@@ -11,6 +7,7 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 Deno.serve(async (req) => {
+  const corsHeaders = buildCorsHeaders(req);
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -37,6 +34,19 @@ Deno.serve(async (req) => {
     if (authError || !claims?.user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Require admin / super_admin — sync creates auth accounts on their behalf.
+    const { data: roleRows } = await nexus
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", claims.user.id);
+    const roles = (roleRows || []).map((r: any) => r.role);
+    if (!roles.includes("admin") && !roles.includes("super_admin")) {
+      return new Response(JSON.stringify({ error: "Forbidden: admin role required" }), {
+        status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
