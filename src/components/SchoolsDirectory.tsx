@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ScholasticBadge } from "@/components/ScholasticBadge";
 import { tierLabel } from "@/lib/schools";
+import { isNexusDiscipline, matchesNexusSports } from "@/lib/nexusSports";
 
 export function SchoolsDirectory() {
   const { data: schools = [], isLoading } = useQuery({
@@ -13,10 +14,15 @@ export function SchoolsDirectory() {
         .select("id, name, school_name, province, level, logo_url, discipline, sports_offered")
         .eq("is_active", true)
         .order("name")
-        .limit(48);
-      return data || [];
+        .limit(200);
+      // Only schools fielding handball or netball (or general schools with no sport tag)
+      return (data || []).filter((s: any) => {
+        if (!s.discipline && !s.sports_offered) return true;
+        return isNexusDiscipline(s.discipline) || matchesNexusSports(s.sports_offered);
+      }).slice(0, 48);
     },
   });
+
 
   return (
     <section id="schools" className="hairline-b bg-background">
