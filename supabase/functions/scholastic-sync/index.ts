@@ -1,321 +1,187 @@
+// Outbound sync: Nexus → Scholastic Services bridge.
+// Called from the /admin Sync tab. Requires HIC/super_admin/admin role.
+// Pulls schools and students from SS, upserts into Nexus teams/athletes,
+// records the run in ss_sync_log.
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { buildCorsHeaders } from "../_shared/cors.ts";
+import { signHmac, signFederationJwt } from "../_shared/federation.ts";
 
-const SCHOLASTIC_URL = Deno.env.get("SCHOLASTIC_SERVICES_SUPABASE_URL");
-const SCHOLASTIC_KEY = Deno.env.get("SCHOLASTIC_SERVICES_SUPABASE_ANON_KEY");
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+const HMAC_SECRET = Deno.env.get("FEDERATION_HMAC_SECRET")!;
+const JWT_SECRET = Deno.env.get("FEDERATION_JWT_SECRET")!;
+const BRIDGE_URL = Deno.env.get("SCHOLASTIC_BRIDGE_URL")!;
+const ISSUER = "nexus";
+
+const json = (cors: Record<string, string>, body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...cors, "Content-Type": "application/json" },
+  });
+
+async function callBridge(action: string, payload: Record<string, unknown>) {
+  if (!BRIDGE_URL) throw new Error("SCHOLASTIC_BRIDGE_URL not configured");
+  const body = JSON.stringify({ action, ...payload });
+  const ts = String(Math.floor(Date.now() / 1000));
+  const sig = await signHmac(HMAC_SECRET, ISSUER, ts, body);
+  const jwt = await signFederationJwt(JWT_SECRET, ISSUER, { action }, 120);
+  const res = await fetch(BRIDGE_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Federation-Signature": sig,
+      "X-Federation-Timestamp": ts,
+      "X-Federation-Issuer": ISSUER,
+      "X-Federation-Jwt": jwt,
+    },
+    body,
+  });
+  const text = await res.text();
+  let parsed: any = {};
+  try { parsed = text ? JSON.parse(text) : {}; } catch { parsed = { raw: text }; }
+  if (!res.ok) throw new Error(`bridge ${action} ${res.status}: ${parsed?.error || text}`);
+  return parsed;
+}
 
 Deno.serve(async (req) => {
-  const corsHeaders = buildCorsHeaders(req);
-  if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: corsHeaders });
+  const cors = buildCorsHeaders(req);
+  if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
+
+  // Caller must be a signed-in user with HIC / super_admin / admin role.
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    return json(cors, { error: "unauthorized" }, 401);
   }
+  const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    global: { headers: { Authorization: authHeader } },
+  });
+  const token = authHeader.replace("Bearer ", "");
+  const { data: claimsData, error: claimsErr } = await userClient.auth.getClaims(token);
+  if (claimsErr || !claimsData?.claims?.sub) {
+    return json(cors, { error: "unauthorized" }, 401);
+  }
+  const userId = claimsData.claims.sub as string;
+
+  const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+    auth: { persistSession: false },
+  });
+
+  const { data: roles } = await admin
+    .from("user_roles").select("role").eq("user_id", userId);
+  const allowed = new Set(["hic", "super_admin", "admin"]);
+  const ok = (roles || []).some((r: any) => allowed.has(r.role));
+  if (!ok) return json(cors, { error: "forbidden" }, 403);
+
+  let body: any = {};
+  try { body = await req.json(); } catch { body = {}; }
+  const action: string = body.action || "full-sync";
+  const sport: string | undefined = body.sport;
+
+  let schoolsSynced = 0;
+  let studentsSynced = 0;
+  let status: "success" | "failed" | "partial" = "success";
+  let errorMessage: string | null = null;
 
   try {
-    if (!SCHOLASTIC_URL || !SCHOLASTIC_KEY) {
-      throw new Error("Scholastic Services credentials not configured");
-    }
-    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
-      throw new Error("Nexus database credentials not configured");
-    }
-
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const nexus = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claims, error: authError } = await nexus.auth.getUser(token);
-    if (authError || !claims?.user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // Require admin / super_admin — sync creates auth accounts on their behalf.
-    const { data: roleRows } = await nexus
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", claims.user.id);
-    const roles = (roleRows || []).map((r: any) => r.role);
-    if (!roles.includes("admin") && !roles.includes("super_admin")) {
-      return new Response(JSON.stringify({ error: "Forbidden: admin role required" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const scholastic = createClient(SCHOLASTIC_URL, SCHOLASTIC_KEY);
-
-    const url = new URL(req.url);
-    const action = url.searchParams.get("action") || "discover";
-
-    if (action === "discover") {
-      const results: Record<string, any> = {};
-      const tablesToTry = [
-        "schools", "students", "learners", "pupils", "institutions",
-        "users", "profiles", "classes", "grades", "teachers",
-        "school_profiles", "student_profiles", "enrollments"
-      ];
-      for (const table of tablesToTry) {
-        const { data, error } = await scholastic.from(table).select("*").limit(1);
-        if (!error) {
-          results[table] = {
-            exists: true,
-            sampleRow: data?.[0] || null,
-            columns: data?.[0] ? Object.keys(data[0]) : [],
-          };
-        }
+    if (action === "sync-schools" || action === "full-sync") {
+      const res = await callBridge("fetch-schools", {});
+      const schools: any[] = res.schools || [];
+      for (const s of schools) {
+        const { error } = await admin.from("teams").upsert({
+          external_school_id: s.school_id,
+          name: s.name,
+          short_name: s.short_name || s.name?.slice(0, 16),
+          logo_url: s.logo_url || null,
+          province: s.province || "Unknown",
+          level: s.level || "secondary",
+          school_name: s.name,
+          city: s.city || null,
+          is_ss_school: true,
+          sport: "general",
+          discipline: "general",
+          is_active: s.is_active !== false,
+        }, { onConflict: "external_school_id" });
+        if (!error) schoolsSynced++;
+        else console.warn("[sync-schools] upsert", s.school_id, error.message);
       }
-      return new Response(JSON.stringify({ tables: results }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
     }
 
-    if (action === "sync-schools") {
-      const { data: schools, error: schErr } = await scholastic.from("schools").select("*").limit(500);
-      if (schErr) {
-        const { data: institutions, error: instErr } = await scholastic.from("institutions").select("*").limit(500);
-        if (instErr) {
-          return new Response(
-            JSON.stringify({ error: "Could not find schools table", details: schErr.message }),
-            { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-        return await syncSchoolData(nexus, institutions, "institutions");
+    if (action === "sync-students" || action === "full-sync") {
+      const res = await callBridge("fetch-students", sport ? { sport } : {});
+      const students: any[] = res.students || [];
+      // map ss_school_id -> Nexus team name for backfill
+      const schoolIds = [...new Set(students.map((s) => s.school_id).filter(Boolean))];
+      const { data: teams } = await admin
+        .from("teams")
+        .select("name, province, external_school_id")
+        .in("external_school_id", schoolIds.length ? schoolIds : ["__none__"]);
+      const teamMap = new Map((teams || []).map((t: any) => [t.external_school_id, t]));
+
+      for (const st of students) {
+        const fullName: string = st.name || "";
+        const [first, ...rest] = fullName.trim().split(/\s+/);
+        const last = rest.join(" ") || first || "Student";
+        const sportsArr: string[] = typeof st.sports === "string"
+          ? st.sports.split(/[,;]+/).map((x: string) => x.trim()).filter(Boolean)
+          : Array.isArray(st.sports) ? st.sports : [];
+        const nexusSport = (() => {
+          const lower = sportsArr.map((s) => s.toLowerCase());
+          const hb = lower.some((s) => s.includes("handball"));
+          const nb = lower.some((s) => s.includes("netball"));
+          if (hb && nb) return "both";
+          if (hb) return "handball";
+          if (nb) return "netball";
+          return null;
+        })();
+        const team = teamMap.get(st.school_id);
+        const { error } = await admin.from("athletes").upsert({
+          external_student_id: st.student_id,
+          first_name: first || "Student",
+          last_name: last,
+          display_name: fullName || `${first} ${last}`.trim(),
+          date_of_birth: st.date_of_birth || null,
+          gender: st.gender || null,
+          photo_url: st.photo_url || null,
+          school_name: team?.name || null,
+          province: team?.province || "Unknown",
+          ss_school_id: st.school_id || null,
+          disciplines: sportsArr.length ? sportsArr : ["General"],
+          nexus_sport: nexusSport,
+          is_ss_linked: true,
+          is_active: (st.status || "active") === "active",
+        }, { onConflict: "external_student_id" });
+        if (!error) studentsSynced++;
+        else console.warn("[sync-students] upsert", st.student_id, error.message);
       }
-      return await syncSchoolData(nexus, schools, "schools");
     }
 
-    if (action === "sync-students") {
-      const { data: students, error: stuErr } = await scholastic.from("students").select("*").limit(1000);
-      if (stuErr) {
-        const { data: learners, error: learnErr } = await scholastic.from("learners").select("*").limit(1000);
-        if (learnErr) {
-          return new Response(
-            JSON.stringify({ error: "Could not find students table", details: stuErr.message }),
-            { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-        return await syncStudentData(nexus, learners, "learners");
-      }
-      return await syncStudentData(nexus, students, "students");
+    if (action !== "sync-schools" && action !== "sync-students" && action !== "full-sync") {
+      return json(cors, { error: `unknown action: ${action}` }, 400);
     }
-
-    if (action === "sync-all") {
-      const syncResults: any = { schools: null, students: null };
-      const { data: schools } = await scholastic.from("schools").select("*").limit(500);
-      if (schools?.length) {
-        const schoolRes = await syncSchoolData(nexus, schools, "schools");
-        syncResults.schools = await schoolRes.json();
-      }
-      const { data: students } = await scholastic.from("students").select("*").limit(1000);
-      if (students?.length) {
-        const studentRes = await syncStudentData(nexus, students, "students");
-        syncResults.students = await studentRes.json();
-      }
-      return new Response(JSON.stringify(syncResults), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    return new Response(
-      JSON.stringify({ error: "Unknown action. Use: discover, sync-schools, sync-students, sync-all" }),
-      { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
-  } catch (err) {
-    console.error("Scholastic sync error:", err);
-    return new Response(
-      JSON.stringify({ error: err instanceof Error ? err.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+  } catch (e) {
+    status = (schoolsSynced || studentsSynced) ? "partial" : "failed";
+    errorMessage = e instanceof Error ? e.message : String(e);
+    console.error("[scholastic-sync]", action, errorMessage);
   }
+
+  const syncType = action === "sync-schools" ? "schools"
+    : action === "sync-students" ? "students" : "full";
+  await admin.from("ss_sync_log").insert({
+    sync_type: syncType,
+    schools_synced: schoolsSynced,
+    students_synced: studentsSynced,
+    status,
+    error_message: errorMessage,
+    performed_by: userId,
+  });
+
+  return json(cors, {
+    ok: status !== "failed",
+    status,
+    schoolsSynced,
+    studentsSynced,
+    error: errorMessage,
+  }, status === "failed" ? 502 : 200);
 });
-
-async function syncSchoolData(nexus: any, schools: any[], sourceTable: string) {
-  let synced = 0;
-  let skipped = 0;
-  const errors: string[] = [];
-  const accountsCreated: string[] = [];
-
-  for (const school of schools) {
-    const name = school.name || school.school_name || school.institution_name || "Unknown School";
-    const province = school.province || school.state || school.region || "Unknown";
-    const city = school.city || school.town || school.location || province;
-    const level = inferLevel(school);
-    const email = school.email || school.contact_email || null;
-
-    // Check if team already exists
-    const { data: existing } = await nexus.from("teams").select("id").eq("school_name", name).limit(1);
-    if (existing?.length) { skipped++; continue; }
-
-    // Create auth account for school if email exists
-    let schoolUserId: string | null = null;
-    if (email) {
-      const tempPassword = `SS-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-      const { data: authData, error: authErr } = await nexus.auth.admin.createUser({
-        email,
-        password: tempPassword,
-        email_confirm: true,
-        user_metadata: {
-          display_name: name,
-          account_type: "school",
-          source: "scholastic_services",
-          scholastic_id: school.id || null,
-        },
-      });
-
-      if (!authErr && authData?.user) {
-        schoolUserId = authData.user.id;
-        accountsCreated.push(email);
-
-        // Create profile
-        await nexus.from("profiles").insert({
-          user_id: authData.user.id,
-          display_name: name,
-          province,
-          first_name: name,
-        });
-
-        // Assign school_coordinator role
-        await nexus.from("user_roles").insert({
-          user_id: authData.user.id,
-          role: "school_coordinator",
-        });
-      }
-    }
-
-    // Create team
-    const sportsOffered = school.sports_offered || school.sports || school.disciplines || [];
-    const logo = school.logo_url || school.logo || school.crest_url || school.badge_url || null;
-    const { error: teamErr } = await nexus.from("teams").insert({
-      name,
-      school_name: name,
-      discipline: school.sport || school.discipline || "Multi-Sport",
-      province,
-      level,
-      is_active: true,
-      manager_id: schoolUserId,
-      logo_url: logo,
-      sports_offered: Array.isArray(sportsOffered) ? sportsOffered : [],
-    });
-
-    if (teamErr) { errors.push(`${name}: ${teamErr.message}`); continue; }
-
-    // Create venue
-    if (school.address || school.city) {
-      const { data: existingVenue } = await nexus.from("venues").select("id").eq("name", `${name} Grounds`).limit(1);
-      if (!existingVenue?.length) {
-        await nexus.from("venues").insert({
-          name: `${name} Grounds`,
-          type: "school",
-          city,
-          province,
-          address: school.address || null,
-          is_active: true,
-        });
-      }
-    }
-
-    synced++;
-  }
-
-  return new Response(
-    JSON.stringify({ source: sourceTable, total: schools.length, synced, skipped, accounts_created: accountsCreated.length, errors: errors.length ? errors : undefined }),
-    { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-  );
-}
-
-async function syncStudentData(nexus: any, students: any[], sourceTable: string) {
-  let synced = 0;
-  let skipped = 0;
-  const errors: string[] = [];
-  const accountsCreated: string[] = [];
-
-  for (const student of students) {
-    const firstName = student.first_name || student.firstname || student.name?.split(" ")[0] || "Unknown";
-    const lastName = student.last_name || student.lastname || student.surname || student.name?.split(" ").slice(1).join(" ") || "Unknown";
-    const province = student.province || student.state || student.region || "Unknown";
-    const schoolName = student.school_name || student.school || student.institution || null;
-    const dob = student.date_of_birth || student.dob || student.birth_date || null;
-    const gender = student.gender || student.sex || null;
-    const email = student.email || student.contact_email || student.guardian_email || null;
-
-    // Check if athlete already exists
-    const { data: existing } = await nexus.from("athletes").select("id").eq("first_name", firstName).eq("last_name", lastName).eq("province", province).limit(1);
-    if (existing?.length) { skipped++; continue; }
-
-    // Create auth account for student if email exists
-    let studentUserId: string | null = null;
-    if (email) {
-      const tempPassword = `SS-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-      const { data: authData, error: authErr } = await nexus.auth.admin.createUser({
-        email,
-        password: tempPassword,
-        email_confirm: true,
-        user_metadata: {
-          display_name: `${firstName} ${lastName}`,
-          account_type: "student_athlete",
-          source: "scholastic_services",
-          scholastic_id: student.id || null,
-        },
-      });
-
-      if (!authErr && authData?.user) {
-        studentUserId = authData.user.id;
-        accountsCreated.push(email);
-
-        // Create profile
-        await nexus.from("profiles").insert({
-          user_id: authData.user.id,
-          display_name: `${firstName} ${lastName}`,
-          first_name: firstName,
-          last_name: lastName,
-          province,
-          date_of_birth: dob,
-        });
-
-        // Assign athlete role
-        await nexus.from("user_roles").insert({
-          user_id: authData.user.id,
-          role: "athlete",
-        });
-      }
-    }
-
-    // Create athlete record
-    const { error: athErr } = await nexus.from("athletes").insert({
-      first_name: firstName,
-      last_name: lastName,
-      province,
-      school_name: schoolName,
-      date_of_birth: dob,
-      gender,
-      disciplines: student.disciplines || student.sports || ["General"],
-      is_active: true,
-      user_id: studentUserId,
-    });
-
-    if (athErr) { errors.push(`${firstName} ${lastName}: ${athErr.message}`); continue; }
-    synced++;
-  }
-
-  return new Response(
-    JSON.stringify({ source: sourceTable, total: students.length, synced, skipped, accounts_created: accountsCreated.length, errors: errors.length ? errors : undefined }),
-    { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-  );
-}
-
-function inferLevel(school: any): string {
-  const type = (school.type || school.level || school.category || "").toLowerCase();
-  if (type.includes("primary") || type.includes("junior")) return "primary_school";
-  if (type.includes("secondary") || type.includes("high") || type.includes("senior")) return "secondary_school";
-  if (type.includes("college") || type.includes("university")) return "club_academy";
-  return "primary_school";
-}

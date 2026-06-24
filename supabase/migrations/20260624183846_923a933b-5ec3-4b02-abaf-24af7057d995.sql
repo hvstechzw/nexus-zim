@@ -1,0 +1,3 @@
+ALTER TYPE app_role ADD VALUE IF NOT EXISTS 'coach';
+ALTER TYPE app_role ADD VALUE IF NOT EXISTS 'hic';
+ALTER TYPE app_role ADD VALUE IF NOT EXISTS 'umpire';
