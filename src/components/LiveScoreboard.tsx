@@ -37,8 +37,11 @@ export function LiveScoreboard() {
         `)
         .in("status", ["live", "scheduled"])
         .order("started_at", { ascending: false })
-        .limit(12);
-      return (data || []) as unknown as LiveFixture[];
+        .limit(48);
+      return ((data || []) as unknown as LiveFixture[]).filter((f) => {
+        const d = f.competition?.discipline?.toLowerCase() || "";
+        return d.includes("handball") || d.includes("netball");
+      }).slice(0, 12);
     },
     refetchInterval: 8000,
   });
@@ -57,8 +60,11 @@ export function LiveScoreboard() {
         `)
         .eq("status", "completed")
         .order("ended_at", { ascending: false })
-        .limit(12);
-      return (data || []) as unknown as LiveFixture[];
+        .limit(48);
+      return ((data || []) as unknown as LiveFixture[]).filter((f) => {
+        const d = f.competition?.discipline?.toLowerCase() || "";
+        return d.includes("handball") || d.includes("netball");
+      }).slice(0, 12);
     },
   });
 
@@ -77,10 +83,14 @@ export function LiveScoreboard() {
         .eq("status", "scheduled")
         .gte("scheduled_at", new Date().toISOString())
         .order("scheduled_at", { ascending: true })
-        .limit(12);
-      return (data || []) as unknown as LiveFixture[];
+        .limit(48);
+      return ((data || []) as unknown as LiveFixture[]).filter((f) => {
+        const d = f.competition?.discipline?.toLowerCase() || "";
+        return d.includes("handball") || d.includes("netball");
+      }).slice(0, 12);
     },
   });
+
 
   const fixtures = activeTab === "live" ? liveFixtures : activeTab === "recent" ? recentFixtures : upcomingFixtures;
 
