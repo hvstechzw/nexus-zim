@@ -55,23 +55,23 @@ export function NexusHeader() {
       >
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 h-14 sm:h-16 flex items-center justify-between gap-4">
           {/* Brand — always white bg behind logo */}
-          <a href="/" className="flex items-center gap-2.5 flex-shrink-0">
+          <Link to="/" className="flex items-center gap-2.5 flex-shrink-0">
             <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-white flex items-center justify-center p-0.5">
               <img src={nexusLogo} alt="Nexus" className="w-full h-full object-contain" />
             </div>
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-0.5">
             {NAV_LINKS.map((link) => (
-              <a
+              <Link
                 key={link.label}
-                href={link.href}
+                to={link.href}
                 className="px-3 xl:px-4 h-8 flex items-center gap-1.5 text-[11px] tracking-wide font-medium rounded-md transition-colors duration-200 text-nexus-muted hover:text-foreground hover:bg-nexus-surface"
               >
                 {link.label === "Live" && <span className="w-1.5 h-1.5 rounded-full bg-nexus-live animate-pulse flex-shrink-0" />}
                 {link.label}
-              </a>
+              </Link>
             ))}
           </nav>
 
