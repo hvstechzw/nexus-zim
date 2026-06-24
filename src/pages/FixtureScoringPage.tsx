@@ -162,7 +162,7 @@ export default function FixtureScoringPage() {
     if (value > 0) {
       const field = activeSide === "home" ? "home_score" : "away_score";
       const newScore = Number((fixture as any)[field] ?? 0) + value;
-      await supabase.from("fixtures").update({ [field]: newScore, round_label: activePeriod }).eq("id", fixtureId!);
+      await supabase.from("fixtures").update({ [field]: newScore, round_label: activePeriod } as any).eq("id", fixtureId!);
     }
   }
 
@@ -174,7 +174,7 @@ export default function FixtureScoringPage() {
       const side = (last.metadata as any)?.side ?? "home";
       const field = side === "home" ? "home_score" : "away_score";
       const newScore = Math.max(0, Number((fixture as any)[field] ?? 0) - Number(last.value));
-      await supabase.from("fixtures").update({ [field]: newScore }).eq("id", fixtureId!);
+      await supabase.from("fixtures").update({ [field]: newScore } as any).eq("id", fixtureId!);
     }
   }
 
