@@ -22,6 +22,8 @@ import FixtureScoringPage from "./pages/FixtureScoringPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import RegisterPage from "./pages/RegisterPage.tsx";
 import DashboardPage from "./pages/DashboardPage.tsx";
+import AdminSyncPage from "./pages/AdminSyncPage.tsx";
+import PlayerVerifyPage from "./pages/PlayerVerifyPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
