@@ -19,6 +19,9 @@ import SportsDayPage from "./pages/SportsDayPage.tsx";
 import PracticeScoringPage from "./pages/PracticeScoringPage.tsx";
 import LivePage from "./pages/LivePage.tsx";
 import FixtureScoringPage from "./pages/FixtureScoringPage.tsx";
+import LoginPage from "./pages/LoginPage.tsx";
+import RegisterPage from "./pages/RegisterPage.tsx";
+import DashboardPage from "./pages/DashboardPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -33,6 +36,9 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/live" element={<LivePage />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/competitions" element={<Navigate to="/inter-school" replace />} />
