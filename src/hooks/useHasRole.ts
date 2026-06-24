@@ -12,6 +12,9 @@ export type AppRole =
   | "athlete"
   | "team_manager"
   | "school_coordinator"
+  | "coach"
+  | "hic"
+  | "umpire"
   | "viewer";
 
 export interface RoleState {
