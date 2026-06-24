@@ -1,5 +1,6 @@
 import { NexusHeader } from "@/components/NexusHeader";
 import { NexusHero } from "@/components/NexusHero";
+import { HomeQuickActions } from "@/components/HomeQuickActions";
 import { LiveScoreboard } from "@/components/LiveScoreboard";
 import { SchoolTierSwitcher } from "@/components/SchoolTierSwitcher";
 import { SchoolsDirectory } from "@/components/SchoolsDirectory";
@@ -16,6 +17,7 @@ const Index = () => {
 
       <main>
         <NexusHero />
+        <HomeQuickActions />
         <LiveScoreboard />
         <SchoolTierSwitcher />
         <SchoolsDirectory />
@@ -31,3 +33,4 @@ const Index = () => {
 };
 
 export default Index;
+
