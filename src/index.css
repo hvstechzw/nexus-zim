@@ -77,6 +77,10 @@
     --nexus-silver: 0 0% 87%;
     --nexus-muted-fg: 0 0% 44%;
     --nexus-live: 0 0% 18%;
+
+    /* Sport accents (used sparingly as pills/dots only — grayscale UI overall) */
+    --sport-handball: 18 90% 56%;   /* #FF6B35 */
+    --sport-netball:  271 67% 57%;  /* #9B5DE5 */
   }
 
   .dark {
@@ -264,6 +268,21 @@
   .text-nexus-live  { color: hsl(var(--nexus-live)); }
   .bg-nexus-live    { background-color: hsl(var(--nexus-live)); }
   .border-nexus-silver { border-color: hsl(var(--nexus-silver)); }
+
+  /* Sport pills — tiny accent only */
+  .pill-sport {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 2px 8px; border-radius: 9999px;
+    font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    border: 1px solid hsl(var(--silver-line));
+  }
+  .pill-sport::before {
+    content: ''; width: 6px; height: 6px; border-radius: 9999px;
+    background: hsl(var(--nexus-muted-fg));
+  }
+  .pill-sport[data-sport="handball"]::before { background: hsl(var(--sport-handball)); }
+  .pill-sport[data-sport="netball"]::before  { background: hsl(var(--sport-netball)); }
 
   /* Score sizes */
   .text-score-lg { font-size: clamp(52px, 8vw, 88px); line-height: 1; }

@@ -17,6 +17,7 @@ import SchoolProfilePage from "./pages/SchoolProfilePage.tsx";
 import InterSchoolPage from "./pages/InterSchoolPage.tsx";
 import SportsDayPage from "./pages/SportsDayPage.tsx";
 import PracticeScoringPage from "./pages/PracticeScoringPage.tsx";
+import LivePage from "./pages/LivePage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/live" element={<LivePage />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/competitions" element={<Navigate to="/inter-school" replace />} />
               <Route path="/competition/:id" element={<CompetitionDetailPage />} />
