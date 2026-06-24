@@ -1478,6 +1478,9 @@ export type Database = {
         | "team_manager"
         | "school_coordinator"
         | "viewer"
+        | "coach"
+        | "hic"
+        | "umpire"
       bracket_format:
         | "round_robin"
         | "single_elimination"
@@ -1659,6 +1662,9 @@ export const Constants = {
         "team_manager",
         "school_coordinator",
         "viewer",
+        "coach",
+        "hic",
+        "umpire",
       ],
       bracket_format: [
         "round_robin",
