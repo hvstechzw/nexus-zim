@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { isNexusDiscipline } from "@/lib/nexusSports";
 
 export function BroadcastHub() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -14,11 +15,12 @@ export function BroadcastHub() {
         .select(`*, competition:competition_id(name, level, discipline), fixture:fixture_id(home_score, away_score, status)`)
         .order("is_live", { ascending: false })
         .order("created_at", { ascending: false })
-        .limit(6);
-      return data || [];
+        .limit(24);
+      return (data || []).filter((b: any) => isNexusDiscipline(b.competition?.discipline)).slice(0, 6);
     },
     refetchInterval: 15000,
   });
+
 
   const liveCount = broadcasts.filter((b: any) => b.is_live).length;
 

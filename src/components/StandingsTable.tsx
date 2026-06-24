@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { isNexusDiscipline } from "@/lib/nexusSports";
 
 export function StandingsTable() {
   const [activeCompId, setActiveCompId] = useState<string>("");
@@ -14,11 +15,13 @@ export function StandingsTable() {
         .select("id, name, discipline, level")
         .in("status", ["ongoing", "registration_closed", "completed"])
         .order("created_at", { ascending: false })
-        .limit(8);
-      if (data?.length && !activeCompId) setActiveCompId(data[0].id);
-      return data || [];
+        .limit(48);
+      const filtered = (data || []).filter((c: any) => isNexusDiscipline(c.discipline)).slice(0, 8);
+      if (filtered.length && !activeCompId) setActiveCompId(filtered[0].id);
+      return filtered;
     },
   });
+
 
   const { data: standings = [] } = useQuery({
     queryKey: ["standings-data", activeCompId],

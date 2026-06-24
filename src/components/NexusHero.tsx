@@ -70,11 +70,11 @@ export function NexusHero() {
         >
           <p className="text-xl sm:text-display-lg display-font font-semibold text-foreground max-w-[30ch] leading-snug">
             Nexus for Schools.{" "}
-            <span className="text-nexus-muted font-normal">Zimbabwe's inter-school competition network.</span>
+            <span className="text-nexus-muted font-normal">Zimbabwe's handball & netball network.</span>
           </p>
           <p className="mt-3 sm:mt-4 text-sm sm:text-base leading-relaxed text-nexus-muted max-w-[60ch]">
-            A closed platform built exclusively for schools — every fixture, sports day, house competition, debate, olympiad and league between vetted Zimbabwean schools.
-            All schools and student athletes are sourced directly from{" "}
+            A closed platform for inter-school handball and netball — fixtures, live scoring, standings and player verification between vetted Zimbabwean schools.
+            Schools and student athletes are sourced directly from{" "}
             <a href="https://scholasticservices.online" target="_blank" rel="noopener noreferrer" className="text-foreground font-medium hover:opacity-70 transition-opacity">Scholastic Services</a>.
             No public sign-ups.
           </p>
@@ -89,12 +89,11 @@ export function NexusHero() {
             </a>
           </div>
 
-          {/* Quick info chips */}
+          {/* Sport chips — Nexus is scoped to handball + netball */}
           <div className="mt-6 flex flex-wrap gap-2">
-            {["Athletics", "Football", "Rugby", "Cricket", "Netball", "Hockey", "Swimming", "Chess", "Debate", "Quiz", "Spelling Bee", "Sports Day", "House Comps"].map(d => (
-              <span key={d} className="text-[10px] sm:text-[11px] mono text-nexus-muted hairline px-2.5 py-1 rounded-full">{d}</span>
+            {["Handball", "Netball"].map(d => (
+              <span key={d} className="text-[10px] sm:text-[11px] mono text-foreground hairline px-2.5 py-1 rounded-full">{d}</span>
             ))}
-            <span className="text-[10px] sm:text-[11px] mono text-nexus-muted hairline px-2.5 py-1 rounded-full">+50 more</span>
           </div>
 
           {/* Scholastic Services integration badge */}
