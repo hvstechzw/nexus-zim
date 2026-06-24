@@ -69,7 +69,10 @@ export default function DashboardPage() {
             <Tile to="/fixtures" title="My fixtures" desc="Score live matches you're officiating." />
           )}
           {isHIC && (
-            <Tile to="/admin" title="HIC verification" desc="Verify player Scholastic Cards before matches." />
+            <>
+              <Tile to="/admin/verify" title="Player Verification" desc="Scan Scholastic Card QR to verify athletes." />
+              <Tile to="/admin/sync" title="SS Sync" desc="Pull schools and athletes from Scholastic Services." />
+            </>
           )}
           <Tile to="/live" title="Live scores" desc="Watch all fixtures live." />
           <Tile to="/fixtures" title="Fixtures" desc="Browse schedule and results." />
