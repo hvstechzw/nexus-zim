@@ -2,7 +2,6 @@ import { NexusHeader } from "@/components/NexusHeader";
 import { NexusHero } from "@/components/NexusHero";
 import { HomeQuickActions } from "@/components/HomeQuickActions";
 import { LiveScoreboard } from "@/components/LiveScoreboard";
-import { SchoolTierSwitcher } from "@/components/SchoolTierSwitcher";
 import { SchoolsDirectory } from "@/components/SchoolsDirectory";
 import { EventsGrid } from "@/components/EventsGrid";
 import { StandingsTable } from "@/components/StandingsTable";
@@ -19,7 +18,6 @@ const Index = () => {
         <NexusHero />
         <HomeQuickActions />
         <LiveScoreboard />
-        <SchoolTierSwitcher />
         <SchoolsDirectory />
         <EventsGrid />
         <StandingsTable />
