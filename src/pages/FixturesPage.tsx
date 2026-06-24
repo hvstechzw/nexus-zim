@@ -37,7 +37,11 @@ interface GeneratedFixture {
 
 export default function FixturesPage() {
   const { user } = useAuth();
+  const { loading: rolesLoading, hasRole } = useHasRole();
+  const canGenerate = hasRole("super_admin", "admin", "hic", "coach");
   const queryClient = useQueryClient();
+
+
 
   const [selectedCompId, setSelectedCompId] = useState("");
   const [format, setFormat] = useState<BracketFormat>("round_robin");
