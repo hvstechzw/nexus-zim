@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { pushFixtureMirror } from "@/lib/scholasticPush";
 
 const SCORING_MODULES = [
   { id: "football", label: "Football", sub: "Soccer", events: ["Goal","Yellow Card","Red Card","Substitution","Penalty","Own Goal","Corner","Offside"], periods: ["1st Half","2nd Half","Extra Time AET","Penalties"] },
@@ -177,6 +178,8 @@ export default function ScoringPage() {
         status: "completed", home_score: homeScore, away_score: awayScore,
         ended_at: new Date().toISOString()
       }).eq("id", selectedFixtureId!);
+      // Mirror to Scholastic Services — fire-and-forget.
+      pushFixtureMirror(selectedFixtureId!);
     }
     toast({ title: "Match finalized", description: `Final score: ${homeScore} - ${awayScore}` });
   };

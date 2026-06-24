@@ -85,6 +85,7 @@ export type Database = {
           date_of_birth: string | null
           disciplines: string[]
           display_name: string | null
+          external_student_id: string | null
           first_name: string
           gender: string | null
           house: string | null
@@ -110,6 +111,7 @@ export type Database = {
           date_of_birth?: string | null
           disciplines: string[]
           display_name?: string | null
+          external_student_id?: string | null
           first_name: string
           gender?: string | null
           house?: string | null
@@ -135,6 +137,7 @@ export type Database = {
           date_of_birth?: string | null
           disciplines?: string[]
           display_name?: string | null
+          external_student_id?: string | null
           first_name?: string
           gender?: string | null
           house?: string | null
@@ -1259,6 +1262,7 @@ export type Database = {
           club_name: string | null
           created_at: string
           discipline: string
+          external_school_id: string | null
           founded_year: number | null
           id: string
           is_active: boolean | null
@@ -1277,6 +1281,7 @@ export type Database = {
           club_name?: string | null
           created_at?: string
           discipline: string
+          external_school_id?: string | null
           founded_year?: number | null
           id?: string
           is_active?: boolean | null
@@ -1295,6 +1300,7 @@ export type Database = {
           club_name?: string | null
           created_at?: string
           discipline?: string
+          external_school_id?: string | null
           founded_year?: number | null
           id?: string
           is_active?: boolean | null
