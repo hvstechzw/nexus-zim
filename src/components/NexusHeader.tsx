@@ -1,33 +1,34 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
+import { useHasRole } from "@/hooks/useHasRole";
 import nexusLogo from "@/assets/nexus-logo.png";
-import { AuthModal } from "@/components/AuthModal";
 
 const PUBLIC_LINKS = [
-  { label: "Live", href: "/#live" },
+  { label: "Live", href: "/live" },
+  { label: "Fixtures", href: "/fixtures" },
   { label: "Schools", href: "/schools" },
   { label: "Inter-School", href: "/inter-school" },
-  { label: "Sports Day", href: "/sports-day" },
-  { label: "Practice", href: "/practice" },
 ];
 
 const ADMIN_LINKS = [
   { label: "Scoring", href: "/scoring" },
-  { label: "ID Cards", href: "/athletes/id-cards" },
-  { label: "Broadcast", href: "/broadcast" },
+  { label: "Sync", href: "/admin/sync" },
+  { label: "Verify", href: "/admin/verify" },
   { label: "Admin", href: "/admin" },
 ];
 
 export function NexusHeader() {
   const [scrolled, setScrolled] = useState(false);
-  const [authOpen, setAuthOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const { user, signOut } = useAuth();
+  const { isAdmin, hasRole } = useHasRole();
+  const showStaffLinks = isAdmin || hasRole("hic", "umpire", "referee", "scorer");
 
-  const NAV_LINKS = [...PUBLIC_LINKS, ...(user ? ADMIN_LINKS : [])];
+  const NAV_LINKS = [...PUBLIC_LINKS, ...(showStaffLinks ? ADMIN_LINKS : [])];
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 60);
@@ -93,18 +94,24 @@ export function NexusHeader() {
             </button>
 
             {user ? (
-              <button onClick={signOut} className="hidden lg:flex items-center h-8 px-3 text-[11px] font-semibold tracking-wide bg-nexus-surface text-foreground rounded-lg hover:bg-nexus-silver transition-colors btn-click">
-                Sign Out
-              </button>
+              <>
+                <Link to="/dashboard" className="hidden lg:flex items-center h-8 px-3 text-[11px] font-semibold tracking-wide bg-nexus-surface text-foreground rounded-lg hover:bg-nexus-silver transition-colors btn-click">
+                  Dashboard
+                </Link>
+                <button onClick={signOut} className="hidden lg:flex items-center h-8 px-3 text-[11px] font-semibold tracking-wide text-nexus-muted hover:text-foreground transition-colors btn-click">
+                  Sign Out
+                </button>
+              </>
             ) : (
-              <button onClick={() => setAuthOpen(true)} className="hidden lg:flex items-center h-8 px-3 text-[11px] font-semibold tracking-wide bg-nexus-surface text-foreground rounded-lg hover:bg-nexus-silver transition-colors btn-click">
-                Sign In
-              </button>
+              <>
+                <Link to="/login" className="hidden lg:flex items-center h-8 px-3 text-[11px] font-semibold tracking-wide bg-nexus-surface text-foreground rounded-lg hover:bg-nexus-silver transition-colors btn-click">
+                  Sign In
+                </Link>
+                <Link to="/register" className="hidden lg:flex items-center h-8 px-4 text-[11px] font-semibold tracking-wide bg-foreground text-primary-foreground rounded-lg hover:opacity-85 transition-opacity btn-click">
+                  Register
+                </Link>
+              </>
             )}
-
-            <a href="https://scholasticservices.online" target="_blank" rel="noopener noreferrer" className="hidden lg:flex items-center h-8 px-4 text-[11px] font-semibold tracking-wide bg-foreground text-primary-foreground rounded-lg hover:opacity-85 transition-opacity btn-click">
-              Join via Scholastic
-            </a>
 
             <a href="https://scholasticservices.online" target="_blank" rel="noopener noreferrer" className="hidden xl:flex items-center gap-1.5 h-8 px-3 text-[10px] mono tracking-wide font-medium rounded-lg bg-nexus-surface text-nexus-muted hover:text-foreground transition-colors">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -155,24 +162,29 @@ export function NexusHeader() {
 
               <div className="flex flex-col gap-3 mt-6">
                 {user ? (
-                  <button onClick={() => { signOut(); setMobileOpen(false); }} className="h-12 px-6 bg-nexus-surface text-foreground text-sm font-semibold rounded-xl btn-click">
-                    Sign Out
-                  </button>
+                  <>
+                    <Link to="/dashboard" onClick={() => setMobileOpen(false)} className="h-12 px-6 bg-foreground text-primary-foreground text-sm font-semibold rounded-xl btn-click flex items-center justify-center">
+                      Dashboard
+                    </Link>
+                    <button onClick={() => { signOut(); setMobileOpen(false); }} className="h-12 px-6 bg-nexus-surface text-foreground text-sm font-semibold rounded-xl btn-click">
+                      Sign Out
+                    </button>
+                  </>
                 ) : (
-                  <button onClick={() => { setAuthOpen(true); setMobileOpen(false); }} className="h-12 px-6 bg-nexus-surface text-foreground text-sm font-semibold rounded-xl btn-click">
-                    Sign In
-                  </button>
+                  <>
+                    <Link to="/login" onClick={() => setMobileOpen(false)} className="h-12 px-6 bg-nexus-surface text-foreground text-sm font-semibold rounded-xl btn-click flex items-center justify-center">
+                      Sign In
+                    </Link>
+                    <Link to="/register" onClick={() => setMobileOpen(false)} className="h-12 px-6 bg-foreground text-primary-foreground text-sm font-semibold rounded-xl btn-click flex items-center justify-center">
+                      Create account
+                    </Link>
+                  </>
                 )}
-                <a href="https://scholasticservices.online" target="_blank" rel="noopener noreferrer" onClick={() => setMobileOpen(false)} className="h-12 px-6 bg-foreground text-primary-foreground text-sm font-semibold rounded-xl btn-click flex items-center justify-center">
-                  Join via Scholastic Services
-                </a>
               </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-
-      <AuthModal open={authOpen} onClose={() => setAuthOpen(false)} />
     </>
   );
 }
