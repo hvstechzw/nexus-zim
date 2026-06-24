@@ -1,12 +1,29 @@
+import { Link } from "react-router-dom";
 import aieLogoLight from "@/assets/aie-logo-light.png";
 import { ScholasticBadge } from "@/components/ScholasticBadge";
 
-const FOOTER_LINKS = {
-  Platform: ["Schools", "Inter-School Fixtures", "Sports Day", "Standings", "Broadcast"],
-  Schools: ["Schools Directory", "School Profiles", "House Competitions", "Student Rosters", "Coordinator Login"],
-  Disciplines: ["Field & Track", "Ball Sports", "Aquatics", "Mind Sports", "Academic Olympiads"],
-  Support: ["Contact Us", "Documentation", "Federation Login", "Practice Scoring", "Privacy Policy"],
+const FOOTER_LINKS: Record<string, { label: string; to: string }[]> = {
+  Platform: [
+    { label: "Live Scores", to: "/live" },
+    { label: "Fixtures", to: "/fixtures" },
+    { label: "Schools", to: "/schools" },
+    { label: "Inter-School", to: "/inter-school" },
+  ],
+  Sports: [
+    { label: "Handball", to: "/fixtures?sport=handball" },
+    { label: "Netball", to: "/fixtures?sport=netball" },
+  ],
+  Account: [
+    { label: "Sign In", to: "/login" },
+    { label: "Register", to: "/register" },
+    { label: "Dashboard", to: "/dashboard" },
+  ],
+  Support: [
+    { label: "Scholastic Services", to: "https://scholasticservices.online" },
+    { label: "Practice Scoring", to: "/scoring/practice" },
+  ],
 };
+
 
 export function NexusFooter() {
   return (
@@ -44,8 +61,12 @@ export function NexusFooter() {
               <p className="text-[10px] sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-semibold">{section}</p>
               <ul className="flex flex-col gap-2 sm:gap-3">
                 {links.map((link) => (
-                  <li key={link}>
-                    <a href="#" className="text-xs sm:text-sm text-foreground hover:text-nexus-muted transition-colors duration-200">{link}</a>
+                  <li key={link.label}>
+                    {link.to.startsWith("http") ? (
+                      <a href={link.to} target="_blank" rel="noopener noreferrer" className="text-xs sm:text-sm text-foreground hover:text-nexus-muted transition-colors duration-200">{link.label}</a>
+                    ) : (
+                      <Link to={link.to} className="text-xs sm:text-sm text-foreground hover:text-nexus-muted transition-colors duration-200">{link.label}</Link>
+                    )}
                   </li>
                 ))}
               </ul>
