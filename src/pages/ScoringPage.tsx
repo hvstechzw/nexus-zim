@@ -177,6 +177,8 @@ export default function ScoringPage() {
         status: "completed", home_score: homeScore, away_score: awayScore,
         ended_at: new Date().toISOString()
       }).eq("id", selectedFixtureId!);
+      // Mirror to Scholastic Services — fire-and-forget.
+      pushFixtureMirror(selectedFixtureId!);
     }
     toast({ title: "Match finalized", description: `Final score: ${homeScore} - ${awayScore}` });
   };
