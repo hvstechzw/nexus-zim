@@ -333,6 +333,36 @@ export default function FixturesPage() {
 
   const conflictCount = generated.filter((f) => f.conflict).length;
 
+  // Gate the generator: only admins, HIC, and coaches may create fixtures.
+  if (!rolesLoading && !canGenerate) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <NexusHeader />
+        <main className="pt-24 pb-16 px-4 sm:px-8 max-w-[800px] mx-auto">
+          <div className="hairline rounded-2xl p-8 sm:p-12 bg-background card-shadow text-center">
+            <p className="text-[10px] mono tracking-[0.25em] uppercase text-nexus-muted mb-3">Restricted</p>
+            <h1 className="display-font text-2xl sm:text-3xl font-bold text-foreground">Fixture generation is staff-only</h1>
+            <p className="text-sm text-nexus-muted mt-3 max-w-[52ch] mx-auto">
+              Only Nexus administrators, the Head of Inter-school Competition (HIC), and verified coaches can generate inter-school fixtures.
+              You can still browse upcoming fixtures and live scores.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+              <Link to="/live" className="h-10 px-5 inline-flex items-center bg-foreground text-primary-foreground text-sm font-semibold rounded-xl hover:opacity-85 transition-opacity">View live matches</Link>
+              {!user ? (
+                <Link to="/login" className="h-10 px-5 inline-flex items-center bg-nexus-surface text-foreground text-sm font-medium rounded-xl hover:bg-nexus-silver transition-colors">Sign in</Link>
+              ) : (
+                <Link to="/dashboard" className="h-10 px-5 inline-flex items-center bg-nexus-surface text-foreground text-sm font-medium rounded-xl hover:bg-nexus-silver transition-colors">Back to dashboard</Link>
+              )}
+            </div>
+          </div>
+        </main>
+        <NexusFooter />
+      </div>
+    );
+  }
+
+
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <NexusHeader />
