@@ -1,115 +1,73 @@
-The user wants to pivot Nexus from a public/multi-level competition platform to a **schools-only** platform. All athletes come from Scholastic Services (students), all teams are schools from Scholastic Services. No public registration. Everything is built around school competitions.
+# Nexus Rebuild — Handball & Netball, SS via Federation
 
-Let me check the current admin/competition pages quickly to understand what needs adjusting.
+Federation stays the SS bridge — no direct cross-project Supabase client, no SS anon key in the browser. All SS reads/writes go through the existing HMAC edge functions (`scholastic-federation`, `scholastic-push`), extended with new actions.
 
-Key changes needed:
+## Phase 1 — Migration (single transaction)
 
-1. Remove public registration (RegistrationPanel) from homepage
-2. Reframe homepage messaging as "Schools Competition Hub"
-3. Lock athlete/team creation to Scholastic Services sync only (no manual creation in admin)
-4. Add school-specific tooling: inter-school fixtures, house competitions, age groups (U12/U14/U16/U19) cater for all possible! And also allow for adding custom age groups, term-based seasons, school sports day mode
-5. Hero stats reframed (Schools, Students, Inter-School Fixtures, etc.)
-6. LevelSwitcher → school-tier switcher (Primary / Secondary / Tertiary)
-7. Header nav: drop public-facing items, add Schools, Students, Inter-School Fixtures, Sports Day
-8. Auto-sync Scholastic on admin load (already in plan), plus a Schools directory page
-9. Branding: "Nexus for Schools — exclusively powered by Scholastic Services"
+1. `TRUNCATE` all 22 existing tables `CASCADE`.
+2. Extend `app_role` enum: add `coach`, `hic`, `umpire`.
+3. Alter existing tables:
+   - `athletes`: add `is_ss_linked`, `scholastic_card_verified`, `jersey_number`, `nexus_sport` (`handball|netball|both`), `ss_school_id`.
+   - `teams`: add `is_ss_school`, `sport` (`handball|netball|both|general`).
+4. Create new tables (each with GRANTs + RLS + policies):
+   - `nexus_coaches` — coach registrations, verified by HIC.
+   - `team_sheets` — coach → HIC submissions with `players` JSONB.
+   - `scholastic_card_verifications` — audit trail of card scans / manual confirms.
+   - `ss_sync_log` — federation sync results.
+   - `nexus_student_activity` — outbound feed read by SS (public SELECT).
+5. Create public view `nexus_student_sports_profile` for SS to consume.
+6. RLS policies use `has_role()` for HIC/super_admin gates; coaches limited to own school; athletes limited to own row.
 
-# Plan: Pivot Nexus to a Schools-Only Competition Platform
+## Phase 2 — Federation extensions (edge functions only, no browser SS client)
 
-## Vision
+Extend `scholastic-federation` with new inbound actions Nexus calls outward via the existing HMAC client:
+- `pull-schools` → upsert into `teams` (`is_ss_school=true`).
+- `pull-students` (optional sport filter) → upsert into `athletes` (`is_ss_linked=true`).
+- `full-sync` → both, writes `ss_sync_log`.
 
-Nexus becomes **Nexus for Schools** — a closed platform exclusively for school competitions in Zimbabwe. No public sign-ups. All schools and students are pulled from Scholastic Services. Every tool is purpose-built for inter-school sport, academic, and cultural competitions.
+Outbound to SS via `scholastic-push`:
+- `push-student-activity` on each goal / match-completed / card / award.
+- `push-card-verification` after HIC verifies a card.
 
-## 1. Remove the public-facing layer
+Front-end `/admin → Sync` tab calls a new `scholastic-sync` function (server-side) that orchestrates pulls. No SS keys ever land in the client bundle.
 
-- Delete `RegistrationPanel` from the homepage (`src/pages/Index.tsx`).
-- Remove the "self sign-up" path from `AuthModal` — keep only **School Coordinator login** and **Student Athlete login** (accounts created exclusively via Scholastic sync, login uses email + password issued by school).
-- Add a "Request access via your school" notice instead of signup, linking to scholasticservices.online.
+## Phase 3 — UI rebuild (delete all current pages/components except shadcn + supabase client)
 
-## 2. Reframe the homepage as a Schools Hub
+Pages:
+- `/` Home — hero, live strip, upcoming, standings (Handball|Netball tabs), SS banner.
+- `/live` — Realtime live matches, two columns by sport.
+- `/fixtures`, `/results`, `/standings` — filters by sport/competition/school.
+- `/schools`, `/schools/:id` — directory + profile with SS Verified / Independent badges.
+- `/scoring/:fixtureId` — sport-aware console:
+  - Handball: 2 halves, goal/yellow/red/2-min, period_scores JSON.
+  - Netball: 4 quarters, goal/penalty/contact/obstruction.
+  - Realtime score broadcast, offline event buffer.
+- `/register/coach`, `/register/umpire`, `/register/school` — public forms.
+- `/login`, `/dashboard` (role router).
+- `/admin` (super_admin + hic) — tabs: Overview, Competitions, Fixtures, Team Sheets, Player Verification (QR scan of Scholastic Card), Schools, Coaches, Umpires, Sync from SS, Settings.
+- `/coach` — squad, team-sheet submission, fixtures.
+- `/umpire` — assigned fixtures, "Start Scoring".
+- `/player-profile` — SS-linked athlete stats + activity feed.
 
-New section order in `src/pages/Index.tsx`:
+Design tokens (semantic, in `index.css`):
+- bg `#0A1628`, primary `#00E5FF`, handball pill `#FF6B35`, netball pill `#9B5DE5`.
+- Keep existing Nexus + AIE logos.
 
-1. `NexusHero` — rewritten: "Zimbabwe's Inter-School Competition Network"
-2. `LiveScoreboard` — filtered to school fixtures only
-3. `SchoolTierSwitcher` (replaces `LevelSwitcher`) — Primary / Secondary / Tertiary / All
-4. `SchoolsDirectory` (new) — grid of synced schools with logos, province, sports
-5. `EventsGrid` — relabelled "Inter-School Competitions"
-6. `StandingsTable` — school league tables
-7. `BroadcastHub` — school match streams
-8. `ScholasticPartnerSection` (new, replaces RegistrationPanel) — explains the exclusive integration and how schools join via Scholastic Services
+## Phase 4 — Verification flow
 
-## 3. Reframe stats & language across the app
+Coach submits team_sheet → HIC opens Player Verification → camera reads Scholastic Card QR → compare scanned `student_id` to `athletes.external_student_id` → mark `scholastic_card_verified=true` and `push-card-verification` to SS. Manual override path with required note for non-SS schools / scan failures.
 
+## Phase 5 — Activity push-back
 
-| Old                   | New                            |
-| --------------------- | ------------------------------ |
-| Athletes              | Student Athletes               |
-| Teams                 | Schools                        |
-| Competitions          | School Competitions            |
-| Fixtures              | Inter-School Fixtures          |
-| Province registration | Drawn from Scholastic Services |
+On every goal / match-complete / card / award for an SS-linked athlete, insert into `nexus_student_activity` and call `scholastic-push push-student-activity`. SS reads either the public table directly or via the `nexus_student_sports_profile` view.
 
+## Out of scope (explicit)
 
-Update: `NexusHero` stats, `NexusHeader` nav links, `NexusFooter` tagline, page titles, and `index.html` meta.
+- No `VITE_SS_SUPABASE_URL` / SS anon key in the client.
+- No sports other than handball + netball.
+- No payments, SMS, parent portal.
+- No edits to `src/integrations/supabase/client.ts` / `types.ts` / `.env`.
 
-## 4. School-specific competition tooling
+## Confirmation needed before I start
 
-Add to `AdminDashboard` (and a new Schools page) — these are the "all tools needed for school competitions":
-
-- **Age group brackets**: U10, U12, U14, U16, U19, Open — applied as a filter on competitions and standings.
-- **House competitions mode**: when a single school runs internal houses (Red/Blue/Green/Yellow) — auto-creates 4 sub-teams under the school.
-- **Inter-school fixtures generator**: pick N schools + discipline + age group → auto-builds round-robin or knockout draw.
-- **Sports Day mode**: one-day, multi-event, multi-age-group meet with live points table per school.
-- **Term-based seasons**: Term 1 / Term 2 / Term 3 instead of calendar seasons.
-- **Discipline catalogue tuned for schools**: Athletics, Football, Rugby, Netball, Cricket, Hockey, Basketball, Tennis, Swimming, Chess, Debate, Quiz, Public Speaking, Spelling Bee, Science Olympiad, Maths Olympiad. Just add all possible disciplines and sports including volleyball, EVERYTHING infact including darts. 
-- **School roster view**: per school → list of students from Scholastic, assignable to teams per discipline.
-- **Permission tiers**: School Coordinator (manages only their school), Federation Official (cross-school), Super Admin.
-
-## 5. Lock down data origin to Scholastic Services
-
-- Remove "Add Athlete" and "Add School/Team" manual forms from `AdminDashboard` — replace with **"Sync from Scholastic Services"** as the only path.
-- Auto-trigger `scholastic-sync?action=sync-all` on first admin load if `teams` count is 0.
-- Add a "Sync status" widget showing last sync time, schools synced, students synced.
-- Show a Scholastic verified badge next to every school and student row everywhere they appear.
-
-## 6. New pages
-
-- `/schools` — directory of all synced schools, filterable by province, level (primary/secondary/tertiary), sport offered. Click → school profile with roster, fixtures, standings, trophies.
-- `/schools/:id` — school profile page.
-- `/sports-day` — Sports Day live console (event queue, live points per school, announcer view).
-- `/inter-school` — inter-school fixtures dashboard.
-- You can add a public no login needed section for local scoring maybe used during training etc
-
-Existing pages updated: `/admin`, `/competitions`, `/fixtures`, `/scoring`, `/broadcast` — all relabelled and filtered to schools-only context.
-
-## 7. Branding pass
-
-- Update logo strip / header tagline to **"Nexus for Schools"**.
-- Add the `ScholasticIntegrationBanner` (already built) to: top of `/admin`, top of `/schools`, footer of every page.
-- Rewrite `NexusHero` copy to lead with schools.
-- Update `index.html` `<title>` and meta description.
-- Update `AuthModal` heading: "School Coordinator & Student Sign-In".
-
-## 8. Database touches (minimal — schema already supports this)
-
-No new tables required. Light additions:
-
-- Add `age_group` (text) and `term` (text) columns to `competitions` via migration.
-- Add `house` (text, nullable) column to `athletes` for house competitions.
-- Add `sports_offered` (text[]) column to `teams` for school-level sport catalogue.
-- Also get school logos etc
-
-## Technical notes
-
-- All changes are frontend + one small migration + one edge-function tweak (sync-all on first admin load is already wired; just needs the auto-trigger).
-- `RegistrationPanel.tsx` will be deleted; references removed from `Index.tsx`.
-- `LevelSwitcher.tsx` renamed/replaced by `SchoolTierSwitcher.tsx`.
-- New components: `SchoolsDirectory.tsx`, `ScholasticPartnerSection.tsx`, `SyncStatusWidget.tsx`, `AgeGroupFilter.tsx`, `SportsDayConsole.tsx`, `InterSchoolFixturesBuilder.tsx`, `HouseCompetitionsPanel.tsx`.
-- New pages: `SchoolsPage.tsx`, `SchoolProfilePage.tsx`, `SportsDayPage.tsx`, `InterSchoolPage.tsx`.
-
-## Out of scope (confirm if you want these too)
-
-- Parent/guardian portal: no
-- Fee collection / payments: no
-- SMS notifications to school: no
+This `TRUNCATE … CASCADE` is irreversible — every athlete, team, fixture, score, role, profile row is gone. Approve this plan and I'll begin with the migration, then deploy the federation actions, then rebuild the UI.
