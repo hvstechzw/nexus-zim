@@ -145,18 +145,21 @@ export function NexusHeader() {
             <div className="pt-20 px-6 pb-10 flex flex-col h-full overflow-y-auto">
               <nav className="flex flex-col gap-1 flex-1">
                 {NAV_LINKS.map((link, i) => (
-                  <motion.a
+                  <motion.div
                     key={link.label}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
                     initial={{ opacity: 0, x: -12 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.04, duration: 0.3 }}
-                    className="flex items-center gap-3 px-4 py-4 rounded-xl text-lg display-font font-semibold text-foreground hover:bg-nexus-surface transition-colors"
                   >
-                    {link.label === "Live" && <span className="w-2 h-2 rounded-full bg-nexus-live animate-pulse" />}
-                    {link.label}
-                  </motion.a>
+                    <Link
+                      to={link.href}
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-3 px-4 py-4 rounded-xl text-lg display-font font-semibold text-foreground hover:bg-nexus-surface transition-colors"
+                    >
+                      {link.label === "Live" && <span className="w-2 h-2 rounded-full bg-nexus-live animate-pulse" />}
+                      {link.label}
+                    </Link>
+                  </motion.div>
                 ))}
               </nav>
 
