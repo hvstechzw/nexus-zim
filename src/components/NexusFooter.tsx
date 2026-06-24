@@ -61,8 +61,12 @@ export function NexusFooter() {
               <p className="text-[10px] sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-semibold">{section}</p>
               <ul className="flex flex-col gap-2 sm:gap-3">
                 {links.map((link) => (
-                  <li key={link}>
-                    <a href="#" className="text-xs sm:text-sm text-foreground hover:text-nexus-muted transition-colors duration-200">{link}</a>
+                  <li key={link.label}>
+                    {link.to.startsWith("http") ? (
+                      <a href={link.to} target="_blank" rel="noopener noreferrer" className="text-xs sm:text-sm text-foreground hover:text-nexus-muted transition-colors duration-200">{link.label}</a>
+                    ) : (
+                      <Link to={link.to} className="text-xs sm:text-sm text-foreground hover:text-nexus-muted transition-colors duration-200">{link.label}</Link>
+                    )}
                   </li>
                 ))}
               </ul>
