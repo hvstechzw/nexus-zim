@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { isNexusDiscipline } from "@/lib/nexusSports";
 
 export function EventsGrid() {
   const { data: competitions = [], isLoading } = useQuery({
@@ -12,11 +13,12 @@ export function EventsGrid() {
         .select("id, name, discipline, level, format, status, season, province, start_date, end_date, prize_pool, max_participants, logo_url, description")
         .in("status", ["registration_open", "ongoing", "registration_closed"])
         .order("start_date", { ascending: true })
-        .limit(12);
+        .limit(48);
       if (error) console.error("EventsGrid query error:", error);
-      return data || [];
+      return (data || []).filter((c: any) => isNexusDiscipline(c.discipline)).slice(0, 12);
     },
   });
+
 
   const compIds = competitions.map((c: any) => c.id);
   const { data: regCounts = {} } = useQuery({
