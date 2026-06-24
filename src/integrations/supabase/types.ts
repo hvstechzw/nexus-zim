@@ -92,16 +92,21 @@ export type Database = {
           id: string
           id_card_number: string | null
           is_active: boolean | null
+          is_ss_linked: boolean
           is_suspended: boolean | null
+          jersey_number: number | null
           last_name: string
           medical_waiver_date: string | null
           medical_waiver_signed: boolean | null
+          nexus_sport: string | null
           nfc_tag: string | null
           personal_bests: Json | null
           photo_url: string | null
           province: string
           qr_code: string | null
+          scholastic_card_verified: boolean
           school_name: string | null
+          ss_school_id: string | null
           updated_at: string
           user_id: string | null
         }
@@ -118,16 +123,21 @@ export type Database = {
           id?: string
           id_card_number?: string | null
           is_active?: boolean | null
+          is_ss_linked?: boolean
           is_suspended?: boolean | null
+          jersey_number?: number | null
           last_name: string
           medical_waiver_date?: string | null
           medical_waiver_signed?: boolean | null
+          nexus_sport?: string | null
           nfc_tag?: string | null
           personal_bests?: Json | null
           photo_url?: string | null
           province: string
           qr_code?: string | null
+          scholastic_card_verified?: boolean
           school_name?: string | null
+          ss_school_id?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -144,16 +154,21 @@ export type Database = {
           id?: string
           id_card_number?: string | null
           is_active?: boolean | null
+          is_ss_linked?: boolean
           is_suspended?: boolean | null
+          jersey_number?: number | null
           last_name?: string
           medical_waiver_date?: string | null
           medical_waiver_signed?: boolean | null
+          nexus_sport?: string | null
           nfc_tag?: string | null
           personal_bests?: Json | null
           photo_url?: string | null
           province?: string
           qr_code?: string | null
+          scholastic_card_verified?: boolean
           school_name?: string | null
+          ss_school_id?: string | null
           updated_at?: string
           user_id?: string | null
         }
@@ -629,6 +644,142 @@ export type Database = {
           },
         ]
       }
+      nexus_coaches: {
+        Row: {
+          certification: string | null
+          created_at: string
+          disciplines: string[]
+          email: string | null
+          first_name: string
+          gender: string | null
+          id: string
+          id_number: string | null
+          is_active: boolean
+          is_ss_school: boolean
+          is_verified: boolean
+          last_name: string
+          notes: string | null
+          phone: string | null
+          photo_url: string | null
+          school_name: string | null
+          ss_school_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          certification?: string | null
+          created_at?: string
+          disciplines?: string[]
+          email?: string | null
+          first_name: string
+          gender?: string | null
+          id?: string
+          id_number?: string | null
+          is_active?: boolean
+          is_ss_school?: boolean
+          is_verified?: boolean
+          last_name: string
+          notes?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          school_name?: string | null
+          ss_school_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          certification?: string | null
+          created_at?: string
+          disciplines?: string[]
+          email?: string | null
+          first_name?: string
+          gender?: string | null
+          id?: string
+          id_number?: string | null
+          is_active?: boolean
+          is_ss_school?: boolean
+          is_verified?: boolean
+          last_name?: string
+          notes?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          school_name?: string | null
+          ss_school_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      nexus_student_activity: {
+        Row: {
+          activity_type: string
+          athlete_id: string | null
+          competition_id: string | null
+          competition_name: string | null
+          created_at: string
+          description: string | null
+          fixture_id: string | null
+          id: string
+          occurred_at: string
+          sport: string
+          ss_school_id: string | null
+          ss_student_id: string
+          value: number | null
+        }
+        Insert: {
+          activity_type: string
+          athlete_id?: string | null
+          competition_id?: string | null
+          competition_name?: string | null
+          created_at?: string
+          description?: string | null
+          fixture_id?: string | null
+          id?: string
+          occurred_at?: string
+          sport: string
+          ss_school_id?: string | null
+          ss_student_id: string
+          value?: number | null
+        }
+        Update: {
+          activity_type?: string
+          athlete_id?: string | null
+          competition_id?: string | null
+          competition_name?: string | null
+          created_at?: string
+          description?: string | null
+          fixture_id?: string | null
+          id?: string
+          occurred_at?: string
+          sport?: string
+          ss_school_id?: string | null
+          ss_student_id?: string
+          value?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nexus_student_activity_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nexus_student_activity_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nexus_student_activity_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
@@ -1067,6 +1218,50 @@ export type Database = {
           },
         ]
       }
+      scholastic_card_verifications: {
+        Row: {
+          athlete_id: string | null
+          card_scan_data: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          ss_student_id: string
+          status: string
+          verification_method: string
+          verified_by: string | null
+        }
+        Insert: {
+          athlete_id?: string | null
+          card_scan_data?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          ss_student_id: string
+          status?: string
+          verification_method?: string
+          verified_by?: string | null
+        }
+        Update: {
+          athlete_id?: string | null
+          card_scan_data?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          ss_student_id?: string
+          status?: string
+          verification_method?: string
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scholastic_card_verifications_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       score_entries: {
         Row: {
           athlete_id: string | null
@@ -1178,6 +1373,39 @@ export type Database = {
           },
         ]
       }
+      ss_sync_log: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          performed_by: string | null
+          schools_synced: number
+          status: string
+          students_synced: number
+          sync_type: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          performed_by?: string | null
+          schools_synced?: number
+          status: string
+          students_synced?: number
+          sync_type: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          performed_by?: string | null
+          schools_synced?: number
+          status?: string
+          students_synced?: number
+          sync_type?: string
+        }
+        Relationships: []
+      }
       standings: {
         Row: {
           athlete_id: string | null
@@ -1257,6 +1485,72 @@ export type Database = {
           },
         ]
       }
+      team_sheets: {
+        Row: {
+          age_group: string | null
+          competition_id: string | null
+          created_at: string
+          discipline: string
+          id: string
+          players: Json
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          status: string
+          submitted_by_name: string
+          submitted_by_user_id: string | null
+          team_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          age_group?: string | null
+          competition_id?: string | null
+          created_at?: string
+          discipline: string
+          id?: string
+          players?: Json
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          submitted_by_name: string
+          submitted_by_user_id?: string | null
+          team_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          age_group?: string | null
+          competition_id?: string | null
+          created_at?: string
+          discipline?: string
+          id?: string
+          players?: Json
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          status?: string
+          submitted_by_name?: string
+          submitted_by_user_id?: string | null
+          team_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_sheets_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_sheets_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       teams: {
         Row: {
           club_name: string | null
@@ -1266,6 +1560,7 @@ export type Database = {
           founded_year: number | null
           id: string
           is_active: boolean | null
+          is_ss_school: boolean
           kit_colors: string[] | null
           level: Database["public"]["Enums"]["competition_level"] | null
           logo_url: string | null
@@ -1274,6 +1569,7 @@ export type Database = {
           province: string | null
           school_name: string | null
           short_name: string | null
+          sport: string | null
           sports_offered: string[] | null
           updated_at: string
         }
@@ -1285,6 +1581,7 @@ export type Database = {
           founded_year?: number | null
           id?: string
           is_active?: boolean | null
+          is_ss_school?: boolean
           kit_colors?: string[] | null
           level?: Database["public"]["Enums"]["competition_level"] | null
           logo_url?: string | null
@@ -1293,6 +1590,7 @@ export type Database = {
           province?: string | null
           school_name?: string | null
           short_name?: string | null
+          sport?: string | null
           sports_offered?: string[] | null
           updated_at?: string
         }
@@ -1304,6 +1602,7 @@ export type Database = {
           founded_year?: number | null
           id?: string
           is_active?: boolean | null
+          is_ss_school?: boolean
           kit_colors?: string[] | null
           level?: Database["public"]["Enums"]["competition_level"] | null
           logo_url?: string | null
@@ -1312,6 +1611,7 @@ export type Database = {
           province?: string | null
           school_name?: string | null
           short_name?: string | null
+          sport?: string | null
           sports_offered?: string[] | null
           updated_at?: string
         }
@@ -1455,7 +1755,21 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      nexus_student_sports_profile: {
+        Row: {
+          disciplines: string[] | null
+          goals_scored: number | null
+          is_ss_linked: boolean | null
+          matches_played: number | null
+          nexus_sport: string | null
+          photo_url: string | null
+          player_name: string | null
+          scholastic_card_verified: boolean | null
+          ss_school_id: string | null
+          ss_student_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
