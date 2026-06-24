@@ -1,0 +1,1 @@
+ALTER VIEW public.nexus_student_sports_profile SET (security_invoker = true);
