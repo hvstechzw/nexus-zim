@@ -18,6 +18,7 @@ import InterSchoolPage from "./pages/InterSchoolPage.tsx";
 import SportsDayPage from "./pages/SportsDayPage.tsx";
 import PracticeScoringPage from "./pages/PracticeScoringPage.tsx";
 import LivePage from "./pages/LivePage.tsx";
+import FixtureScoringPage from "./pages/FixtureScoringPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/competitions" element={<Navigate to="/inter-school" replace />} />
               <Route path="/competition/:id" element={<CompetitionDetailPage />} />
               <Route path="/scoring" element={<ScoringPage />} />
+              <Route path="/scoring/:fixtureId" element={<FixtureScoringPage />} />
               <Route path="/fixtures" element={<FixturesPage />} />
               <Route path="/athletes/id-cards" element={<AthleteIDPage />} />
               <Route path="/broadcast" element={<BroadcastCGPage />} />
