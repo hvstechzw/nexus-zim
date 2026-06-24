@@ -77,6 +77,10 @@
     --nexus-silver: 0 0% 87%;
     --nexus-muted-fg: 0 0% 44%;
     --nexus-live: 0 0% 18%;
+
+    /* Sport accents (used sparingly as pills/dots only — grayscale UI overall) */
+    --sport-handball: 18 90% 56%;   /* #FF6B35 */
+    --sport-netball:  271 67% 57%;  /* #9B5DE5 */
   }
 
   .dark {
