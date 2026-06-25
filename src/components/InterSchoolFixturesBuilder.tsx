@@ -53,11 +53,19 @@ export function InterSchoolFixturesBuilder() {
   const [selected, setSelected] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
 
-  const { data: schools = [] } = useQuery({
-    queryKey: ["builder-schools"],
+  // Pick school teams (e.g. "Marist Handball U16"), filtered to the chosen
+  // discipline + age group. Only PUBLISHED teams are eligible for fixtures.
+  const { data: schoolTeams = [] } = useQuery({
+    queryKey: ["builder-school-teams", discipline, ageGroup],
     queryFn: async () => {
-      const { data } = await supabase.from("teams").select("id, name, school_name, province, level").eq("is_active", true).order("name").limit(500);
-      return data || [];
+      const { data } = await supabase
+        .from("school_teams")
+        .select("id, name, school_id, discipline, age_group, gender, school:teams!school_teams_school_id_fkey(id, name, school_name, province)")
+        .eq("is_published", true)
+        .eq("discipline", discipline)
+        .order("name")
+        .limit(500);
+      return (data || []).filter((t: any) => !ageGroup || !t.age_group || t.age_group === ageGroup);
     },
   });
 
