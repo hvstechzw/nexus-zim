@@ -1,0 +1,8 @@
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+CREATE EXTENSION IF NOT EXISTS pg_net;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.ss_sync_log;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.teams;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.athletes;
+ALTER TABLE public.ss_sync_log REPLICA IDENTITY FULL;
+ALTER TABLE public.teams REPLICA IDENTITY FULL;
+ALTER TABLE public.athletes REPLICA IDENTITY FULL;

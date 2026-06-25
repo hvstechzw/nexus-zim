@@ -49,30 +49,35 @@ Deno.serve(async (req) => {
   const cors = buildCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
 
-  // Caller must be a signed-in user with HIC / super_admin / admin role.
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return json(cors, { error: "unauthorized" }, 401);
-  }
-  const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    global: { headers: { Authorization: authHeader } },
-  });
-  const token = authHeader.replace("Bearer ", "");
-  const { data: claimsData, error: claimsErr } = await userClient.auth.getClaims(token);
-  if (claimsErr || !claimsData?.claims?.sub) {
-    return json(cors, { error: "unauthorized" }, 401);
-  }
-  const userId = claimsData.claims.sub as string;
-
   const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
     auth: { persistSession: false },
   });
 
-  const { data: roles } = await admin
-    .from("user_roles").select("role").eq("user_id", userId);
-  const allowed = new Set(["hic", "super_admin", "admin"]);
-  const ok = (roles || []).some((r: any) => allowed.has(r.role));
-  if (!ok) return json(cors, { error: "forbidden" }, 403);
+  const authHeader = req.headers.get("Authorization") || "";
+  const bearer = authHeader.replace("Bearer ", "").trim();
+  const isCron = bearer && bearer === SUPABASE_SERVICE_KEY;
+
+  let userId: string | null = null;
+
+  if (!isCron) {
+    if (!authHeader.startsWith("Bearer ")) {
+      return json(cors, { error: "unauthorized" }, 401);
+    }
+    const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: claimsData, error: claimsErr } = await userClient.auth.getClaims(bearer);
+    if (claimsErr || !claimsData?.claims?.sub) {
+      return json(cors, { error: "unauthorized" }, 401);
+    }
+    userId = claimsData.claims.sub as string;
+
+    const { data: roles } = await admin
+      .from("user_roles").select("role").eq("user_id", userId);
+    const allowed = new Set(["hic", "super_admin", "admin"]);
+    const ok = (roles || []).some((r: any) => allowed.has(r.role));
+    if (!ok) return json(cors, { error: "forbidden" }, 403);
+  }
 
   let body: any = {};
   try { body = await req.json(); } catch { body = {}; }
