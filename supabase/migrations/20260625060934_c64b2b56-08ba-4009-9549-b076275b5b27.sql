@@ -1,0 +1,1 @@
+ALTER TYPE bracket_format ADD VALUE IF NOT EXISTS 'pooled';
