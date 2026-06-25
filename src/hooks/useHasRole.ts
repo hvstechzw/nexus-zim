@@ -15,6 +15,10 @@ export type AppRole =
   | "coach"
   | "hic"
   | "umpire"
+  | "zonal_admin"
+  | "district_admin"
+  | "provincial_admin"
+  | "national_admin"
   | "viewer";
 
 export interface RoleState {
