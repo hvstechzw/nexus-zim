@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { AGE_GROUPS, SCHOOL_TERMS, ALL_DISCIPLINES } from "@/lib/schools";
+import { AGE_GROUPS, SCHOOL_TERMS, ALL_DISCIPLINES, COMPETITION_STAGES, type CompetitionStage } from "@/lib/schools";
 import { AgeGroupFilter } from "@/components/AgeGroupFilter";
 
 const inputCls = "bg-nexus-surface hairline rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-nexus-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground/20 transition-all w-full";
@@ -42,6 +42,7 @@ export function InterSchoolFixturesBuilder() {
   const [discipline, setDiscipline] = useState("Football");
   const [ageGroup, setAgeGroup] = useState("U16");
   const [term, setTerm] = useState<string>("Term 1");
+  const [stage, setStage] = useState<CompetitionStage>("zonal");
   const [format, setFormat] = useState<"round_robin" | "single_elimination">("round_robin");
   const [name, setName] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
@@ -67,13 +68,14 @@ export function InterSchoolFixturesBuilder() {
         name: name.trim(),
         discipline,
         level: "secondary_school",
+        stage,
         format,
         status: "registration_closed",
         season: new Date().getFullYear().toString(),
         age_group: ageGroup,
         term,
         created_by: user.id,
-      }).select().single();
+      } as any).select().single();
       if (cErr) throw cErr;
 
       const pairs = format === "round_robin" ? roundRobin(selected) : knockout(selected);
@@ -123,6 +125,24 @@ export function InterSchoolFixturesBuilder() {
           <select value={term} onChange={(e) => setTerm(e.target.value)} className={inputCls + " cursor-pointer"}>
             {SCHOOL_TERMS.map((t) => <option key={t}>{t}</option>)}
           </select>
+        </div>
+        <div className="flex flex-col gap-1.5 md:col-span-2">
+          <label className={labelCls}>Stage *</label>
+          <div className="flex flex-wrap gap-2">
+            {COMPETITION_STAGES.map((s, i) => (
+              <div key={s.value} className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setStage(s.value)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all btn-click ${stage === s.value ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted hover:text-foreground"}`}
+                >
+                  {s.label}
+                </button>
+                {i < COMPETITION_STAGES.length - 1 && <span className="text-nexus-muted/50 text-xs">→</span>}
+              </div>
+            ))}
+          </div>
+          <p className="text-[10px] text-nexus-muted mt-1">Pathway: Zonal/Cluster → District → Provincial → National. Winners progress to the next stage.</p>
         </div>
         <div className="flex flex-col gap-1.5">
           <label className={labelCls}>Format</label>
