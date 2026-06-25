@@ -47,6 +47,7 @@ const App = () => (
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/sync" element={<AdminSyncPage />} />
               <Route path="/admin/verify" element={<PlayerVerifyPage />} />
+              <Route path="/admin/regions" element={<AdminRegionsPage />} />
               <Route path="/competitions" element={<Navigate to="/inter-school" replace />} />
               <Route path="/competition/:id" element={<CompetitionDetailPage />} />
               <Route path="/scoring" element={<ScoringPage />} />
