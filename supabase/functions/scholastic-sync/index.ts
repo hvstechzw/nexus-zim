@@ -132,7 +132,6 @@ Deno.serve(async (req) => {
           province: s.province || "Unknown",
           level: s.level || "secondary",
           school_name: s.name,
-          city: s.city || null,
           is_ss_school: true,
           sport: "general",
           discipline: "general",
