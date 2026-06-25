@@ -74,6 +74,51 @@ function normalizeSchoolLevel(level: unknown): string {
   return "secondary_school";
 }
 
+function pickFirstString(...values: unknown[]): string | null {
+  for (const value of values) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return null;
+}
+
+function normalizeExternalAssetUrl(raw: unknown): string | null {
+  const value = typeof raw === "string" ? raw.trim() : "";
+  if (!value) return null;
+  if (/^https?:\/\//i.test(value)) return value;
+  if (value.startsWith("//")) return `https:${value}`;
+  const origin = (() => {
+    try { return new URL(RAW_BRIDGE || "https://scholasticservices.online").origin; }
+    catch { return "https://scholasticservices.online"; }
+  })();
+  return `${origin}${value.startsWith("/") ? "" : "/"}${value}`;
+}
+
+function schoolLogoFromPayload(s: Record<string, unknown>): string | null {
+  const branding = (s.branding && typeof s.branding === "object") ? s.branding as Record<string, unknown> : {};
+  const media = (s.media && typeof s.media === "object") ? s.media as Record<string, unknown> : {};
+  const profile = (s.profile && typeof s.profile === "object") ? s.profile as Record<string, unknown> : {};
+  return normalizeExternalAssetUrl(pickFirstString(
+    s.logo_url,
+    s.logoUrl,
+    s.logoURL,
+    s.logo,
+    s.school_logo_url,
+    s.schoolLogoUrl,
+    s.school_logo,
+    s.emblem_url,
+    s.badge_url,
+    branding.logo_url,
+    branding.logoUrl,
+    branding.logo,
+    media.logo_url,
+    media.logoUrl,
+    media.logo,
+    profile.logo_url,
+    profile.logoUrl,
+    profile.logo,
+  ));
+}
+
 Deno.serve(async (req) => {
   const cors = buildCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
@@ -138,11 +183,12 @@ Deno.serve(async (req) => {
       const res = await callBridge("fetch-schools", {});
       const schools: any[] = res.schools || [];
       for (const s of schools) {
+        const logoUrl = schoolLogoFromPayload(s);
         const { error } = await admin.from("teams").upsert({
           external_school_id: s.school_id,
           name: s.name,
           short_name: s.short_name || s.name?.slice(0, 16),
-          logo_url: s.logo_url || null,
+          logo_url: logoUrl,
           province: s.province || "Unknown",
           level: normalizeSchoolLevel(s.level),
           school_name: s.name,
