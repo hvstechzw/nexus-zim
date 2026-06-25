@@ -617,28 +617,6 @@ export default function AdminDashboard() {
   const { toast } = useToast();
   const qc = useQueryClient();
 
-  if (authLoading || rolesLoading) {
-    return (
-      <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-        <p className="text-nexus-muted mono text-sm tracking-[0.15em] uppercase">Loading…</p>
-      </div>
-    );
-  }
-  if (!user) return <Navigate to="/" replace />;
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen bg-background text-foreground">
-        <NexusHeader />
-        <div className="max-w-[900px] mx-auto pt-32 px-8 text-center">
-          <p className="text-[10px] mono tracking-[0.2em] uppercase text-nexus-muted mb-3">403 Forbidden</p>
-          <h1 className="text-2xl font-semibold mb-3">Admin access required</h1>
-          <p className="text-nexus-muted text-sm">
-            Your account doesn't carry the <code>admin</code> or <code>super_admin</code> role. Contact a federation official if you believe this is a mistake.
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   const { data: competitions = [], refetch: refetchComp } = useQuery({ queryKey: ["admin-competitions"], queryFn: async () => { const { data } = await supabase.from("competitions").select("id, name, discipline, level, format, status, province, season, parent_id, created_at, description, start_date, end_date, max_participants, entry_fee, prize_pool, sponsor, logo_url").order("created_at", { ascending: false }).limit(100); return data || []; } });
   const { data: athletes = [], refetch: refetchAthletes } = useQuery({ queryKey: ["admin-athletes"], queryFn: async () => { const { data } = await supabase.from("athletes").select("id, first_name, last_name, province, disciplines, id_card_number, is_active, is_suspended, created_at, date_of_birth, school_name, club_name, photo_url, gender").order("created_at", { ascending: false }).limit(100); return data || []; } });
