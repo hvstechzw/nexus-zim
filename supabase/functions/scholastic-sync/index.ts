@@ -184,6 +184,7 @@ Deno.serve(async (req) => {
       const schools: any[] = res.schools || [];
       for (const s of schools) {
         const logoUrl = schoolLogoFromPayload(s);
+        console.log("[sync-schools] keys:", Object.keys(s), "resolvedLogo:", logoUrl);
         const { error } = await admin.from("teams").upsert({
           external_school_id: s.school_id,
           name: s.name,
