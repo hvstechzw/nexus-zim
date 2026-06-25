@@ -207,26 +207,28 @@ export function InterSchoolFixturesBuilder() {
       </div>
 
       <div>
-        <p className={labelCls + " mb-2"}>Schools — Selected: {selected.length}</p>
+        <p className={labelCls + " mb-2"}>School Teams ({discipline} · {ageGroup}) — Selected: {selected.length}</p>
         <div className="hairline rounded-lg max-h-64 overflow-y-auto">
-          {schools.length === 0 ? (
+          {schoolTeams.length === 0 ? (
             <div className="p-5 flex flex-col items-center gap-2 text-center">
-              <p className="text-xs text-nexus-muted">No schools in the directory yet.</p>
+              <p className="text-xs text-nexus-muted">No published {discipline} teams for {ageGroup}.</p>
+              <p className="text-[11px] text-nexus-muted">Sports directors publish teams from the coach console. Fixtures list real teams (e.g. "Marist Handball U16"), not schools.</p>
               <Link to="/admin/sync" className="text-xs font-semibold underline underline-offset-2 hover:opacity-70">
-                Sync from Scholastic Services →
+                Sync schools from Scholastic Services →
               </Link>
             </div>
           ) : (
-            schools.map((s, i) => (
-              <label key={s.id} className={`flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-nexus-surface transition-colors ${i < schools.length - 1 ? "hairline-b" : ""}`}>
-                <input type="checkbox" checked={selected.includes(s.id)} onChange={() => toggle(s.id)} className="w-3.5 h-3.5" />
-                <span className="text-sm text-foreground flex-1">{s.school_name || s.name}</span>
-                <span className="text-[10px] mono uppercase text-nexus-muted">{s.province}</span>
+            schoolTeams.map((t: any, i: number) => (
+              <label key={t.id} className={`flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-nexus-surface transition-colors ${i < schoolTeams.length - 1 ? "hairline-b" : ""}`}>
+                <input type="checkbox" checked={selected.includes(t.id)} onChange={() => toggle(t.id)} className="w-3.5 h-3.5" />
+                <span className="text-sm text-foreground flex-1">{t.name} <span className="text-nexus-muted text-xs">· {t.school?.school_name || t.school?.name}</span></span>
+                <span className="text-[10px] mono uppercase text-nexus-muted">{t.school?.province}</span>
               </label>
             ))
           )}
         </div>
       </div>
+
 
       <button onClick={generate} disabled={busy} className="h-11 px-6 text-sm font-semibold rounded-xl bg-foreground text-primary-foreground hover:opacity-85 disabled:opacity-50 btn-click">
         {busy ? "Generating…" : `Generate ${format === "round_robin" ? "Round Robin" : format === "pooled" ? "Pooled Draw" : "Knockout"} Draw`}
