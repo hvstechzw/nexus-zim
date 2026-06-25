@@ -946,60 +946,43 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* TEAMS */}
-          {activeTab === "teams" && (
+          {/* SCHOOLS & TEAMS */}
+          {activeTab === "schools" && (
             <div>
-              {sectionHeader("Teams", user && (
-                <button onClick={() => setShowForm(!showForm)} className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click">
-                  {showForm ? "Cancel" : "+ New Team"}
-                </button>
+              {sectionHeader("Schools & Teams", (
+                <Link to="/schools" className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-nexus-surface hover:bg-nexus-silver flex items-center transition-colors">
+                  Open public directory →
+                </Link>
               ))}
-              {showForm && <div className="p-4 sm:p-8 hairline-b"><TeamForm onSuccess={() => { setShowForm(false); refetchTeams(); }} /></div>}
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px]">
-                  {tableHead("","Name","Discipline","Level","Province","Status")}
-                  <tbody>
-                    {(teams as any[]).map((t) => (
-                      <tr key={t.id} className={clickableRow} onClick={() => openDetail(t, "team")}>
-                        <td className="px-4 sm:px-6 py-4 w-10">{t.logo_url ? <img src={t.logo_url} className="w-8 h-8 rounded-lg object-cover bg-white" alt="" /> : <div className="w-8 h-8 rounded-lg bg-nexus-surface flex items-center justify-center text-[9px] mono text-nexus-muted">{t.short_name?.slice(0,2) || t.name?.slice(0,2)}</div>}</td>
-                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{t.name}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{t.discipline}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{t.level?.replace(/_/g," ") || "—"}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{t.province || "—"}</td>
-                        <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${t.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{t.is_active ? "Active" : "Inactive"}</span></td>
-                      </tr>
-                    ))}
-                    {teams.length === 0 && <tr><td colSpan={6}><EmptyState msg="No teams yet." /></td></tr>}
-                  </tbody>
-                </table>
+              <div className="p-4 sm:p-8 space-y-6">
+                <SchoolsDirectory />
+                <div className="hairline rounded-xl bg-background overflow-hidden">
+                  <p className="px-6 py-4 hairline-b text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium">All synced schools</p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[640px]">
+                      {tableHead("","Name","Discipline","Level","Province","Status")}
+                      <tbody>
+                        {(teams as any[]).map((t) => (
+                          <tr key={t.id} className={clickableRow} onClick={() => openDetail(t, "team")}>
+                            <td className="px-4 sm:px-6 py-4 w-10">{t.logo_url ? <img src={t.logo_url} className="w-8 h-8 rounded-lg object-cover bg-white" alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} /> : <div className="w-8 h-8 rounded-lg bg-nexus-surface flex items-center justify-center text-[9px] mono text-nexus-muted">{t.short_name?.slice(0,2) || t.name?.slice(0,2)}</div>}</td>
+                            <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{t.name}</td>
+                            <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{t.discipline || "—"}</td>
+                            <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{t.level?.replace(/_/g," ") || "—"}</td>
+                            <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{t.province || "—"}</td>
+                            <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${t.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{t.is_active ? "Active" : "Inactive"}</span></td>
+                          </tr>
+                        ))}
+                        {teams.length === 0 && <tr><td colSpan={6}><EmptyState msg="No schools synced yet. Trigger a federation sync." /></td></tr>}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {/* ATHLETES */}
-          {activeTab === "athletes" && (
-            <div>
-              {sectionHeader("Athletes")}
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px]">
-                  {tableHead("","Name","Province","Disciplines","ID Card","Status")}
-                  <tbody>
-                    {(athletes as any[]).map((a) => (
-                      <tr key={a.id} className={clickableRow} onClick={() => openDetail(a, "athlete")}>
-                        <td className="px-4 sm:px-6 py-4 w-10">{a.photo_url ? <img src={a.photo_url} className="w-8 h-8 rounded-full object-cover" alt="" /> : <div className="w-8 h-8 rounded-full bg-nexus-surface flex items-center justify-center text-[9px] mono font-bold text-nexus-muted">{a.first_name?.[0]}{a.last_name?.[0]}</div>}</td>
-                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{a.first_name} {a.last_name}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{a.province}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{a.disciplines?.join(", ")}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{a.id_card_number || "—"}</td>
-                        <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${a.is_suspended ? "bg-foreground text-primary-foreground" : a.is_active ? "bg-nexus-surface text-nexus-muted" : "bg-nexus-surface text-nexus-muted"}`}>{a.is_suspended ? "Suspended" : a.is_active ? "Active" : "Inactive"}</span></td>
-                      </tr>
-                    ))}
-                    {athletes.length === 0 && <tr><td colSpan={6}><EmptyState msg="No athletes registered yet." /></td></tr>}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+          {/* SPORTING CALENDAR */}
+          {activeTab === "calendar" && <SportingCalendar />}
 
           {/* OFFICIALS */}
           {activeTab === "officials" && (
@@ -1026,93 +1009,14 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* VENUES */}
-          {activeTab === "venues" && (
-            <div>
-              {sectionHeader("Venues", user && (
-                <button onClick={() => setShowForm(!showForm)} className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click">
-                  {showForm ? "Cancel" : "+ Add Venue"}
-                </button>
-              ))}
-              {showForm && <div className="p-4 sm:p-8 hairline-b"><VenueForm onSuccess={() => { setShowForm(false); refetchVenues(); }} /></div>}
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px]">
-                  {tableHead("Name","Type","City","Province","Capacity","Status")}
-                  <tbody>
-                    {(venues as any[]).map((v) => (
-                      <tr key={v.id} className={clickableRow} onClick={() => openDetail(v, "venue")}>
-                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{v.name}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted capitalize">{v.type}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{v.city}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{v.province}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{v.capacity ? v.capacity.toLocaleString() : "—"}</td>
-                        <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${v.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{v.is_active ? "Active" : "Inactive"}</span></td>
-                      </tr>
-                    ))}
-                    {venues.length === 0 && <tr><td colSpan={6}><EmptyState msg="No venues yet." /></td></tr>}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* DISCIPLINARY */}
-          {activeTab === "disciplinary" && (
-            <div>
-              {sectionHeader("Disciplinary Registry")}
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[700px]">
-                  {tableHead("Athlete","Severity","Reason","Appeal","Suspension Until","Active")}
-                  <tbody>
-                    {(disciplinary as any[]).map((d) => (
-                      <tr key={d.id} className={clickableRow} onClick={() => openDetail(d, "disciplinary")}>
-                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{d.athlete ? `${d.athlete.first_name} ${d.athlete.last_name}` : "—"}</td>
-                        <td className="px-4 sm:px-6 py-4"><span className="text-[10px] mono px-2.5 py-1 rounded-full bg-nexus-surface text-nexus-muted uppercase tracking-widest">{d.severity?.replace(/_/g," ")}</span></td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted max-w-[200px] truncate">{d.reason}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{d.appeal_status || "none"}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{d.suspension_until || "—"}</td>
-                        <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${d.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{d.is_active ? "Active" : "Resolved"}</span></td>
-                      </tr>
-                    ))}
-                    {disciplinary.length === 0 && <tr><td colSpan={6}><EmptyState msg="No disciplinary records." /></td></tr>}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
           {/* STANDINGS */}
           {activeTab === "standings" && (
             <div>
-              {sectionHeader("Standings Management")}
+              {sectionHeader("Standings & Records")}
               <div className="p-8 text-center">
-                <p className="text-nexus-muted mono text-sm">Standings are auto-populated from fixture results.</p>
-                <p className="text-nexus-muted mono text-xs mt-2">Go to Scoring to enter results, then view standings on the main page.</p>
-              </div>
-            </div>
-          )}
-
-          {/* REGISTRATIONS */}
-          {activeTab === "registrations" && (
-            <div>
-              {sectionHeader("Registrations")}
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[700px]">
-                  {tableHead("Registrant","Type","Competition","Status","Payment","Date")}
-                  <tbody>
-                    {(registrations as any[]).map((r) => (
-                      <tr key={r.id} className={clickableRow} onClick={() => openDetail(r, "registration")}>
-                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{r.athlete ? `${r.athlete.first_name} ${r.athlete.last_name}` : r.team?.name || "—"}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted capitalize">{r.registration_type}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{r.competition?.name || "—"}</td>
-                        <td className="px-4 sm:px-6 py-4"><span className="text-[10px] mono px-2.5 py-1 rounded-full bg-nexus-surface text-nexus-muted">{r.status}</span></td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{r.payment_status}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{new Date(r.created_at).toLocaleDateString("en-ZW", { month: "short", day: "numeric" })}</td>
-                      </tr>
-                    ))}
-                    {registrations.length === 0 && <tr><td colSpan={6}><EmptyState msg="No registrations yet." /></td></tr>}
-                  </tbody>
-                </table>
+                <p className="text-nexus-muted mono text-sm">Standings auto-populate from fixture results.</p>
+                <p className="text-nexus-muted mono text-xs mt-2">Use Fixtures & Scoring to enter results, then view standings publicly on /standings.</p>
+                <Link to="/standings" className="mt-4 inline-block h-9 px-4 text-xs font-semibold rounded-lg bg-foreground text-primary-foreground hover:opacity-85 leading-9">Open public standings →</Link>
               </div>
             </div>
           )}
@@ -1120,7 +1024,7 @@ export default function AdminDashboard() {
           {/* BROADCASTS */}
           {activeTab === "broadcasts" && (
             <div>
-              {sectionHeader("Broadcasts")}
+              {sectionHeader("Broadcasts & Media")}
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[640px]">
                   {tableHead("Title","Competition","Platform","Status","Viewers","Quality")}
@@ -1142,41 +1046,18 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* SPONSORSHIPS */}
-          {activeTab === "sponsorships" && (
-            <div>
-              {sectionHeader("Sponsorships", user && (
-                <button onClick={() => setShowForm(!showForm)} className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click">
-                  {showForm ? "Cancel" : "+ Add Sponsor"}
-                </button>
-              ))}
-              {showForm && <div className="p-4 sm:p-8 hairline-b"><SponsorshipForm competitions={competitions as any[]} onSuccess={() => { setShowForm(false); refetchSponsors(); }} /></div>}
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px]">
-                  {tableHead("","Sponsor","Competition","Tier","Amount","Start","End")}
-                  <tbody>
-                    {(sponsorships as any[]).map((s) => (
-                      <tr key={s.id} className={clickableRow} onClick={() => openDetail(s, "sponsor")}>
-                        <td className="px-4 sm:px-6 py-4 w-10">{s.sponsor_logo ? <img src={s.sponsor_logo} className="w-8 h-8 rounded-lg object-contain bg-white p-0.5" alt="" /> : <div className="w-8 h-8 rounded-lg bg-nexus-surface" />}</td>
-                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{s.sponsor_name}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{s.competition?.name || "General"}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted capitalize">{s.tier || "—"}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{s.amount ? `$${Number(s.amount).toLocaleString()}` : "—"}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{s.contract_start || "—"}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{s.contract_end || "—"}</td>
-                      </tr>
-                    ))}
-                    {sponsorships.length === 0 && <tr><td colSpan={7}><EmptyState msg="No sponsorships yet. Add one above." /></td></tr>}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+          {/* USERS & ROLES */}
+          {activeTab === "users" && <UsersRolesPanel />}
 
-          {/* SCHOLASTIC SERVICES */}
-          {activeTab === "scholastic" && (
+          {/* REGION REQUESTS */}
+          {activeTab === "regions" && <RegionRequestsPanel />}
+
+          {/* FEDERATION SYNC */}
+          {activeTab === "federation" && (
             <ScholasticPanel user={user} toast={toast} refetchTeams={refetchTeams} refetchAthletes={refetchAthletes} refetchVenues={refetchVenues} />
           )}
+
+
 
         </motion.div>
       </div>
