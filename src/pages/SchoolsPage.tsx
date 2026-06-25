@@ -77,7 +77,7 @@ export default function SchoolsPage() {
               {filtered.map((s) => (
                 <Link key={s.id} to={`/schools/${s.id}`} className="hairline rounded-xl p-4 bg-background hover:bg-nexus-surface transition-colors flex flex-col gap-2">
                   <div className="w-12 h-12 rounded-lg bg-white flex items-center justify-center p-1 hairline">
-                    {s.logo_url ? <img src={s.logo_url} alt={s.name} className="w-full h-full object-contain" /> : <span className="text-sm font-bold">{s.name.charAt(0)}</span>}
+                    {s.logo_url ? <img src={s.logo_url} alt={`${s.school_name || s.name} logo`} className="w-full h-full object-contain" onError={(event) => { event.currentTarget.style.display = "none"; }} /> : <span className="text-sm font-bold">{s.name.charAt(0)}</span>}
                   </div>
                   <p className="text-xs sm:text-sm font-semibold line-clamp-2 leading-tight">{s.school_name || s.name}</p>
                   <p className="text-[10px] mono uppercase tracking-wider text-nexus-muted">{tierLabel(s.level)}</p>

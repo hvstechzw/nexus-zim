@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -30,11 +31,16 @@ export default function LoginPage() {
   }
 
   async function onGoogle() {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${window.location.origin}/dashboard` },
+    setBusy(true);
+    const result = await lovable.auth.signInWithOAuth("google", {
+      redirect_uri: window.location.origin,
     });
-    if (error) toast({ title: "Google sign-in failed", description: error.message, variant: "destructive" });
+    setBusy(false);
+    if (result.error) {
+      toast({ title: "Google sign-in failed", description: result.error.message, variant: "destructive" });
+      return;
+    }
+    if (!result.redirected) navigate("/dashboard", { replace: true });
   }
 
   return (
@@ -58,7 +64,7 @@ export default function LoginPage() {
           <div className="my-4 flex items-center gap-3">
             <div className="flex-1 hairline-b" /><span className="text-[10px] mono text-nexus-muted">OR</span><div className="flex-1 hairline-b" />
           </div>
-          <Button type="button" variant="outline" className="w-full" onClick={onGoogle}>Continue with Google</Button>
+          <Button type="button" variant="outline" className="w-full" disabled={busy} onClick={onGoogle}>Continue with Google</Button>
           <p className="mt-6 text-xs text-center text-nexus-muted">
             No account? <Link to="/register" className="underline hover:text-foreground">Register</Link>
           </p>

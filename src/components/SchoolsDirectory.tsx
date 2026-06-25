@@ -56,7 +56,7 @@ export function SchoolsDirectory() {
             >
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-white flex items-center justify-center p-1 hairline">
                 {s.logo_url ? (
-                  <img src={s.logo_url} alt={s.name} className="w-full h-full object-contain" />
+                  <img src={s.logo_url} alt={`${s.school_name || s.name} logo`} className="w-full h-full object-contain" onError={(event) => { event.currentTarget.style.display = "none"; }} />
                 ) : (
                   <span className="text-sm font-bold text-foreground">{s.name.charAt(0)}</span>
                 )}
