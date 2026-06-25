@@ -1168,6 +1168,51 @@ export type Database = {
           },
         ]
       }
+      region_admin_assignments: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          district_name: string | null
+          id: string
+          level: string
+          notes: string | null
+          province_name: string | null
+          status: string
+          updated_at: string
+          user_id: string
+          zone_name: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          district_name?: string | null
+          id?: string
+          level: string
+          notes?: string | null
+          province_name?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+          zone_name?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          district_name?: string | null
+          id?: string
+          level?: string
+          notes?: string | null
+          province_name?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+          zone_name?: string | null
+        }
+        Relationships: []
+      }
       registrations: {
         Row: {
           athlete_id: string | null
@@ -1997,6 +2042,10 @@ export type Database = {
         | "coach"
         | "hic"
         | "umpire"
+        | "zonal_admin"
+        | "district_admin"
+        | "provincial_admin"
+        | "national_admin"
       bracket_format:
         | "round_robin"
         | "single_elimination"
@@ -2182,6 +2231,10 @@ export const Constants = {
         "coach",
         "hic",
         "umpire",
+        "zonal_admin",
+        "district_admin",
+        "provincial_admin",
+        "national_admin",
       ],
       bracket_format: [
         "round_robin",
