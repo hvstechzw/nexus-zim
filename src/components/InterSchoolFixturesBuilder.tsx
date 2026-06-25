@@ -141,12 +141,12 @@ export function InterSchoolFixturesBuilder() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
           <label className={labelCls}>Competition Name *</label>
-          <input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="Term 1 Football League — U16" />
+          <input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="Term 1 Handball League — U16" />
         </div>
         <div className="flex flex-col gap-1.5">
           <label className={labelCls}>Discipline</label>
           <select value={discipline} onChange={(e) => setDiscipline(e.target.value)} className={inputCls + " cursor-pointer"}>
-            {ALL_DISCIPLINES.map((d) => <option key={d}>{d}</option>)}
+            {NEXUS_DISCIPLINES.map((d) => <option key={d}>{d}</option>)}
           </select>
         </div>
         <div className="flex flex-col gap-1.5">
@@ -178,8 +178,17 @@ export function InterSchoolFixturesBuilder() {
           <select value={format} onChange={(e) => setFormat(e.target.value as any)} className={inputCls + " cursor-pointer"}>
             <option value="round_robin">Round Robin (everyone plays everyone)</option>
             <option value="single_elimination">Knockout (single elimination)</option>
+            <option value="pooled">Pooled (group stage → playoffs)</option>
           </select>
         </div>
+        {format === "pooled" && (
+          <div className="flex flex-col gap-1.5">
+            <label className={labelCls}>Teams per Pool</label>
+            <select value={poolSize} onChange={(e) => setPoolSize(Number(e.target.value))} className={inputCls + " cursor-pointer"}>
+              {[3, 4, 5, 6].map((n) => <option key={n} value={n}>{n} teams</option>)}
+            </select>
+          </div>
+        )}
         <div className="md:col-span-2">
           <AgeGroupFilter value={ageGroup} onChange={setAgeGroup} />
         </div>
