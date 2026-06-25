@@ -32,6 +32,7 @@ const json = (cors: Record<string, string>, body: unknown, status = 200) =>
 
 async function callBridge(action: string, payload: Record<string, unknown>) {
   if (!BRIDGE_URL) throw new Error("SCHOLASTIC_BRIDGE_URL not configured");
+  console.log("[bridge] POST", action, "->", BRIDGE_URL);
   const body = JSON.stringify({ action, ...payload });
   const ts = String(Math.floor(Date.now() / 1000));
   const sig = await signHmac(HMAC_SECRET, ISSUER, ts, body);
