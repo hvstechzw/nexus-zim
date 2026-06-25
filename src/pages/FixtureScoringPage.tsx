@@ -8,47 +8,24 @@ import { NexusHeader } from "@/components/NexusHeader";
 import { NexusFooter } from "@/components/NexusFooter";
 import { Button } from "@/components/ui/button";
 
-type SportKey = "handball" | "netball";
+import { detectSport as detectSportKey, getSport, type SportKey } from "@/lib/sports";
 
-const SPORT_CONFIG: Record<SportKey, {
-  label: string;
-  periods: string[];
-  periodLabel: string;
-  scoreEvents: { label: string; value: number }[];
-  otherEvents: { label: string; metadata?: Record<string, unknown> }[];
-}> = {
-  handball: {
-    label: "Handball",
-    periods: ["1st Half", "2nd Half", "ET1", "ET2", "Shootout"],
-    periodLabel: "Half",
-    scoreEvents: [
-      { label: "Goal", value: 1 },
-      { label: "7m Goal", value: 1 },
-    ],
-    otherEvents: [
-      { label: "7m Miss" }, { label: "Save" }, { label: "Yellow Card" },
-      { label: "2-min Suspension" }, { label: "Red Card" }, { label: "Timeout" },
-    ],
-  },
-  netball: {
-    label: "Netball",
-    periods: ["Q1", "Q2", "Q3", "Q4", "ET1", "ET2"],
-    periodLabel: "Quarter",
-    scoreEvents: [
-      { label: "Goal", value: 1 },
-      { label: "Super Shot", value: 2 },
-    ],
-    otherEvents: [
-      { label: "Miss" }, { label: "Turnover" }, { label: "Penalty Pass" },
-      { label: "Obstruction" }, { label: "Substitution" }, { label: "Timeout" },
-    ],
-  },
-};
+// Single source of truth: the rule set (periods, events, point values) comes
+// from the shared sport domain layer so this per-fixture scorer and the main
+// scoring console can never drift apart.
+function buildConfig(sport: SportKey) {
+  const c = getSport(sport);
+  return {
+    label: c.label,
+    periodLabel: c.periodNoun,
+    periods: c.periods.map((p) => p.short),
+    scoreEvents: c.scoreEvents.map((e) => ({ label: e.label, value: e.value })),
+    otherEvents: c.otherEvents.map((e) => ({ label: e.label })),
+  };
+}
 
 function detectSport(f: { match_data?: any; competition?: { discipline?: string } | null }): SportKey {
-  const raw = (f.match_data?.sport || f.competition?.discipline || "").toString().toLowerCase();
-  if (raw.includes("net")) return "netball";
-  return "handball";
+  return detectSportKey(f.match_data?.sport || f.competition?.discipline);
 }
 
 export default function FixtureScoringPage() {
@@ -87,7 +64,7 @@ export default function FixtureScoringPage() {
   });
 
   const sport: SportKey = useMemo(() => fixture ? detectSport(fixture as any) : "handball", [fixture]);
-  const config = SPORT_CONFIG[sport];
+  const config = useMemo(() => buildConfig(sport), [sport]);
 
   useEffect(() => {
     if (!activePeriod && config.periods.length) setActivePeriod(config.periods[0]);
