@@ -12,13 +12,18 @@ const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const HMAC_SECRET = Deno.env.get("FEDERATION_HMAC_SECRET")!;
 const JWT_SECRET = Deno.env.get("FEDERATION_JWT_SECRET")!;
-// Normalise BRIDGE_URL. If it points to a site root (no /functions/v1/ path)
-// fall back to the Scholastic Services Supabase federation endpoint.
+// Resolve BRIDGE_URL. The SS bridge is a Supabase edge function — when the
+// configured URL points at the Lovable custom domain (scholasticservices.online)
+// the /functions/v1/* path returns the SPA index.html, not the function.
+// Prefer the Scholastic Services Supabase project URL when available.
 const RAW_BRIDGE = Deno.env.get("SCHOLASTIC_BRIDGE_URL") || "";
 const SS_SUPABASE_URL = Deno.env.get("SCHOLASTIC_SERVICES_SUPABASE_URL") || "";
 function resolveBridgeUrl(): string {
-  if (RAW_BRIDGE && /\/functions\/v1\//.test(RAW_BRIDGE)) return RAW_BRIDGE;
-  if (SS_SUPABASE_URL) return `${SS_SUPABASE_URL.replace(/\/$/, "")}/functions/v1/scholastic-federation`;
+  const fnMatch = RAW_BRIDGE.match(/\/functions\/v1\/([^/?#]+)/);
+  const fnName = fnMatch?.[1] || "scholastic-bridge";
+  const isSupabaseHost = /\.supabase\.co/i.test(RAW_BRIDGE);
+  if (isSupabaseHost) return RAW_BRIDGE;
+  if (SS_SUPABASE_URL) return `${SS_SUPABASE_URL.replace(/\/$/, "")}/functions/v1/${fnName}`;
   return RAW_BRIDGE;
 }
 const BRIDGE_URL = resolveBridgeUrl();
