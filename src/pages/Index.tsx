@@ -8,8 +8,10 @@ import { StandingsTable } from "@/components/StandingsTable";
 import { BroadcastHub } from "@/components/BroadcastHub";
 import { ScholasticPartnerSection } from "@/components/ScholasticPartnerSection";
 import { NexusFooter } from "@/components/NexusFooter";
+import { useScholasticAutoSync } from "@/hooks/useScholasticAutoSync";
 
 const Index = () => {
+  useScholasticAutoSync();
   return (
     <div className="min-h-screen bg-background text-foreground">
       <NexusHeader />

@@ -12,7 +12,21 @@ const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const HMAC_SECRET = Deno.env.get("FEDERATION_HMAC_SECRET")!;
 const JWT_SECRET = Deno.env.get("FEDERATION_JWT_SECRET")!;
-const BRIDGE_URL = Deno.env.get("SCHOLASTIC_BRIDGE_URL")!;
+// Resolve BRIDGE_URL. The SS bridge is a Supabase edge function — when the
+// configured URL points at the Lovable custom domain (scholasticservices.online)
+// the /functions/v1/* path returns the SPA index.html, not the function.
+// Prefer the Scholastic Services Supabase project URL when available.
+const RAW_BRIDGE = Deno.env.get("SCHOLASTIC_BRIDGE_URL") || "";
+const SS_SUPABASE_URL = Deno.env.get("SCHOLASTIC_SERVICES_SUPABASE_URL") || "";
+function resolveBridgeUrl(): string {
+  const fnMatch = RAW_BRIDGE.match(/\/functions\/v1\/([^/?#]+)/);
+  const fnName = fnMatch?.[1] || "scholastic-bridge";
+  const isSupabaseHost = /\.supabase\.co/i.test(RAW_BRIDGE);
+  if (isSupabaseHost) return RAW_BRIDGE;
+  if (SS_SUPABASE_URL) return `${SS_SUPABASE_URL.replace(/\/$/, "")}/functions/v1/${fnName}`;
+  return RAW_BRIDGE;
+}
+const BRIDGE_URL = resolveBridgeUrl();
 const ISSUER = "nexus";
 
 const json = (cors: Record<string, string>, body: unknown, status = 200) =>
@@ -23,10 +37,12 @@ const json = (cors: Record<string, string>, body: unknown, status = 200) =>
 
 async function callBridge(action: string, payload: Record<string, unknown>) {
   if (!BRIDGE_URL) throw new Error("SCHOLASTIC_BRIDGE_URL not configured");
+  console.log("[bridge] POST", action, "->", BRIDGE_URL);
   const body = JSON.stringify({ action, ...payload });
   const ts = String(Math.floor(Date.now() / 1000));
   const sig = await signHmac(HMAC_SECRET, ISSUER, ts, body);
   const jwt = await signFederationJwt(JWT_SECRET, ISSUER, { action }, 120);
+  const SS_ANON = Deno.env.get("SCHOLASTIC_SERVICES_SUPABASE_ANON_KEY") || "";
   const res = await fetch(BRIDGE_URL, {
     method: "POST",
     headers: {
@@ -35,6 +51,7 @@ async function callBridge(action: string, payload: Record<string, unknown>) {
       "X-Federation-Timestamp": ts,
       "X-Federation-Issuer": ISSUER,
       "X-Federation-Jwt": jwt,
+      ...(SS_ANON ? { "apikey": SS_ANON, "Authorization": `Bearer ${SS_ANON}` } : {}),
     },
     body,
   });
@@ -55,28 +72,40 @@ Deno.serve(async (req) => {
 
   const authHeader = req.headers.get("Authorization") || "";
   const bearer = authHeader.replace("Bearer ", "").trim();
-  const isCron = bearer && bearer === SUPABASE_SERVICE_KEY;
+  const isService = bearer && bearer === SUPABASE_SERVICE_KEY;
 
   let userId: string | null = null;
+  let isPrivileged = isService;
 
-  if (!isCron) {
-    if (!authHeader.startsWith("Bearer ")) {
-      return json(cors, { error: "unauthorized" }, 401);
-    }
-    const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: claimsData, error: claimsErr } = await userClient.auth.getClaims(bearer);
-    if (claimsErr || !claimsData?.claims?.sub) {
-      return json(cors, { error: "unauthorized" }, 401);
-    }
-    userId = claimsData.claims.sub as string;
+  // Try to resolve a signed-in user (optional). If they have HIC/admin/super_admin, mark privileged.
+  if (!isService && authHeader.startsWith("Bearer ")) {
+    try {
+      const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data: userData } = await userClient.auth.getUser();
+      if (userData?.user?.id) {
+        userId = userData.user.id;
+        const { data: roles } = await admin
+          .from("user_roles").select("role").eq("user_id", userId);
+        const allowed = new Set(["hic", "super_admin", "admin"]);
+        if ((roles || []).some((r: any) => allowed.has(r.role))) isPrivileged = true;
+      }
+    } catch (_) { /* anon fallback */ }
+  }
 
-    const { data: roles } = await admin
-      .from("user_roles").select("role").eq("user_id", userId);
-    const allowed = new Set(["hic", "super_admin", "admin"]);
-    const ok = (roles || []).some((r: any) => allowed.has(r.role));
-    if (!ok) return json(cors, { error: "forbidden" }, 403);
+  // Anonymous / non-privileged auto-sync: throttle to one run per 90s to prevent abuse.
+  if (!isPrivileged) {
+    const cutoff = new Date(Date.now() - 90_000).toISOString();
+    const { data: recent } = await admin
+      .from("ss_sync_log")
+      .select("id, status")
+      .gte("created_at", cutoff)
+      .in("status", ["success", "partial"])
+      .limit(1);
+    if (recent && recent.length) {
+      return json(cors, { ok: true, throttled: true, schoolsSynced: 0, studentsSynced: 0 }, 200);
+    }
   }
 
   let body: any = {};
@@ -93,6 +122,7 @@ Deno.serve(async (req) => {
     if (action === "sync-schools" || action === "full-sync") {
       const res = await callBridge("fetch-schools", {});
       const schools: any[] = res.schools || [];
+      console.log("[sync-schools] bridge returned", schools.length, "schools; keys:", Object.keys(res || {}), "raw:", typeof (res as any)?.raw === "string" ? (res as any).raw.slice(0, 500) : JSON.stringify(res).slice(0, 500));
       for (const s of schools) {
         const { error } = await admin.from("teams").upsert({
           external_school_id: s.school_id,

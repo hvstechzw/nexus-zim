@@ -6,10 +6,12 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { tierLabel, SCHOOL_TIERS } from "@/lib/schools";
+import { useScholasticAutoSync } from "@/hooks/useScholasticAutoSync";
 
 const PROVINCES = ["All","Harare","Bulawayo","Manicaland","Mashonaland Central","Mashonaland East","Mashonaland West","Masvingo","Matabeleland North","Matabeleland South","Midlands"];
 
 export default function SchoolsPage() {
+  useScholasticAutoSync();
   const [tier, setTier] = useState<string>("all");
   const [province, setProvince] = useState("All");
   const [search, setSearch] = useState("");
