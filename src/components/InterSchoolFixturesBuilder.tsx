@@ -75,7 +75,7 @@ export function InterSchoolFixturesBuilder() {
         age_group: ageGroup,
         term,
         created_by: user.id,
-      }).select().single();
+      } as any).select().single();
       if (cErr) throw cErr;
 
       const pairs = format === "round_robin" ? roundRobin(selected) : knockout(selected);
