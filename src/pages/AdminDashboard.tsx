@@ -678,7 +678,7 @@ export default function AdminDashboard() {
     );
   }
   if (!user) return <Navigate to="/" replace />;
-  if (!isAdmin) {
+  if (!isAnyAdmin) {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <NexusHeader />
@@ -686,12 +686,13 @@ export default function AdminDashboard() {
           <p className="text-[10px] mono tracking-[0.2em] uppercase text-nexus-muted mb-3">403 Forbidden</p>
           <h1 className="text-2xl font-semibold mb-3">Admin access required</h1>
           <p className="text-nexus-muted text-sm">
-            Your account doesn't carry the <code>admin</code> or <code>super_admin</code> role. Contact a federation official if you believe this is a mistake.
+            Your account doesn't carry an admin role (super_admin, admin, national_admin, provincial_admin, district_admin or zonal_admin). Request access via <Link to="/register" className="underline">registration</Link>.
           </p>
         </div>
       </div>
     );
   }
+
 
 
   const openDetail = (item: any, type: string) => { setSelectedItem(item); setDetailType(type); };
