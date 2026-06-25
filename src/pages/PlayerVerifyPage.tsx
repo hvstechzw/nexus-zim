@@ -38,18 +38,40 @@ export default function PlayerVerifyPage() {
   if (loading) return <div className="p-12 text-center text-nexus-muted">Loading…</div>;
   if (!isAdmin && !hasRole("hic")) return <Navigate to="/dashboard" replace />;
 
-  async function lookup(ssId: string) {
-    if (!ssId.trim()) return;
+  async function lookup(idOrQr: string, isQr = false) {
+    if (!idOrQr.trim()) return;
     setLookupBusy(true);
-    const { data, error } = await supabase
-      .from("athletes")
-      .select("id, display_name, first_name, last_name, external_student_id, ss_school_id, school_name, photo_url, scholastic_card_verified, nexus_sport")
-      .eq("external_student_id", ssId.trim())
-      .maybeSingle();
+    setAthlete(null);
+    setCardData(idOrQr.trim());
+    const body: any = isQr ? { qrData: idOrQr.trim() } : { student_id: idOrQr.trim() };
+    const { data, error } = await supabase.functions.invoke("verify-card", { body });
     setLookupBusy(false);
-    if (error) toast({ title: "Lookup failed", description: error.message, variant: "destructive" });
-    else if (!data) toast({ title: "Not found", description: `No athlete with SS ID ${ssId}`, variant: "destructive" });
-    else { setAthlete(data as Athlete); setCardData(ssId.trim()); }
+    if (error) {
+      toast({ title: "Verification failed", description: error.message, variant: "destructive" });
+      return;
+    }
+    if (!data?.ok) {
+      toast({ title: data?.status === "not_found" ? "Student not found" : `Card ${data?.status || "invalid"}`,
+              description: data?.error || "Scholastic Services rejected this card.", variant: "destructive" });
+      return;
+    }
+    if (data.athlete) setAthlete(data.athlete as Athlete);
+    else {
+      const s = data.student || {};
+      setAthlete({
+        id: s.uuid || "",
+        external_student_id: s.student_id,
+        display_name: s.name,
+        first_name: (s.name || "").split(" ")[0] || null,
+        last_name: (s.name || "").split(" ").slice(1).join(" ") || null,
+        ss_school_id: s.school_id || null,
+        school_name: null,
+        photo_url: s.photo_url || null,
+        scholastic_card_verified: true,
+        nexus_sport: null,
+      } as Athlete);
+    }
+    toast({ title: "Card verified", description: `${data.student?.name || "Student"} — ${data.status}` });
   }
 
   async function startCamera() {

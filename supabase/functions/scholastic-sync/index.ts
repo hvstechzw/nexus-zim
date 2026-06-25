@@ -128,6 +128,7 @@ Deno.serve(async (req) => {
 
   let schoolsSynced = 0;
   let studentsSynced = 0;
+  let staffSynced = 0;
   let upsertErrors = 0;
   let status: "success" | "failed" | "partial" = "success";
   let errorMessage: string | null = null;
@@ -136,7 +137,6 @@ Deno.serve(async (req) => {
     if (action === "sync-schools" || action === "full-sync") {
       const res = await callBridge("fetch-schools", {});
       const schools: any[] = res.schools || [];
-      console.log("[sync-schools] bridge returned", schools.length, "schools; keys:", Object.keys(res || {}), "raw:", typeof (res as any)?.raw === "string" ? (res as any).raw.slice(0, 500) : JSON.stringify(res).slice(0, 500));
       for (const s of schools) {
         const { error } = await admin.from("teams").upsert({
           external_school_id: s.school_id,
@@ -152,21 +152,16 @@ Deno.serve(async (req) => {
           is_active: s.is_active !== false,
         }, { onConflict: "external_school_id" });
         if (!error) schoolsSynced++;
-        else {
-          upsertErrors++;
-          console.warn("[sync-schools] upsert", s.school_id, error.message);
-        }
+        else { upsertErrors++; console.warn("[sync-schools] upsert", s.school_id, error.message); }
       }
     }
 
     if (action === "sync-students" || action === "full-sync") {
       const res = await callBridge("fetch-students", sport ? { sport } : {});
       const students: any[] = res.students || [];
-      // map ss_school_id -> Nexus team name for backfill
       const schoolIds = [...new Set(students.map((s) => s.school_id).filter(Boolean))];
       const { data: teams } = await admin
-        .from("teams")
-        .select("name, province, external_school_id")
+        .from("teams").select("name, province, external_school_id")
         .in("external_school_id", schoolIds.length ? schoolIds : ["__none__"]);
       const teamMap = new Map((teams || []).map((t: any) => [t.external_school_id, t]));
 
@@ -204,20 +199,47 @@ Deno.serve(async (req) => {
           is_active: (st.status || "active") === "active",
         }, { onConflict: "external_student_id" });
         if (!error) studentsSynced++;
-        else {
-          upsertErrors++;
-          console.warn("[sync-students] upsert", st.student_id, error.message);
-        }
+        else { upsertErrors++; console.warn("[sync-students] upsert", st.student_id, error.message); }
       }
     }
 
-    if (action !== "sync-schools" && action !== "sync-students" && action !== "full-sync") {
+    if (action === "sync-staff" || action === "full-sync") {
+      try {
+        const res = await callBridge("fetch-school-staff", {});
+        const staff: any[] = res.staff || [];
+        for (const m of staff) {
+          const { error } = await admin.from("school_staff").upsert({
+            ss_staff_id: m.ss_staff_id,
+            ss_school_id: m.school_id,
+            email: m.email || null,
+            phone: m.phone || null,
+            name: m.name || "Staff",
+            title: m.title || null,
+            department: m.department || null,
+            primary_role: m.primary_role || null,
+            roles: Array.isArray(m.roles) ? m.roles : [],
+            sport_relevant: !!m.sport_relevant,
+            sports: Array.isArray(m.sports) ? m.sports : [],
+            is_active: m.is_active !== false,
+            last_synced_at: new Date().toISOString(),
+          }, { onConflict: "ss_staff_id" });
+          if (!error) staffSynced++;
+          else { upsertErrors++; console.warn("[sync-staff] upsert", m.ss_staff_id, error.message); }
+        }
+      } catch (e) {
+        // bridge may not implement fetch-school-staff yet — log but don't fail
+        console.warn("[sync-staff] skipped:", e instanceof Error ? e.message : e);
+      }
+    }
+
+    if (!["sync-schools","sync-students","sync-staff","full-sync"].includes(action)) {
       return json(cors, { error: `unknown action: ${action}` }, 400);
     }
     if (upsertErrors > 0) {
-      status = (schoolsSynced || studentsSynced) ? "partial" : "failed";
+      status = (schoolsSynced || studentsSynced || staffSynced) ? "partial" : "failed";
       errorMessage = `${upsertErrors} record(s) could not be saved`;
     }
+
   } catch (e) {
     status = (schoolsSynced || studentsSynced) ? "partial" : "failed";
     errorMessage = e instanceof Error ? e.message : String(e);

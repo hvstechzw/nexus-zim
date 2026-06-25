@@ -24,6 +24,7 @@ import RegisterPage from "./pages/RegisterPage.tsx";
 import DashboardPage from "./pages/DashboardPage.tsx";
 import AdminSyncPage from "./pages/AdminSyncPage.tsx";
 import PlayerVerifyPage from "./pages/PlayerVerifyPage.tsx";
+import TeamBuilderPage from "./pages/TeamBuilderPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="/broadcast/:fixtureId" element={<BroadcastCGPage />} />
               <Route path="/schools" element={<SchoolsPage />} />
               <Route path="/schools/:id" element={<SchoolProfilePage />} />
+              <Route path="/schools/:id/teams/new" element={<TeamBuilderPage />} />
               <Route path="/inter-school" element={<InterSchoolPage />} />
               <Route path="/sports-day" element={<SportsDayPage />} />
               <Route path="/practice" element={<PracticeScoringPage />} />
