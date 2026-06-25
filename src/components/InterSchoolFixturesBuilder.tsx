@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { AGE_GROUPS, SCHOOL_TERMS, ALL_DISCIPLINES } from "@/lib/schools";
+import { AGE_GROUPS, SCHOOL_TERMS, ALL_DISCIPLINES, COMPETITION_STAGES, type CompetitionStage } from "@/lib/schools";
 import { AgeGroupFilter } from "@/components/AgeGroupFilter";
 
 const inputCls = "bg-nexus-surface hairline rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-nexus-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground/20 transition-all w-full";
