@@ -641,14 +641,22 @@ function ScholasticPanel({ user, toast, refetchTeams, refetchAthletes, refetchVe
 
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [showForm, setShowForm] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [detailType, setDetailType] = useState("");
   const { user, loading: authLoading } = useAuth();
-  const { isAdmin, loading: rolesLoading } = useHasRole();
+  const { isAdmin, hasRole, roles, loading: rolesLoading } = useHasRole();
   const { toast } = useToast();
   const qc = useQueryClient();
+
+  // Any admin-tier role grants access to /admin (not just super_admin/admin).
+  const isAnyAdmin = hasRole(...ADMIN_ROLES);
+  const visibleTabs = useMemo(
+    () => ALL_TABS.filter((t) => t.roles.length === 0 || hasRole(...t.roles)),
+    [roles.join("|")],
+  );
+
 
 
   const { data: competitions = [], refetch: refetchComp } = useQuery({ queryKey: ["admin-competitions"], queryFn: async () => { const { data } = await supabase.from("competitions").select("id, name, discipline, level, format, status, province, season, parent_id, created_at, description, start_date, end_date, max_participants, entry_fee, prize_pool, sponsor, logo_url").order("created_at", { ascending: false }).limit(100); return data || []; } });
