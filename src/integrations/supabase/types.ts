@@ -275,6 +275,7 @@ export type Database = {
           season: string | null
           slug: string | null
           sponsor: string | null
+          stage: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["competition_status"]
           term: string | null
@@ -306,6 +307,7 @@ export type Database = {
           season?: string | null
           slug?: string | null
           sponsor?: string | null
+          stage?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["competition_status"]
           term?: string | null
@@ -337,6 +339,7 @@ export type Database = {
           season?: string | null
           slug?: string | null
           sponsor?: string | null
+          stage?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["competition_status"]
           term?: string | null
