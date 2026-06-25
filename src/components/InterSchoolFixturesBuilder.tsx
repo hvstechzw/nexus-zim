@@ -120,7 +120,7 @@ export function InterSchoolFixturesBuilder() {
       const { error: fErr } = await supabase.from("fixtures").insert(fixtures);
       if (fErr) throw fErr;
 
-      toast({ title: "Bracket generated", description: `${comp.name} · ${pairs.length} fixtures` });
+      toast({ title: "Bracket generated", description: `${comp.name} · ${fixtures.length} fixtures` });
       qc.invalidateQueries();
       setSelected([]);
       setName("");
