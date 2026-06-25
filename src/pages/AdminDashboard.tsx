@@ -1,32 +1,64 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 import { NexusHeader } from "@/components/NexusHeader";
 import { NexusFooter } from "@/components/NexusFooter";
 import { ScholasticIntegrationBanner } from "@/components/ScholasticBadge";
 import { SyncStatusWidget } from "@/components/SyncStatusWidget";
 import { InterSchoolFixturesBuilder } from "@/components/InterSchoolFixturesBuilder";
 import { HouseCompetitionsPanel } from "@/components/HouseCompetitionsPanel";
+import { SchoolsDirectory } from "@/components/SchoolsDirectory";
+import { SportingCalendar } from "@/components/admin/SportingCalendar";
+import { UsersRolesPanel } from "@/components/admin/UsersRolesPanel";
+import { RegionRequestsPanel } from "@/components/admin/RegionRequestsPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
-import { useHasRole } from "@/hooks/useHasRole";
+import { useHasRole, AppRole } from "@/hooks/useHasRole";
 import { useToast } from "@/hooks/use-toast";
 import { Navigate } from "react-router-dom";
 
-const ADMIN_TABS = [
-  { id: "overview", label: "Overview" },
-  { id: "competitions", label: "Competitions" },
-  { id: "fixtures", label: "Fixtures" },
-  { id: "teams", label: "Teams" },
-  { id: "athletes", label: "Athletes" },
-  { id: "officials", label: "Officials" },
-  { id: "venues", label: "Venues" },
-  { id: "disciplinary", label: "Disciplinary" },
-  { id: "standings", label: "Standings" },
-  { id: "broadcasts", label: "Broadcasts" },
-  { id: "registrations", label: "Registrations" },
-  { id: "sponsorships", label: "Sponsorships" },
-  { id: "scholastic", label: "Scholastic Services" },
+type TabId =
+  | "overview"
+  | "schools"
+  | "competitions"
+  | "calendar"
+  | "fixtures"
+  | "officials"
+  | "standings"
+  | "broadcasts"
+  | "users"
+  | "regions"
+  | "federation";
+
+interface TabDef {
+  id: TabId;
+  label: string;
+  roles: AppRole[]; // empty = any admin role
+}
+
+// Admin-tier roles allowed in /admin (super_admin always allowed elsewhere)
+const ADMIN_ROLES: AppRole[] = [
+  "super_admin",
+  "admin",
+  "national_admin",
+  "provincial_admin",
+  "district_admin",
+  "zonal_admin",
+];
+
+const ALL_TABS: TabDef[] = [
+  { id: "overview", label: "Overview", roles: ADMIN_ROLES },
+  { id: "schools", label: "Schools & Teams", roles: ADMIN_ROLES },
+  { id: "competitions", label: "Competitions", roles: ADMIN_ROLES },
+  { id: "calendar", label: "Sporting Calendar", roles: ADMIN_ROLES },
+  { id: "fixtures", label: "Fixtures & Scoring", roles: ADMIN_ROLES },
+  { id: "officials", label: "Officials", roles: ["super_admin", "admin", "national_admin", "provincial_admin"] },
+  { id: "standings", label: "Standings & Records", roles: ADMIN_ROLES },
+  { id: "broadcasts", label: "Broadcasts & Media", roles: ["super_admin", "admin", "national_admin"] },
+  { id: "users", label: "Users & Roles", roles: ["super_admin"] },
+  { id: "regions", label: "Region Requests", roles: ["super_admin"] },
+  { id: "federation", label: "Federation Sync", roles: ["super_admin", "admin"] },
 ];
 
 const inputCls = "bg-nexus-surface hairline rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-nexus-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground/20 transition-all w-full";
@@ -35,7 +67,8 @@ const PROVINCES = ["Harare","Bulawayo","Manicaland","Mashonaland Central","Masho
 const LEVELS = ["primary_school","secondary_school","club_academy","provincial","national_league","national_cup","international"] as const;
 const FORMATS = ["round_robin","single_elimination","double_elimination","swiss","league","ladder","custom_heats"] as const;
 const STATUSES = ["draft","registration_open","registration_closed","ongoing","completed","cancelled"] as const;
-const DISCIPLINES = ["Football","Rugby","Cricket","Athletics","Swimming","Basketball","Volleyball","Tennis","Chess","Debate","Quiz","Netball","Hockey","Boxing","Judo","Cycling","Other"];
+const DISCIPLINES = ["Handball","Netball"];
+
 
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
