@@ -1806,6 +1806,7 @@ export type Database = {
         | "league"
         | "ladder"
         | "custom_heats"
+        | "pooled"
       competition_level:
         | "primary_school"
         | "secondary_school"
@@ -1991,6 +1992,7 @@ export const Constants = {
         "league",
         "ladder",
         "custom_heats",
+        "pooled",
       ],
       competition_level: [
         "primary_school",

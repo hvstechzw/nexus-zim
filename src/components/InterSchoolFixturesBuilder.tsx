@@ -1,10 +1,14 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { AGE_GROUPS, SCHOOL_TERMS, ALL_DISCIPLINES, COMPETITION_STAGES, type CompetitionStage } from "@/lib/schools";
+import { SCHOOL_TERMS, COMPETITION_STAGES, type CompetitionStage } from "@/lib/schools";
 import { AgeGroupFilter } from "@/components/AgeGroupFilter";
+
+// Nexus is scoped to handball + netball only.
+const NEXUS_DISCIPLINES = ["Handball", "Netball"] as const;
 
 const inputCls = "bg-nexus-surface hairline rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-nexus-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground/20 transition-all w-full";
 const labelCls = "text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold";
@@ -39,11 +43,12 @@ export function InterSchoolFixturesBuilder() {
   const { toast } = useToast();
   const qc = useQueryClient();
 
-  const [discipline, setDiscipline] = useState("Football");
+  const [discipline, setDiscipline] = useState<string>("Handball");
   const [ageGroup, setAgeGroup] = useState("U16");
   const [term, setTerm] = useState<string>("Term 1");
   const [stage, setStage] = useState<CompetitionStage>("zonal");
-  const [format, setFormat] = useState<"round_robin" | "single_elimination">("round_robin");
+  const [format, setFormat] = useState<"round_robin" | "single_elimination" | "pooled">("round_robin");
+  const [poolSize, setPoolSize] = useState<number>(4);
   const [name, setName] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
@@ -78,20 +83,44 @@ export function InterSchoolFixturesBuilder() {
       } as any).select().single();
       if (cErr) throw cErr;
 
-      const pairs = format === "round_robin" ? roundRobin(selected) : knockout(selected);
-      const fixtures = pairs.map((p, i) => ({
-        competition_id: comp.id,
-        home_team_id: p[0],
-        away_team_id: p[1],
-        round_number: format === "single_elimination" ? 1 : Math.floor(i / Math.floor(selected.length / 2)) + 1,
-        round_label: format === "single_elimination" ? "Round 1" : `Round ${Math.floor(i / Math.floor(selected.length / 2)) + 1}`,
-        status: "scheduled" as const,
-      }));
+      let fixtures: any[] = [];
+      if (format === "pooled") {
+        // Split into pools, round-robin inside each pool.
+        const shuffled = [...selected];
+        const numPools = Math.max(1, Math.ceil(shuffled.length / poolSize));
+        const pools: string[][] = Array.from({ length: numPools }, () => []);
+        shuffled.forEach((id, i) => pools[i % numPools].push(id));
+        pools.forEach((pool, pi) => {
+          const poolPairs = roundRobin(pool);
+          const half = Math.max(1, Math.floor(pool.length / 2));
+          poolPairs.forEach((p, i) => {
+            fixtures.push({
+              competition_id: comp.id,
+              home_team_id: p[0],
+              away_team_id: p[1],
+              round_number: Math.floor(i / half) + 1,
+              round_label: `Pool ${String.fromCharCode(65 + pi)} · R${Math.floor(i / half) + 1}`,
+              status: "scheduled" as const,
+            });
+          });
+        });
+      } else {
+        const pairs = format === "round_robin" ? roundRobin(selected) : knockout(selected);
+        const half = Math.max(1, Math.floor(selected.length / 2));
+        fixtures = pairs.map((p, i) => ({
+          competition_id: comp.id,
+          home_team_id: p[0],
+          away_team_id: p[1],
+          round_number: format === "single_elimination" ? 1 : Math.floor(i / half) + 1,
+          round_label: format === "single_elimination" ? "Round 1" : `Round ${Math.floor(i / half) + 1}`,
+          status: "scheduled" as const,
+        }));
+      }
 
       const { error: fErr } = await supabase.from("fixtures").insert(fixtures);
       if (fErr) throw fErr;
 
-      toast({ title: "Bracket generated", description: `${comp.name} · ${pairs.length} fixtures` });
+      toast({ title: "Bracket generated", description: `${comp.name} · ${fixtures.length} fixtures` });
       qc.invalidateQueries();
       setSelected([]);
       setName("");
@@ -112,12 +141,12 @@ export function InterSchoolFixturesBuilder() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="flex flex-col gap-1.5">
           <label className={labelCls}>Competition Name *</label>
-          <input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="Term 1 Football League — U16" />
+          <input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} placeholder="Term 1 Handball League — U16" />
         </div>
         <div className="flex flex-col gap-1.5">
           <label className={labelCls}>Discipline</label>
           <select value={discipline} onChange={(e) => setDiscipline(e.target.value)} className={inputCls + " cursor-pointer"}>
-            {ALL_DISCIPLINES.map((d) => <option key={d}>{d}</option>)}
+            {NEXUS_DISCIPLINES.map((d) => <option key={d}>{d}</option>)}
           </select>
         </div>
         <div className="flex flex-col gap-1.5">
@@ -149,8 +178,17 @@ export function InterSchoolFixturesBuilder() {
           <select value={format} onChange={(e) => setFormat(e.target.value as any)} className={inputCls + " cursor-pointer"}>
             <option value="round_robin">Round Robin (everyone plays everyone)</option>
             <option value="single_elimination">Knockout (single elimination)</option>
+            <option value="pooled">Pooled (group stage → playoffs)</option>
           </select>
         </div>
+        {format === "pooled" && (
+          <div className="flex flex-col gap-1.5">
+            <label className={labelCls}>Teams per Pool</label>
+            <select value={poolSize} onChange={(e) => setPoolSize(Number(e.target.value))} className={inputCls + " cursor-pointer"}>
+              {[3, 4, 5, 6].map((n) => <option key={n} value={n}>{n} teams</option>)}
+            </select>
+          </div>
+        )}
         <div className="md:col-span-2">
           <AgeGroupFilter value={ageGroup} onChange={setAgeGroup} />
         </div>
@@ -160,7 +198,12 @@ export function InterSchoolFixturesBuilder() {
         <p className={labelCls + " mb-2"}>Schools — Selected: {selected.length}</p>
         <div className="hairline rounded-lg max-h-64 overflow-y-auto">
           {schools.length === 0 ? (
-            <p className="p-4 text-xs text-nexus-muted text-center">No schools yet. Sync from Scholastic Services first.</p>
+            <div className="p-5 flex flex-col items-center gap-2 text-center">
+              <p className="text-xs text-nexus-muted">No schools in the directory yet.</p>
+              <Link to="/admin/sync" className="text-xs font-semibold underline underline-offset-2 hover:opacity-70">
+                Sync from Scholastic Services →
+              </Link>
+            </div>
           ) : (
             schools.map((s, i) => (
               <label key={s.id} className={`flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-nexus-surface transition-colors ${i < schools.length - 1 ? "hairline-b" : ""}`}>
@@ -174,7 +217,7 @@ export function InterSchoolFixturesBuilder() {
       </div>
 
       <button onClick={generate} disabled={busy} className="h-11 px-6 text-sm font-semibold rounded-xl bg-foreground text-primary-foreground hover:opacity-85 disabled:opacity-50 btn-click">
-        {busy ? "Generating…" : `Generate ${format === "round_robin" ? "Round Robin" : "Knockout"} Draw`}
+        {busy ? "Generating…" : `Generate ${format === "round_robin" ? "Round Robin" : format === "pooled" ? "Pooled Draw" : "Knockout"} Draw`}
       </button>
     </div>
   );
