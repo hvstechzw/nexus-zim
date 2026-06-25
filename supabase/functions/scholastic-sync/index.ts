@@ -62,6 +62,18 @@ async function callBridge(action: string, payload: Record<string, unknown>) {
   return parsed;
 }
 
+function normalizeSchoolLevel(level: unknown): string {
+  const raw = String(level || "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+  if (raw === "primary" || raw === "primary_school") return "primary_school";
+  if (raw === "secondary" || raw === "high" || raw === "high_school" || raw === "secondary_school") return "secondary_school";
+  if (raw === "club" || raw === "academy" || raw === "club_academy") return "club_academy";
+  if (raw === "provincial") return "provincial";
+  if (raw === "national" || raw === "national_league") return "national_league";
+  if (raw === "national_cup") return "national_cup";
+  if (raw === "international") return "international";
+  return "secondary_school";
+}
+
 Deno.serve(async (req) => {
   const cors = buildCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
@@ -132,7 +144,7 @@ Deno.serve(async (req) => {
           short_name: s.short_name || s.name?.slice(0, 16),
           logo_url: s.logo_url || null,
           province: s.province || "Unknown",
-          level: s.level || "secondary",
+          level: normalizeSchoolLevel(s.level),
           school_name: s.name,
           is_ss_school: true,
           sport: "general",
