@@ -249,6 +249,65 @@ export type Database = {
           },
         ]
       }
+      calendar_events: {
+        Row: {
+          competition_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          discipline: string
+          end_date: string | null
+          event_type: string
+          id: string
+          level: string
+          region: string | null
+          season: string | null
+          start_date: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          competition_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discipline: string
+          end_date?: string | null
+          event_type?: string
+          id?: string
+          level: string
+          region?: string | null
+          season?: string | null
+          start_date: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          competition_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          discipline?: string
+          end_date?: string | null
+          event_type?: string
+          id?: string
+          level?: string
+          region?: string | null
+          season?: string | null
+          start_date?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_events_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competitions: {
         Row: {
           age_group: string | null
