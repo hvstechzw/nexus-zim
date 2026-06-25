@@ -83,15 +83,39 @@ export function InterSchoolFixturesBuilder() {
       } as any).select().single();
       if (cErr) throw cErr;
 
-      const pairs = format === "round_robin" ? roundRobin(selected) : knockout(selected);
-      const fixtures = pairs.map((p, i) => ({
-        competition_id: comp.id,
-        home_team_id: p[0],
-        away_team_id: p[1],
-        round_number: format === "single_elimination" ? 1 : Math.floor(i / Math.floor(selected.length / 2)) + 1,
-        round_label: format === "single_elimination" ? "Round 1" : `Round ${Math.floor(i / Math.floor(selected.length / 2)) + 1}`,
-        status: "scheduled" as const,
-      }));
+      let fixtures: any[] = [];
+      if (format === "pooled") {
+        // Split into pools, round-robin inside each pool.
+        const shuffled = [...selected];
+        const numPools = Math.max(1, Math.ceil(shuffled.length / poolSize));
+        const pools: string[][] = Array.from({ length: numPools }, () => []);
+        shuffled.forEach((id, i) => pools[i % numPools].push(id));
+        pools.forEach((pool, pi) => {
+          const poolPairs = roundRobin(pool);
+          const half = Math.max(1, Math.floor(pool.length / 2));
+          poolPairs.forEach((p, i) => {
+            fixtures.push({
+              competition_id: comp.id,
+              home_team_id: p[0],
+              away_team_id: p[1],
+              round_number: Math.floor(i / half) + 1,
+              round_label: `Pool ${String.fromCharCode(65 + pi)} · R${Math.floor(i / half) + 1}`,
+              status: "scheduled" as const,
+            });
+          });
+        });
+      } else {
+        const pairs = format === "round_robin" ? roundRobin(selected) : knockout(selected);
+        const half = Math.max(1, Math.floor(selected.length / 2));
+        fixtures = pairs.map((p, i) => ({
+          competition_id: comp.id,
+          home_team_id: p[0],
+          away_team_id: p[1],
+          round_number: format === "single_elimination" ? 1 : Math.floor(i / half) + 1,
+          round_label: format === "single_elimination" ? "Round 1" : `Round ${Math.floor(i / half) + 1}`,
+          status: "scheduled" as const,
+        }));
+      }
 
       const { error: fErr } = await supabase.from("fixtures").insert(fixtures);
       if (fErr) throw fErr;
