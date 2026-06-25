@@ -36,6 +36,7 @@ async function callBridge(action: string, payload: Record<string, unknown>) {
   const ts = String(Math.floor(Date.now() / 1000));
   const sig = await signHmac(HMAC_SECRET, ISSUER, ts, body);
   const jwt = await signFederationJwt(JWT_SECRET, ISSUER, { action }, 120);
+  const SS_ANON = Deno.env.get("SCHOLASTIC_SERVICES_SUPABASE_ANON_KEY") || "";
   const res = await fetch(BRIDGE_URL, {
     method: "POST",
     headers: {
@@ -44,6 +45,7 @@ async function callBridge(action: string, payload: Record<string, unknown>) {
       "X-Federation-Timestamp": ts,
       "X-Federation-Issuer": ISSUER,
       "X-Federation-Jwt": jwt,
+      ...(SS_ANON ? { "apikey": SS_ANON, "Authorization": `Bearer ${SS_ANON}` } : {}),
     },
     body,
   });
