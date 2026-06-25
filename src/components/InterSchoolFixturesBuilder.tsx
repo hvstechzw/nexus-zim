@@ -68,6 +68,7 @@ export function InterSchoolFixturesBuilder() {
         name: name.trim(),
         discipline,
         level: "secondary_school",
+        stage,
         format,
         status: "registration_closed",
         season: new Date().getFullYear().toString(),
