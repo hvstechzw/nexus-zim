@@ -55,28 +55,40 @@ Deno.serve(async (req) => {
 
   const authHeader = req.headers.get("Authorization") || "";
   const bearer = authHeader.replace("Bearer ", "").trim();
-  const isCron = bearer && bearer === SUPABASE_SERVICE_KEY;
+  const isService = bearer && bearer === SUPABASE_SERVICE_KEY;
 
   let userId: string | null = null;
+  let isPrivileged = isService;
 
-  if (!isCron) {
-    if (!authHeader.startsWith("Bearer ")) {
-      return json(cors, { error: "unauthorized" }, 401);
-    }
-    const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: claimsData, error: claimsErr } = await userClient.auth.getClaims(bearer);
-    if (claimsErr || !claimsData?.claims?.sub) {
-      return json(cors, { error: "unauthorized" }, 401);
-    }
-    userId = claimsData.claims.sub as string;
+  // Try to resolve a signed-in user (optional). If they have HIC/admin/super_admin, mark privileged.
+  if (!isService && authHeader.startsWith("Bearer ")) {
+    try {
+      const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        global: { headers: { Authorization: authHeader } },
+      });
+      const { data: userData } = await userClient.auth.getUser();
+      if (userData?.user?.id) {
+        userId = userData.user.id;
+        const { data: roles } = await admin
+          .from("user_roles").select("role").eq("user_id", userId);
+        const allowed = new Set(["hic", "super_admin", "admin"]);
+        if ((roles || []).some((r: any) => allowed.has(r.role))) isPrivileged = true;
+      }
+    } catch (_) { /* anon fallback */ }
+  }
 
-    const { data: roles } = await admin
-      .from("user_roles").select("role").eq("user_id", userId);
-    const allowed = new Set(["hic", "super_admin", "admin"]);
-    const ok = (roles || []).some((r: any) => allowed.has(r.role));
-    if (!ok) return json(cors, { error: "forbidden" }, 403);
+  // Anonymous / non-privileged auto-sync: throttle to one run per 90s to prevent abuse.
+  if (!isPrivileged) {
+    const cutoff = new Date(Date.now() - 90_000).toISOString();
+    const { data: recent } = await admin
+      .from("ss_sync_log")
+      .select("id, status")
+      .gte("created_at", cutoff)
+      .in("status", ["success", "partial"])
+      .limit(1);
+    if (recent && recent.length) {
+      return json(cors, { ok: true, throttled: true, schoolsSynced: 0, studentsSynced: 0 }, 200);
+    }
   }
 
   let body: any = {};
@@ -93,6 +105,7 @@ Deno.serve(async (req) => {
     if (action === "sync-schools" || action === "full-sync") {
       const res = await callBridge("fetch-schools", {});
       const schools: any[] = res.schools || [];
+      console.log("[sync-schools] bridge returned", schools.length, "schools; keys:", Object.keys(res || {}), "raw:", typeof (res as any)?.raw === "string" ? (res as any).raw.slice(0, 500) : JSON.stringify(res).slice(0, 500));
       for (const s of schools) {
         const { error } = await admin.from("teams").upsert({
           external_school_id: s.school_id,
