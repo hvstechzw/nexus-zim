@@ -62,6 +62,18 @@ async function callBridge(action: string, payload: Record<string, unknown>) {
   return parsed;
 }
 
+function normalizeSchoolLevel(level: unknown): string {
+  const raw = String(level || "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+  if (raw === "primary" || raw === "primary_school") return "primary_school";
+  if (raw === "secondary" || raw === "high" || raw === "high_school" || raw === "secondary_school") return "secondary_school";
+  if (raw === "club" || raw === "academy" || raw === "club_academy") return "club_academy";
+  if (raw === "provincial") return "provincial";
+  if (raw === "national" || raw === "national_league") return "national_league";
+  if (raw === "national_cup") return "national_cup";
+  if (raw === "international") return "international";
+  return "secondary_school";
+}
+
 Deno.serve(async (req) => {
   const cors = buildCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
@@ -99,11 +111,12 @@ Deno.serve(async (req) => {
     const cutoff = new Date(Date.now() - 90_000).toISOString();
     const { data: recent } = await admin
       .from("ss_sync_log")
-      .select("id, status")
+      .select("id, status, schools_synced, students_synced")
       .gte("created_at", cutoff)
       .in("status", ["success", "partial"])
       .limit(1);
-    if (recent && recent.length) {
+    const recentUsefulSync = (recent || []).some((r: any) => (r.schools_synced || 0) > 0 || (r.students_synced || 0) > 0);
+    if (recentUsefulSync) {
       return json(cors, { ok: true, throttled: true, schoolsSynced: 0, studentsSynced: 0 }, 200);
     }
   }
@@ -115,6 +128,7 @@ Deno.serve(async (req) => {
 
   let schoolsSynced = 0;
   let studentsSynced = 0;
+  let upsertErrors = 0;
   let status: "success" | "failed" | "partial" = "success";
   let errorMessage: string | null = null;
 
@@ -130,16 +144,18 @@ Deno.serve(async (req) => {
           short_name: s.short_name || s.name?.slice(0, 16),
           logo_url: s.logo_url || null,
           province: s.province || "Unknown",
-          level: s.level || "secondary",
+          level: normalizeSchoolLevel(s.level),
           school_name: s.name,
-          city: s.city || null,
           is_ss_school: true,
           sport: "general",
           discipline: "general",
           is_active: s.is_active !== false,
         }, { onConflict: "external_school_id" });
         if (!error) schoolsSynced++;
-        else console.warn("[sync-schools] upsert", s.school_id, error.message);
+        else {
+          upsertErrors++;
+          console.warn("[sync-schools] upsert", s.school_id, error.message);
+        }
       }
     }
 
@@ -188,12 +204,19 @@ Deno.serve(async (req) => {
           is_active: (st.status || "active") === "active",
         }, { onConflict: "external_student_id" });
         if (!error) studentsSynced++;
-        else console.warn("[sync-students] upsert", st.student_id, error.message);
+        else {
+          upsertErrors++;
+          console.warn("[sync-students] upsert", st.student_id, error.message);
+        }
       }
     }
 
     if (action !== "sync-schools" && action !== "sync-students" && action !== "full-sync") {
       return json(cors, { error: `unknown action: ${action}` }, 400);
+    }
+    if (upsertErrors > 0) {
+      status = (schoolsSynced || studentsSynced) ? "partial" : "failed";
+      errorMessage = `${upsertErrors} record(s) could not be saved`;
     }
   } catch (e) {
     status = (schoolsSynced || studentsSynced) ? "partial" : "failed";
