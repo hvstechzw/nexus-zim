@@ -1,73 +1,59 @@
-# Nexus Rebuild — Handball & Netball, SS via Federation
+## Restructure Admin Dashboard — Schools-Only Handball/Netball Model
 
-Federation stays the SS bridge — no direct cross-project Supabase client, no SS anon key in the browser. All SS reads/writes go through the existing HMAC edge functions (`scholastic-federation`, `scholastic-push`), extended with new actions.
+Rebuild `/admin` so it matches what the app actually does today: a closed Scholastic Services ecosystem for school Handball and Netball with a Zonal → District → Provincial → National pathway. Same single `/admin` route, content adapts to the signed-in role.
 
-## Phase 1 — Migration (single transaction)
+### Tab map (replaces current 13 tabs)
 
-1. `TRUNCATE` all 22 existing tables `CASCADE`.
-2. Extend `app_role` enum: add `coach`, `hic`, `umpire`.
-3. Alter existing tables:
-   - `athletes`: add `is_ss_linked`, `scholastic_card_verified`, `jersey_number`, `nexus_sport` (`handball|netball|both`), `ss_school_id`.
-   - `teams`: add `is_ss_school`, `sport` (`handball|netball|both|general`).
-4. Create new tables (each with GRANTs + RLS + policies):
-   - `nexus_coaches` — coach registrations, verified by HIC.
-   - `team_sheets` — coach → HIC submissions with `players` JSONB.
-   - `scholastic_card_verifications` — audit trail of card scans / manual confirms.
-   - `ss_sync_log` — federation sync results.
-   - `nexus_student_activity` — outbound feed read by SS (public SELECT).
-5. Create public view `nexus_student_sports_profile` for SS to consume.
-6. RLS policies use `has_role()` for HIC/super_admin gates; coaches limited to own school; athletes limited to own row.
+| New tab | Who sees it | Replaces |
+|---|---|---|
+| Overview | All admins | Overview |
+| Schools & Teams | All admins (filtered by region) | Athletes + Teams |
+| Competitions | super_admin, national_admin, region admins (own region) | Competitions |
+| Sporting Calendar | super_admin, national_admin, region admins | new |
+| Fixtures & Scoring | All admins (filtered) | Fixtures |
+| Officials (HIC / Umpire) | super_admin, national_admin, region admins | Officials |
+| Standings & Records | All admins | Standings |
+| Broadcasts & Media | super_admin, national_admin | Broadcasts |
+| Users & Roles | super_admin only | new (replaces Registrations) |
+| Region Requests | super_admin only | (was at /admin/regions) |
+| Federation Sync | super_admin only | Scholastic Services |
 
-## Phase 2 — Federation extensions (edge functions only, no browser SS client)
+Removed entirely: Athletes, Teams (generic), Venues, Disciplinary, Registrations, Sponsorships.
 
-Extend `scholastic-federation` with new inbound actions Nexus calls outward via the existing HMAC client:
-- `pull-schools` → upsert into `teams` (`is_ss_school=true`).
-- `pull-students` (optional sport filter) → upsert into `athletes` (`is_ss_linked=true`).
-- `full-sync` → both, writes `ss_sync_log`.
+### Sporting Calendar (new)
 
-Outbound to SS via `scholastic-push`:
-- `push-student-activity` on each goal / match-completed / card / award.
-- `push-card-verification` after HIC verifies a card.
+Per-discipline timeline (Handball, Netball) similar to NASH:
+- Auto-populated from competitions: every competition with start/end dates becomes a calendar entry tagged by level and region
+- Manual entries: training camps, trials, congresses, holidays
+- Filters: discipline, level (Zonal/District/Provincial/National), season
+- Views: list + month grid
+- Region admins see their region + national; super_admin sees all
+- New table `calendar_events` (discipline, level, region, title, start/end, type, competition_id?, created_by)
 
-Front-end `/admin → Sync` tab calls a new `scholastic-sync` function (server-side) that orchestrates pulls. No SS keys ever land in the client bundle.
+### Role-aware access
 
-## Phase 3 — UI rebuild (delete all current pages/components except shadcn + supabase client)
+Wrap each tab section in a small `<RoleGate roles=[...] regions=[...]>` helper. Region admins only see/edit data scoped to their assigned zone/district/province (from `region_admin_assignments`).
 
-Pages:
-- `/` Home — hero, live strip, upcoming, standings (Handball|Netball tabs), SS banner.
-- `/live` — Realtime live matches, two columns by sport.
-- `/fixtures`, `/results`, `/standings` — filters by sport/competition/school.
-- `/schools`, `/schools/:id` — directory + profile with SS Verified / Independent badges.
-- `/scoring/:fixtureId` — sport-aware console:
-  - Handball: 2 halves, goal/yellow/red/2-min, period_scores JSON.
-  - Netball: 4 quarters, goal/penalty/contact/obstruction.
-  - Realtime score broadcast, offline event buffer.
-- `/register/coach`, `/register/umpire`, `/register/school` — public forms.
-- `/login`, `/dashboard` (role router).
-- `/admin` (super_admin + hic) — tabs: Overview, Competitions, Fixtures, Team Sheets, Player Verification (QR scan of Scholastic Card), Schools, Coaches, Umpires, Sync from SS, Settings.
-- `/coach` — squad, team-sheet submission, fixtures.
-- `/umpire` — assigned fixtures, "Start Scoring".
-- `/player-profile` — SS-linked athlete stats + activity feed.
+| Role | Default landing tab | Scope |
+|---|---|---|
+| super_admin | Overview | Global |
+| national_admin | Overview | Global, read-mostly except calendar/competitions |
+| provincial_admin | Schools & Teams | Their province |
+| district_admin | Fixtures & Scoring | Their district |
+| zonal_admin | Fixtures & Scoring | Their zone |
+| hic | Fixtures & Scoring | Assigned fixtures |
+| coach | Schools & Teams | Their school's teams |
 
-Design tokens (semantic, in `index.css`):
-- bg `#0A1628`, primary `#00E5FF`, handball pill `#FF6B35`, netball pill `#9B5DE5`.
-- Keep existing Nexus + AIE logos.
+### Technical details
 
-## Phase 4 — Verification flow
+- Database: one migration to add `public.calendar_events` (with GRANTs + RLS) and a `competition_calendar_sync` trigger that mirrors competition date changes into the calendar
+- `src/pages/AdminDashboard.tsx`: replace the tab list, drop dead forms/queries, gate sections by role + region using `useHasRole` and a new `useRegionScope` hook
+- New components: `src/components/admin/SportingCalendar.tsx`, `src/components/admin/UsersRolesPanel.tsx`, `src/components/admin/RegionRequestsPanel.tsx` (move from `/admin/regions`), `src/components/admin/FederationSyncPanel.tsx` (move existing ScholasticPanel content)
+- Remove `/admin/regions` standalone route (becomes a tab); keep redirect for old links
+- Keep all existing data fetches that still apply; delete queries for the removed tabs (sponsorships, disciplinary, registrations, generic teams/athletes/venues)
 
-Coach submits team_sheet → HIC opens Player Verification → camera reads Scholastic Card QR → compare scanned `student_id` to `athletes.external_student_id` → mark `scholastic_card_verified=true` and `push-card-verification` to SS. Manual override path with required note for non-SS schools / scan failures.
+### Out of scope (ask later if you want)
 
-## Phase 5 — Activity push-back
-
-On every goal / match-complete / card / award for an SS-linked athlete, insert into `nexus_student_activity` and call `scholastic-push push-student-activity`. SS reads either the public table directly or via the `nexus_student_sports_profile` view.
-
-## Out of scope (explicit)
-
-- No `VITE_SS_SUPABASE_URL` / SS anon key in the client.
-- No sports other than handball + netball.
-- No payments, SMS, parent portal.
-- No edits to `src/integrations/supabase/client.ts` / `types.ts` / `.env`.
-
-## Confirmation needed before I start
-
-This `TRUNCATE … CASCADE` is irreversible — every athlete, team, fixture, score, role, profile row is gone. Approve this plan and I'll begin with the migration, then deploy the federation actions, then rebuild the UI.
+- Editing synced school/student records (stay read-only mirror)
+- Bulk roster CSV imports
+- Mobile-specific calendar gestures

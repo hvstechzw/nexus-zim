@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.sync_competition_to_calendar() FROM PUBLIC, anon, authenticated;

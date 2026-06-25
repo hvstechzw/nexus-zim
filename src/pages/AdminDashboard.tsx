@@ -1,32 +1,64 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
 import { NexusHeader } from "@/components/NexusHeader";
 import { NexusFooter } from "@/components/NexusFooter";
 import { ScholasticIntegrationBanner } from "@/components/ScholasticBadge";
 import { SyncStatusWidget } from "@/components/SyncStatusWidget";
 import { InterSchoolFixturesBuilder } from "@/components/InterSchoolFixturesBuilder";
 import { HouseCompetitionsPanel } from "@/components/HouseCompetitionsPanel";
+import { SchoolsDirectory } from "@/components/SchoolsDirectory";
+import { SportingCalendar } from "@/components/admin/SportingCalendar";
+import { UsersRolesPanel } from "@/components/admin/UsersRolesPanel";
+import { RegionRequestsPanel } from "@/components/admin/RegionRequestsPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
-import { useHasRole } from "@/hooks/useHasRole";
+import { useHasRole, AppRole } from "@/hooks/useHasRole";
 import { useToast } from "@/hooks/use-toast";
 import { Navigate } from "react-router-dom";
 
-const ADMIN_TABS = [
-  { id: "overview", label: "Overview" },
-  { id: "competitions", label: "Competitions" },
-  { id: "fixtures", label: "Fixtures" },
-  { id: "teams", label: "Teams" },
-  { id: "athletes", label: "Athletes" },
-  { id: "officials", label: "Officials" },
-  { id: "venues", label: "Venues" },
-  { id: "disciplinary", label: "Disciplinary" },
-  { id: "standings", label: "Standings" },
-  { id: "broadcasts", label: "Broadcasts" },
-  { id: "registrations", label: "Registrations" },
-  { id: "sponsorships", label: "Sponsorships" },
-  { id: "scholastic", label: "Scholastic Services" },
+type TabId =
+  | "overview"
+  | "schools"
+  | "competitions"
+  | "calendar"
+  | "fixtures"
+  | "officials"
+  | "standings"
+  | "broadcasts"
+  | "users"
+  | "regions"
+  | "federation";
+
+interface TabDef {
+  id: TabId;
+  label: string;
+  roles: AppRole[]; // empty = any admin role
+}
+
+// Admin-tier roles allowed in /admin (super_admin always allowed elsewhere)
+const ADMIN_ROLES: AppRole[] = [
+  "super_admin",
+  "admin",
+  "national_admin",
+  "provincial_admin",
+  "district_admin",
+  "zonal_admin",
+];
+
+const ALL_TABS: TabDef[] = [
+  { id: "overview", label: "Overview", roles: ADMIN_ROLES },
+  { id: "schools", label: "Schools & Teams", roles: ADMIN_ROLES },
+  { id: "competitions", label: "Competitions", roles: ADMIN_ROLES },
+  { id: "calendar", label: "Sporting Calendar", roles: ADMIN_ROLES },
+  { id: "fixtures", label: "Fixtures & Scoring", roles: ADMIN_ROLES },
+  { id: "officials", label: "Officials", roles: ["super_admin", "admin", "national_admin", "provincial_admin"] },
+  { id: "standings", label: "Standings & Records", roles: ADMIN_ROLES },
+  { id: "broadcasts", label: "Broadcasts & Media", roles: ["super_admin", "admin", "national_admin"] },
+  { id: "users", label: "Users & Roles", roles: ["super_admin"] },
+  { id: "regions", label: "Region Requests", roles: ["super_admin"] },
+  { id: "federation", label: "Federation Sync", roles: ["super_admin", "admin"] },
 ];
 
 const inputCls = "bg-nexus-surface hairline rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-nexus-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground/20 transition-all w-full";
@@ -35,7 +67,8 @@ const PROVINCES = ["Harare","Bulawayo","Manicaland","Mashonaland Central","Masho
 const LEVELS = ["primary_school","secondary_school","club_academy","provincial","national_league","national_cup","international"] as const;
 const FORMATS = ["round_robin","single_elimination","double_elimination","swiss","league","ladder","custom_heats"] as const;
 const STATUSES = ["draft","registration_open","registration_closed","ongoing","completed","cancelled"] as const;
-const DISCIPLINES = ["Football","Rugby","Cricket","Athletics","Swimming","Basketball","Volleyball","Tennis","Chess","Debate","Quiz","Netball","Hockey","Boxing","Judo","Cycling","Other"];
+const DISCIPLINES = ["Handball","Netball"];
+
 
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
@@ -608,14 +641,22 @@ function ScholasticPanel({ user, toast, refetchTeams, refetchAthletes, refetchVe
 
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [showForm, setShowForm] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [detailType, setDetailType] = useState("");
   const { user, loading: authLoading } = useAuth();
-  const { isAdmin, loading: rolesLoading } = useHasRole();
+  const { isAdmin, hasRole, roles, loading: rolesLoading } = useHasRole();
   const { toast } = useToast();
   const qc = useQueryClient();
+
+  // Any admin-tier role grants access to /admin (not just super_admin/admin).
+  const isAnyAdmin = hasRole(...ADMIN_ROLES);
+  const visibleTabs = useMemo(
+    () => ALL_TABS.filter((t) => t.roles.length === 0 || hasRole(...t.roles)),
+    [roles.join("|")],
+  );
+
 
 
   const { data: competitions = [], refetch: refetchComp } = useQuery({ queryKey: ["admin-competitions"], queryFn: async () => { const { data } = await supabase.from("competitions").select("id, name, discipline, level, format, status, province, season, parent_id, created_at, description, start_date, end_date, max_participants, entry_fee, prize_pool, sponsor, logo_url").order("created_at", { ascending: false }).limit(100); return data || []; } });
@@ -637,7 +678,7 @@ export default function AdminDashboard() {
     );
   }
   if (!user) return <Navigate to="/" replace />;
-  if (!isAdmin) {
+  if (!isAnyAdmin) {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <NexusHeader />
@@ -645,12 +686,13 @@ export default function AdminDashboard() {
           <p className="text-[10px] mono tracking-[0.2em] uppercase text-nexus-muted mb-3">403 Forbidden</p>
           <h1 className="text-2xl font-semibold mb-3">Admin access required</h1>
           <p className="text-nexus-muted text-sm">
-            Your account doesn't carry the <code>admin</code> or <code>super_admin</code> role. Contact a federation official if you believe this is a mistake.
+            Your account doesn't carry an admin role (super_admin, admin, national_admin, provincial_admin, district_admin or zonal_admin). Request access via <Link to="/register" className="underline">registration</Link>.
           </p>
         </div>
       </div>
     );
   }
+
 
 
   const openDetail = (item: any, type: string) => { setSelectedItem(item); setDetailType(type); };
@@ -689,7 +731,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className="flex overflow-x-auto hairline-b scrollbar-hide">
-          {ADMIN_TABS.map((tab) => (
+          {visibleTabs.map((tab) => (
             <button key={tab.id} onClick={() => { setActiveTab(tab.id); setShowForm(false); }}
               className={`px-4 sm:px-6 py-4 text-xs font-semibold tracking-wide whitespace-nowrap flex-shrink-0 border-b-2 transition-all duration-200 btn-click
                 ${activeTab === tab.id ? "border-foreground text-foreground" : "border-transparent text-nexus-muted hover:text-foreground"}`}>
@@ -697,6 +739,7 @@ export default function AdminDashboard() {
             </button>
           ))}
         </div>
+
 
         <motion.div key={activeTab} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
 
@@ -903,60 +946,43 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* TEAMS */}
-          {activeTab === "teams" && (
+          {/* SCHOOLS & TEAMS */}
+          {activeTab === "schools" && (
             <div>
-              {sectionHeader("Teams", user && (
-                <button onClick={() => setShowForm(!showForm)} className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click">
-                  {showForm ? "Cancel" : "+ New Team"}
-                </button>
+              {sectionHeader("Schools & Teams", (
+                <Link to="/schools" className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-nexus-surface hover:bg-nexus-silver flex items-center transition-colors">
+                  Open public directory →
+                </Link>
               ))}
-              {showForm && <div className="p-4 sm:p-8 hairline-b"><TeamForm onSuccess={() => { setShowForm(false); refetchTeams(); }} /></div>}
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px]">
-                  {tableHead("","Name","Discipline","Level","Province","Status")}
-                  <tbody>
-                    {(teams as any[]).map((t) => (
-                      <tr key={t.id} className={clickableRow} onClick={() => openDetail(t, "team")}>
-                        <td className="px-4 sm:px-6 py-4 w-10">{t.logo_url ? <img src={t.logo_url} className="w-8 h-8 rounded-lg object-cover bg-white" alt="" /> : <div className="w-8 h-8 rounded-lg bg-nexus-surface flex items-center justify-center text-[9px] mono text-nexus-muted">{t.short_name?.slice(0,2) || t.name?.slice(0,2)}</div>}</td>
-                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{t.name}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{t.discipline}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{t.level?.replace(/_/g," ") || "—"}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{t.province || "—"}</td>
-                        <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${t.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{t.is_active ? "Active" : "Inactive"}</span></td>
-                      </tr>
-                    ))}
-                    {teams.length === 0 && <tr><td colSpan={6}><EmptyState msg="No teams yet." /></td></tr>}
-                  </tbody>
-                </table>
+              <div className="p-4 sm:p-8 space-y-6">
+                <SchoolsDirectory />
+                <div className="hairline rounded-xl bg-background overflow-hidden">
+                  <p className="px-6 py-4 hairline-b text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium">All synced schools</p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[640px]">
+                      {tableHead("","Name","Discipline","Level","Province","Status")}
+                      <tbody>
+                        {(teams as any[]).map((t) => (
+                          <tr key={t.id} className={clickableRow} onClick={() => openDetail(t, "team")}>
+                            <td className="px-4 sm:px-6 py-4 w-10">{t.logo_url ? <img src={t.logo_url} className="w-8 h-8 rounded-lg object-cover bg-white" alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} /> : <div className="w-8 h-8 rounded-lg bg-nexus-surface flex items-center justify-center text-[9px] mono text-nexus-muted">{t.short_name?.slice(0,2) || t.name?.slice(0,2)}</div>}</td>
+                            <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{t.name}</td>
+                            <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{t.discipline || "—"}</td>
+                            <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{t.level?.replace(/_/g," ") || "—"}</td>
+                            <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{t.province || "—"}</td>
+                            <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${t.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{t.is_active ? "Active" : "Inactive"}</span></td>
+                          </tr>
+                        ))}
+                        {teams.length === 0 && <tr><td colSpan={6}><EmptyState msg="No schools synced yet. Trigger a federation sync." /></td></tr>}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             </div>
           )}
 
-          {/* ATHLETES */}
-          {activeTab === "athletes" && (
-            <div>
-              {sectionHeader("Athletes")}
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px]">
-                  {tableHead("","Name","Province","Disciplines","ID Card","Status")}
-                  <tbody>
-                    {(athletes as any[]).map((a) => (
-                      <tr key={a.id} className={clickableRow} onClick={() => openDetail(a, "athlete")}>
-                        <td className="px-4 sm:px-6 py-4 w-10">{a.photo_url ? <img src={a.photo_url} className="w-8 h-8 rounded-full object-cover" alt="" /> : <div className="w-8 h-8 rounded-full bg-nexus-surface flex items-center justify-center text-[9px] mono font-bold text-nexus-muted">{a.first_name?.[0]}{a.last_name?.[0]}</div>}</td>
-                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{a.first_name} {a.last_name}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{a.province}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{a.disciplines?.join(", ")}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{a.id_card_number || "—"}</td>
-                        <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${a.is_suspended ? "bg-foreground text-primary-foreground" : a.is_active ? "bg-nexus-surface text-nexus-muted" : "bg-nexus-surface text-nexus-muted"}`}>{a.is_suspended ? "Suspended" : a.is_active ? "Active" : "Inactive"}</span></td>
-                      </tr>
-                    ))}
-                    {athletes.length === 0 && <tr><td colSpan={6}><EmptyState msg="No athletes registered yet." /></td></tr>}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+          {/* SPORTING CALENDAR */}
+          {activeTab === "calendar" && <SportingCalendar />}
 
           {/* OFFICIALS */}
           {activeTab === "officials" && (
@@ -983,93 +1009,14 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* VENUES */}
-          {activeTab === "venues" && (
-            <div>
-              {sectionHeader("Venues", user && (
-                <button onClick={() => setShowForm(!showForm)} className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click">
-                  {showForm ? "Cancel" : "+ Add Venue"}
-                </button>
-              ))}
-              {showForm && <div className="p-4 sm:p-8 hairline-b"><VenueForm onSuccess={() => { setShowForm(false); refetchVenues(); }} /></div>}
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px]">
-                  {tableHead("Name","Type","City","Province","Capacity","Status")}
-                  <tbody>
-                    {(venues as any[]).map((v) => (
-                      <tr key={v.id} className={clickableRow} onClick={() => openDetail(v, "venue")}>
-                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{v.name}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted capitalize">{v.type}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{v.city}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{v.province}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{v.capacity ? v.capacity.toLocaleString() : "—"}</td>
-                        <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${v.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{v.is_active ? "Active" : "Inactive"}</span></td>
-                      </tr>
-                    ))}
-                    {venues.length === 0 && <tr><td colSpan={6}><EmptyState msg="No venues yet." /></td></tr>}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* DISCIPLINARY */}
-          {activeTab === "disciplinary" && (
-            <div>
-              {sectionHeader("Disciplinary Registry")}
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[700px]">
-                  {tableHead("Athlete","Severity","Reason","Appeal","Suspension Until","Active")}
-                  <tbody>
-                    {(disciplinary as any[]).map((d) => (
-                      <tr key={d.id} className={clickableRow} onClick={() => openDetail(d, "disciplinary")}>
-                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{d.athlete ? `${d.athlete.first_name} ${d.athlete.last_name}` : "—"}</td>
-                        <td className="px-4 sm:px-6 py-4"><span className="text-[10px] mono px-2.5 py-1 rounded-full bg-nexus-surface text-nexus-muted uppercase tracking-widest">{d.severity?.replace(/_/g," ")}</span></td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted max-w-[200px] truncate">{d.reason}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{d.appeal_status || "none"}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{d.suspension_until || "—"}</td>
-                        <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${d.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{d.is_active ? "Active" : "Resolved"}</span></td>
-                      </tr>
-                    ))}
-                    {disciplinary.length === 0 && <tr><td colSpan={6}><EmptyState msg="No disciplinary records." /></td></tr>}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
           {/* STANDINGS */}
           {activeTab === "standings" && (
             <div>
-              {sectionHeader("Standings Management")}
+              {sectionHeader("Standings & Records")}
               <div className="p-8 text-center">
-                <p className="text-nexus-muted mono text-sm">Standings are auto-populated from fixture results.</p>
-                <p className="text-nexus-muted mono text-xs mt-2">Go to Scoring to enter results, then view standings on the main page.</p>
-              </div>
-            </div>
-          )}
-
-          {/* REGISTRATIONS */}
-          {activeTab === "registrations" && (
-            <div>
-              {sectionHeader("Registrations")}
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[700px]">
-                  {tableHead("Registrant","Type","Competition","Status","Payment","Date")}
-                  <tbody>
-                    {(registrations as any[]).map((r) => (
-                      <tr key={r.id} className={clickableRow} onClick={() => openDetail(r, "registration")}>
-                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{r.athlete ? `${r.athlete.first_name} ${r.athlete.last_name}` : r.team?.name || "—"}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted capitalize">{r.registration_type}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{r.competition?.name || "—"}</td>
-                        <td className="px-4 sm:px-6 py-4"><span className="text-[10px] mono px-2.5 py-1 rounded-full bg-nexus-surface text-nexus-muted">{r.status}</span></td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{r.payment_status}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{new Date(r.created_at).toLocaleDateString("en-ZW", { month: "short", day: "numeric" })}</td>
-                      </tr>
-                    ))}
-                    {registrations.length === 0 && <tr><td colSpan={6}><EmptyState msg="No registrations yet." /></td></tr>}
-                  </tbody>
-                </table>
+                <p className="text-nexus-muted mono text-sm">Standings auto-populate from fixture results.</p>
+                <p className="text-nexus-muted mono text-xs mt-2">Use Fixtures & Scoring to enter results, then view standings publicly on /standings.</p>
+                <Link to="/standings" className="mt-4 inline-block h-9 px-4 text-xs font-semibold rounded-lg bg-foreground text-primary-foreground hover:opacity-85 leading-9">Open public standings →</Link>
               </div>
             </div>
           )}
@@ -1077,7 +1024,7 @@ export default function AdminDashboard() {
           {/* BROADCASTS */}
           {activeTab === "broadcasts" && (
             <div>
-              {sectionHeader("Broadcasts")}
+              {sectionHeader("Broadcasts & Media")}
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[640px]">
                   {tableHead("Title","Competition","Platform","Status","Viewers","Quality")}
@@ -1099,41 +1046,18 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {/* SPONSORSHIPS */}
-          {activeTab === "sponsorships" && (
-            <div>
-              {sectionHeader("Sponsorships", user && (
-                <button onClick={() => setShowForm(!showForm)} className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click">
-                  {showForm ? "Cancel" : "+ Add Sponsor"}
-                </button>
-              ))}
-              {showForm && <div className="p-4 sm:p-8 hairline-b"><SponsorshipForm competitions={competitions as any[]} onSuccess={() => { setShowForm(false); refetchSponsors(); }} /></div>}
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px]">
-                  {tableHead("","Sponsor","Competition","Tier","Amount","Start","End")}
-                  <tbody>
-                    {(sponsorships as any[]).map((s) => (
-                      <tr key={s.id} className={clickableRow} onClick={() => openDetail(s, "sponsor")}>
-                        <td className="px-4 sm:px-6 py-4 w-10">{s.sponsor_logo ? <img src={s.sponsor_logo} className="w-8 h-8 rounded-lg object-contain bg-white p-0.5" alt="" /> : <div className="w-8 h-8 rounded-lg bg-nexus-surface" />}</td>
-                        <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{s.sponsor_name}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{s.competition?.name || "General"}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted capitalize">{s.tier || "—"}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{s.amount ? `$${Number(s.amount).toLocaleString()}` : "—"}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{s.contract_start || "—"}</td>
-                        <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{s.contract_end || "—"}</td>
-                      </tr>
-                    ))}
-                    {sponsorships.length === 0 && <tr><td colSpan={7}><EmptyState msg="No sponsorships yet. Add one above." /></td></tr>}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+          {/* USERS & ROLES */}
+          {activeTab === "users" && <UsersRolesPanel />}
 
-          {/* SCHOLASTIC SERVICES */}
-          {activeTab === "scholastic" && (
+          {/* REGION REQUESTS */}
+          {activeTab === "regions" && <RegionRequestsPanel />}
+
+          {/* FEDERATION SYNC */}
+          {activeTab === "federation" && (
             <ScholasticPanel user={user} toast={toast} refetchTeams={refetchTeams} refetchAthletes={refetchAthletes} refetchVenues={refetchVenues} />
           )}
+
+
 
         </motion.div>
       </div>
