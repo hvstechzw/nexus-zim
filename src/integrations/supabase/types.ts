@@ -1246,10 +1246,14 @@ export type Database = {
           athlete_id: string | null
           card_scan_data: string | null
           created_at: string
+          fixture_id: string | null
           id: string
+          jti: string | null
+          nonce: string | null
           notes: string | null
           ss_student_id: string
           status: string
+          student_payload: Json | null
           verification_method: string
           verified_by: string | null
         }
@@ -1257,10 +1261,14 @@ export type Database = {
           athlete_id?: string | null
           card_scan_data?: string | null
           created_at?: string
+          fixture_id?: string | null
           id?: string
+          jti?: string | null
+          nonce?: string | null
           notes?: string | null
           ss_student_id: string
           status?: string
+          student_payload?: Json | null
           verification_method?: string
           verified_by?: string | null
         }
@@ -1268,10 +1276,14 @@ export type Database = {
           athlete_id?: string | null
           card_scan_data?: string | null
           created_at?: string
+          fixture_id?: string | null
           id?: string
+          jti?: string | null
+          nonce?: string | null
           notes?: string | null
           ss_student_id?: string
           status?: string
+          student_payload?: Json | null
           verification_method?: string
           verified_by?: string | null
         }
@@ -1284,6 +1296,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      school_staff: {
+        Row: {
+          created_at: string
+          department: string | null
+          email: string | null
+          id: string
+          is_active: boolean
+          last_synced_at: string
+          name: string
+          phone: string | null
+          primary_role: string | null
+          roles: string[]
+          sport_relevant: boolean
+          sports: string[]
+          ss_school_id: string
+          ss_staff_id: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          department?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          last_synced_at?: string
+          name: string
+          phone?: string | null
+          primary_role?: string | null
+          roles?: string[]
+          sport_relevant?: boolean
+          sports?: string[]
+          ss_school_id: string
+          ss_staff_id: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          department?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          last_synced_at?: string
+          name?: string
+          phone?: string | null
+          primary_role?: string | null
+          roles?: string[]
+          sport_relevant?: boolean
+          sports?: string[]
+          ss_school_id?: string
+          ss_staff_id?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       school_team_players: {
         Row: {
@@ -1336,6 +1405,8 @@ export type Database = {
       school_teams: {
         Row: {
           age_group: string | null
+          coach_name: string | null
+          coach_ss_staff_id: string | null
           created_at: string
           created_by: string | null
           discipline: string
@@ -1346,10 +1417,13 @@ export type Database = {
           published_at: string | null
           school_id: string
           season: string | null
+          team_photo_url: string | null
           updated_at: string
         }
         Insert: {
           age_group?: string | null
+          coach_name?: string | null
+          coach_ss_staff_id?: string | null
           created_at?: string
           created_by?: string | null
           discipline: string
@@ -1360,10 +1434,13 @@ export type Database = {
           published_at?: string | null
           school_id: string
           season?: string | null
+          team_photo_url?: string | null
           updated_at?: string
         }
         Update: {
           age_group?: string | null
+          coach_name?: string | null
+          coach_ss_staff_id?: string | null
           created_at?: string
           created_by?: string | null
           discipline?: string
@@ -1374,6 +1451,7 @@ export type Database = {
           published_at?: string | null
           school_id?: string
           season?: string | null
+          team_photo_url?: string | null
           updated_at?: string
         }
         Relationships: [
