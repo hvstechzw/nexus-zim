@@ -25,6 +25,7 @@ import DashboardPage from "./pages/DashboardPage.tsx";
 import AdminSyncPage from "./pages/AdminSyncPage.tsx";
 import PlayerVerifyPage from "./pages/PlayerVerifyPage.tsx";
 import TeamBuilderPage from "./pages/TeamBuilderPage.tsx";
+import AdminRegionsPage from "./pages/AdminRegionsPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
