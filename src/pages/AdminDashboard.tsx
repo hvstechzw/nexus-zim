@@ -731,7 +731,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className="flex overflow-x-auto hairline-b scrollbar-hide">
-          {ADMIN_TABS.map((tab) => (
+          {visibleTabs.map((tab) => (
             <button key={tab.id} onClick={() => { setActiveTab(tab.id); setShowForm(false); }}
               className={`px-4 sm:px-6 py-4 text-xs font-semibold tracking-wide whitespace-nowrap flex-shrink-0 border-b-2 transition-all duration-200 btn-click
                 ${activeTab === tab.id ? "border-foreground text-foreground" : "border-transparent text-nexus-muted hover:text-foreground"}`}>
@@ -739,6 +739,7 @@ export default function AdminDashboard() {
             </button>
           ))}
         </div>
+
 
         <motion.div key={activeTab} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
 
