@@ -126,6 +126,24 @@ export function InterSchoolFixturesBuilder() {
             {SCHOOL_TERMS.map((t) => <option key={t}>{t}</option>)}
           </select>
         </div>
+        <div className="flex flex-col gap-1.5 md:col-span-2">
+          <label className={labelCls}>Stage *</label>
+          <div className="flex flex-wrap gap-2">
+            {COMPETITION_STAGES.map((s, i) => (
+              <div key={s.value} className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setStage(s.value)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-full transition-all btn-click ${stage === s.value ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted hover:text-foreground"}`}
+                >
+                  {s.label}
+                </button>
+                {i < COMPETITION_STAGES.length - 1 && <span className="text-nexus-muted/50 text-xs">→</span>}
+              </div>
+            ))}
+          </div>
+          <p className="text-[10px] text-nexus-muted mt-1">Pathway: Zonal/Cluster → District → Provincial → National. Winners progress to the next stage.</p>
+        </div>
         <div className="flex flex-col gap-1.5">
           <label className={labelCls}>Format</label>
           <select value={format} onChange={(e) => setFormat(e.target.value as any)} className={inputCls + " cursor-pointer"}>
