@@ -459,6 +459,7 @@ export type Database = {
       fixtures: {
         Row: {
           away_athlete_id: string | null
+          away_school_team_id: string | null
           away_score: number | null
           away_team_id: string | null
           broadcast_url: string | null
@@ -467,6 +468,7 @@ export type Database = {
           ended_at: string | null
           extra_time_score: Json | null
           home_athlete_id: string | null
+          home_school_team_id: string | null
           home_score: number | null
           home_team_id: string | null
           id: string
@@ -487,6 +489,7 @@ export type Database = {
         }
         Insert: {
           away_athlete_id?: string | null
+          away_school_team_id?: string | null
           away_score?: number | null
           away_team_id?: string | null
           broadcast_url?: string | null
@@ -495,6 +498,7 @@ export type Database = {
           ended_at?: string | null
           extra_time_score?: Json | null
           home_athlete_id?: string | null
+          home_school_team_id?: string | null
           home_score?: number | null
           home_team_id?: string | null
           id?: string
@@ -515,6 +519,7 @@ export type Database = {
         }
         Update: {
           away_athlete_id?: string | null
+          away_school_team_id?: string | null
           away_score?: number | null
           away_team_id?: string | null
           broadcast_url?: string | null
@@ -523,6 +528,7 @@ export type Database = {
           ended_at?: string | null
           extra_time_score?: Json | null
           home_athlete_id?: string | null
+          home_school_team_id?: string | null
           home_score?: number | null
           home_team_id?: string | null
           id?: string
@@ -550,6 +556,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fixtures_away_school_team_id_fkey"
+            columns: ["away_school_team_id"]
+            isOneToOne: false
+            referencedRelation: "school_teams"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "fixtures_away_team_id_fkey"
             columns: ["away_team_id"]
             isOneToOne: false
@@ -568,6 +581,13 @@ export type Database = {
             columns: ["home_athlete_id"]
             isOneToOne: false
             referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fixtures_home_school_team_id_fkey"
+            columns: ["home_school_team_id"]
+            isOneToOne: false
+            referencedRelation: "school_teams"
             referencedColumns: ["id"]
           },
           {
@@ -1261,6 +1281,107 @@ export type Database = {
             columns: ["athlete_id"]
             isOneToOne: false
             referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_team_players: {
+        Row: {
+          added_by: string | null
+          athlete_id: string
+          created_at: string
+          id: string
+          is_captain: boolean
+          jersey_number: number | null
+          position: string | null
+          school_team_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          athlete_id: string
+          created_at?: string
+          id?: string
+          is_captain?: boolean
+          jersey_number?: number | null
+          position?: string | null
+          school_team_id: string
+        }
+        Update: {
+          added_by?: string | null
+          athlete_id?: string
+          created_at?: string
+          id?: string
+          is_captain?: boolean
+          jersey_number?: number | null
+          position?: string | null
+          school_team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_team_players_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_team_players_school_team_id_fkey"
+            columns: ["school_team_id"]
+            isOneToOne: false
+            referencedRelation: "school_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_teams: {
+        Row: {
+          age_group: string | null
+          created_at: string
+          created_by: string | null
+          discipline: string
+          gender: string | null
+          id: string
+          is_published: boolean
+          name: string
+          published_at: string | null
+          school_id: string
+          season: string | null
+          updated_at: string
+        }
+        Insert: {
+          age_group?: string | null
+          created_at?: string
+          created_by?: string | null
+          discipline: string
+          gender?: string | null
+          id?: string
+          is_published?: boolean
+          name: string
+          published_at?: string | null
+          school_id: string
+          season?: string | null
+          updated_at?: string
+        }
+        Update: {
+          age_group?: string | null
+          created_at?: string
+          created_by?: string | null
+          discipline?: string
+          gender?: string | null
+          id?: string
+          is_published?: boolean
+          name?: string
+          published_at?: string | null
+          school_id?: string
+          season?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_teams_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
             referencedColumns: ["id"]
           },
         ]

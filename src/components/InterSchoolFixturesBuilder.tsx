@@ -53,11 +53,19 @@ export function InterSchoolFixturesBuilder() {
   const [selected, setSelected] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
 
-  const { data: schools = [] } = useQuery({
-    queryKey: ["builder-schools"],
+  // Pick school teams (e.g. "Marist Handball U16"), filtered to the chosen
+  // discipline + age group. Only PUBLISHED teams are eligible for fixtures.
+  const { data: schoolTeams = [] } = useQuery({
+    queryKey: ["builder-school-teams", discipline, ageGroup],
     queryFn: async () => {
-      const { data } = await supabase.from("teams").select("id, name, school_name, province, level").eq("is_active", true).order("name").limit(500);
-      return data || [];
+      const { data } = await supabase
+        .from("school_teams")
+        .select("id, name, school_id, discipline, age_group, gender, school:teams!school_teams_school_id_fkey(id, name, school_name, province)")
+        .eq("is_published", true)
+        .eq("discipline", discipline)
+        .order("name")
+        .limit(500);
+      return (data || []).filter((t: any) => !ageGroup || !t.age_group || t.age_group === ageGroup);
     },
   });
 
@@ -83,9 +91,21 @@ export function InterSchoolFixturesBuilder() {
       } as any).select().single();
       if (cErr) throw cErr;
 
+      // selected[] are school_team ids. Look up their parent school for home_team_id/away_team_id.
+      const schoolByTeam = new Map(schoolTeams.map((t: any) => [t.id, t.school_id]));
+
+      const pairToFixture = (p: [string, string], extra: Partial<any>) => ({
+        competition_id: comp.id,
+        home_team_id: schoolByTeam.get(p[0]) || null,
+        away_team_id: schoolByTeam.get(p[1]) || null,
+        home_school_team_id: p[0],
+        away_school_team_id: p[1],
+        status: "scheduled" as const,
+        ...extra,
+      });
+
       let fixtures: any[] = [];
       if (format === "pooled") {
-        // Split into pools, round-robin inside each pool.
         const shuffled = [...selected];
         const numPools = Math.max(1, Math.ceil(shuffled.length / poolSize));
         const pools: string[][] = Array.from({ length: numPools }, () => []);
@@ -94,26 +114,18 @@ export function InterSchoolFixturesBuilder() {
           const poolPairs = roundRobin(pool);
           const half = Math.max(1, Math.floor(pool.length / 2));
           poolPairs.forEach((p, i) => {
-            fixtures.push({
-              competition_id: comp.id,
-              home_team_id: p[0],
-              away_team_id: p[1],
+            fixtures.push(pairToFixture(p, {
               round_number: Math.floor(i / half) + 1,
               round_label: `Pool ${String.fromCharCode(65 + pi)} · R${Math.floor(i / half) + 1}`,
-              status: "scheduled" as const,
-            });
+            }));
           });
         });
       } else {
         const pairs = format === "round_robin" ? roundRobin(selected) : knockout(selected);
         const half = Math.max(1, Math.floor(selected.length / 2));
-        fixtures = pairs.map((p, i) => ({
-          competition_id: comp.id,
-          home_team_id: p[0],
-          away_team_id: p[1],
+        fixtures = pairs.map((p, i) => pairToFixture(p, {
           round_number: format === "single_elimination" ? 1 : Math.floor(i / half) + 1,
           round_label: format === "single_elimination" ? "Round 1" : `Round ${Math.floor(i / half) + 1}`,
-          status: "scheduled" as const,
         }));
       }
 
@@ -195,26 +207,28 @@ export function InterSchoolFixturesBuilder() {
       </div>
 
       <div>
-        <p className={labelCls + " mb-2"}>Schools — Selected: {selected.length}</p>
+        <p className={labelCls + " mb-2"}>School Teams ({discipline} · {ageGroup}) — Selected: {selected.length}</p>
         <div className="hairline rounded-lg max-h-64 overflow-y-auto">
-          {schools.length === 0 ? (
+          {schoolTeams.length === 0 ? (
             <div className="p-5 flex flex-col items-center gap-2 text-center">
-              <p className="text-xs text-nexus-muted">No schools in the directory yet.</p>
+              <p className="text-xs text-nexus-muted">No published {discipline} teams for {ageGroup}.</p>
+              <p className="text-[11px] text-nexus-muted">Sports directors publish teams from the coach console. Fixtures list real teams (e.g. "Marist Handball U16"), not schools.</p>
               <Link to="/admin/sync" className="text-xs font-semibold underline underline-offset-2 hover:opacity-70">
-                Sync from Scholastic Services →
+                Sync schools from Scholastic Services →
               </Link>
             </div>
           ) : (
-            schools.map((s, i) => (
-              <label key={s.id} className={`flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-nexus-surface transition-colors ${i < schools.length - 1 ? "hairline-b" : ""}`}>
-                <input type="checkbox" checked={selected.includes(s.id)} onChange={() => toggle(s.id)} className="w-3.5 h-3.5" />
-                <span className="text-sm text-foreground flex-1">{s.school_name || s.name}</span>
-                <span className="text-[10px] mono uppercase text-nexus-muted">{s.province}</span>
+            schoolTeams.map((t: any, i: number) => (
+              <label key={t.id} className={`flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-nexus-surface transition-colors ${i < schoolTeams.length - 1 ? "hairline-b" : ""}`}>
+                <input type="checkbox" checked={selected.includes(t.id)} onChange={() => toggle(t.id)} className="w-3.5 h-3.5" />
+                <span className="text-sm text-foreground flex-1">{t.name} <span className="text-nexus-muted text-xs">· {t.school?.school_name || t.school?.name}</span></span>
+                <span className="text-[10px] mono uppercase text-nexus-muted">{t.school?.province}</span>
               </label>
             ))
           )}
         </div>
       </div>
+
 
       <button onClick={generate} disabled={busy} className="h-11 px-6 text-sm font-semibold rounded-xl bg-foreground text-primary-foreground hover:opacity-85 disabled:opacity-50 btn-click">
         {busy ? "Generating…" : `Generate ${format === "round_robin" ? "Round Robin" : format === "pooled" ? "Pooled Draw" : "Knockout"} Draw`}
