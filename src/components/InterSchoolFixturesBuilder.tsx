@@ -42,6 +42,7 @@ export function InterSchoolFixturesBuilder() {
   const [discipline, setDiscipline] = useState("Football");
   const [ageGroup, setAgeGroup] = useState("U16");
   const [term, setTerm] = useState<string>("Term 1");
+  const [stage, setStage] = useState<CompetitionStage>("zonal");
   const [format, setFormat] = useState<"round_robin" | "single_elimination">("round_robin");
   const [name, setName] = useState("");
   const [selected, setSelected] = useState<string[]>([]);
