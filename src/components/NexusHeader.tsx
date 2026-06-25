@@ -8,13 +8,11 @@ import nexusLogo from "@/assets/nexus-logo.png";
 
 const PUBLIC_LINKS = [
   { label: "Live", href: "/live" },
-  { label: "Fixtures", href: "/fixtures" },
   { label: "Schools", href: "/schools" },
   { label: "Inter-School", href: "/inter-school" },
 ];
 
-const ADMIN_LINKS = [
-  { label: "Scoring", href: "/scoring" },
+const ADMIN_ONLY_LINKS = [
   { label: "Sync", href: "/admin/sync" },
   { label: "Verify", href: "/admin/verify" },
   { label: "Admin", href: "/admin" },
@@ -25,10 +23,19 @@ export function NexusHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const { user, signOut } = useAuth();
-  const { isAdmin, hasRole } = useHasRole();
-  const showStaffLinks = isAdmin || hasRole("hic", "umpire", "referee", "scorer");
+  const { loading: rolesLoading, isAdmin, hasRole } = useHasRole();
 
-  const NAV_LINKS = [...PUBLIC_LINKS, ...(showStaffLinks ? ADMIN_LINKS : [])];
+  const canSchedule = isAdmin || hasRole("hic", "coach");
+  const canScore = isAdmin || hasRole("hic", "umpire", "referee", "scorer");
+
+  const NAV_LINKS = !user || rolesLoading
+    ? PUBLIC_LINKS
+    : [
+        ...PUBLIC_LINKS,
+        ...(canSchedule ? [{ label: "Fixtures", href: "/fixtures" }] : []),
+        ...(canScore ? [{ label: "Scoring", href: "/scoring" }] : []),
+        ...(isAdmin ? ADMIN_ONLY_LINKS : []),
+      ];
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 60);
