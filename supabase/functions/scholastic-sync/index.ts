@@ -84,7 +84,7 @@ function pickFirstString(...values: unknown[]): string | null {
 function normalizeExternalAssetUrl(raw: unknown): string | null {
   const value = typeof raw === "string" ? raw.trim() : "";
   if (!value) return null;
-  if (/^https?:\/\//i.test(value)) return value;
+  if (/^(https?:|data:|blob:)/i.test(value)) return value;
   if (value.startsWith("//")) return `https:${value}`;
   const origin = (() => {
     try { return new URL(RAW_BRIDGE || "https://scholasticservices.online").origin; }
