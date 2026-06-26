@@ -1052,6 +1052,9 @@ export default function AdminDashboard() {
           {/* USERS & ROLES */}
           {activeTab === "users" && <UsersRolesPanel />}
 
+          {/* ROLE APPLICATIONS */}
+          {activeTab === "role_requests" && <RoleRequestsPanel />}
+
           {/* REGION REQUESTS */}
           {activeTab === "regions" && <RegionRequestsPanel />}
 
