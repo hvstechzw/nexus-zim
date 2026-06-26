@@ -125,7 +125,7 @@ export default function SchoolProfilePage() {
         <div className="max-w-[1200px] mx-auto px-4 sm:px-8 py-6 sm:py-10 flex flex-col gap-6">
           {/* Identity card */}
           <div className="hairline rounded-2xl p-6 sm:p-8 bg-background card-shadow flex flex-col sm:flex-row gap-6 items-start -mt-16 sm:-mt-20 relative z-10">
-            <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl bg-gradient-to-br from-slate-200 to-slate-400 flex items-center justify-center p-2 hairline flex-shrink-0 shadow-lg">
+            <div className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl bg-white flex items-center justify-center p-2 hairline flex-shrink-0 shadow-lg">
               {school.logo_url ? (
                 <img src={school.logo_url} alt={school.name} className="w-full h-full object-contain" onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
               ) : (
