@@ -27,6 +27,8 @@ import PlayerVerifyPage from "./pages/PlayerVerifyPage.tsx";
 import TeamBuilderPage from "./pages/TeamBuilderPage.tsx";
 import AdminRegionsPage from "./pages/AdminRegionsPage.tsx";
 import PlayerProfilePage from "./pages/PlayerProfilePage.tsx";
+import MatchConsolePage from "./pages/MatchConsolePage.tsx";
+import MatchLivePage from "./pages/MatchLivePage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -45,6 +47,8 @@ const App = () => (
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/live" element={<LivePage />} />
+              <Route path="/live/:fixtureId" element={<MatchLivePage />} />
+              <Route path="/score/:fixtureId" element={<MatchConsolePage />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/sync" element={<AdminSyncPage />} />
               <Route path="/admin/verify" element={<PlayerVerifyPage />} />
