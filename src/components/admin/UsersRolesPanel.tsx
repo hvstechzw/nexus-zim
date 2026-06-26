@@ -19,8 +19,12 @@ const GRANTABLE: AppRole[] = [
   "coach",
   "hic",
   "umpire",
+  "referee",
+  "scorer",
   "broadcaster",
   "federation_official",
+  "team_manager",
+  "school_coordinator",
   "viewer",
 ];
 
