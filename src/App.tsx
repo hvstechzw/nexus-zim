@@ -29,6 +29,9 @@ import AdminRegionsPage from "./pages/AdminRegionsPage.tsx";
 import PlayerProfilePage from "./pages/PlayerProfilePage.tsx";
 import MatchConsolePage from "./pages/MatchConsolePage.tsx";
 import MatchLivePage from "./pages/MatchLivePage.tsx";
+import TournamentWizardPage from "./pages/TournamentWizardPage.tsx";
+import BracketPage from "./pages/BracketPage.tsx";
+import StandingsPage from "./pages/StandingsPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
