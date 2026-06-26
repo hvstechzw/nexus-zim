@@ -13,7 +13,6 @@ export default function DashboardPage() {
   const { roles, loading: rolesLoading, isAdmin, hasRole } = useHasRole();
   const navigate = useNavigate();
 
-  if (!authLoading && !user) return <Navigate to="/login" replace />;
   const loading = authLoading || rolesLoading;
 
   const { data: profile } = useQuery({
@@ -25,16 +24,19 @@ export default function DashboardPage() {
     },
   });
 
+  useEffect(() => {
+    // Admins go straight to admin panel
+    if (!loading && isAdmin) navigate("/admin", { replace: true });
+  }, [loading, isAdmin, navigate]);
+
+  if (!authLoading && !user) return <Navigate to="/login" replace />;
+
   const requestedRole = profile?.bio?.startsWith("requested_role:") ? profile.bio.split(":")[1] : null;
   const isCoach = hasRole("coach");
   const isUmpire = hasRole("umpire", "referee");
   const isHIC = hasRole("hic");
   const isPending = requestedRole && requestedRole !== "viewer" && !hasRole(requestedRole as any);
 
-  useEffect(() => {
-    // Admins go straight to admin panel
-    if (!loading && isAdmin) navigate("/admin", { replace: true });
-  }, [loading, isAdmin, navigate]);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
