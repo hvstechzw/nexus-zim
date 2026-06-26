@@ -44,6 +44,7 @@ export function InterSchoolFixturesBuilder() {
   const { user } = useAuth();
   const { toast } = useToast();
   const qc = useQueryClient();
+  useScholasticAutoSync();
 
   const [discipline, setDiscipline] = useState<string>("Handball");
   const [ageGroup, setAgeGroup] = useState("U16");
@@ -52,11 +53,13 @@ export function InterSchoolFixturesBuilder() {
   const [format, setFormat] = useState<"round_robin" | "single_elimination" | "pooled">("round_robin");
   const [poolSize, setPoolSize] = useState<number>(4);
   const [name, setName] = useState("");
-  const [selected, setSelected] = useState<string[]>([]);
+  const [pickMode, setPickMode] = useState<"teams" | "schools">("teams");
+  const [selected, setSelected] = useState<string[]>([]);          // school_team ids
+  const [selectedSchools, setSelectedSchools] = useState<string[]>([]); // school (teams) ids
   const [busy, setBusy] = useState(false);
+  const [syncing, setSyncing] = useState(false);
 
-  // Pick school teams (e.g. "Marist Handball U16"), filtered to the chosen
-  // discipline + age group. Only PUBLISHED teams are eligible for fixtures.
+  // Published school teams (e.g. "Marist Handball U16") filtered to discipline + age group.
   const { data: schoolTeams = [] } = useQuery({
     queryKey: ["builder-school-teams", discipline, ageGroup],
     queryFn: async () => {
@@ -71,7 +74,37 @@ export function InterSchoolFixturesBuilder() {
     },
   });
 
+  // Every school synced from Scholastic Services — always available as a
+  // fallback picker so admins aren't blocked when sports directors haven't
+  // published team sheets yet. We auto-create a school_team per selection.
+  const { data: schools = [] } = useQuery({
+    queryKey: ["builder-schools"],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("teams")
+        .select("id, name, school_name, province, district, logo_url")
+        .eq("is_active", true)
+        .order("name")
+        .limit(1000);
+      return data || [];
+    },
+  });
+
+  const runSync = async () => {
+    setSyncing(true);
+    try {
+      const { error } = await supabase.functions.invoke("scholastic-sync", { body: { action: "full-sync" } });
+      if (error) throw error;
+      await qc.invalidateQueries();
+      toast({ title: "Sync complete", description: "Pulled latest schools from Scholastic Services." });
+    } catch (e: any) {
+      toast({ title: "Sync failed", description: e.message, variant: "destructive" });
+    } finally { setSyncing(false); }
+  };
+
   const toggle = (id: string) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
+  const toggleSchool = (id: string) => setSelectedSchools((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
+
 
   const generate = async () => {
     if (!user) { toast({ title: "Sign in required", variant: "destructive" }); return; }
