@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { NexusHeader } from "@/components/NexusHeader";
 import { NexusFooter } from "@/components/NexusFooter";
@@ -78,7 +78,7 @@ export default function InterSchoolPage() {
               <div className="grid gap-4 mt-4 md:grid-cols-3">
                 <SearchColumn title="Players" empty="No players">
                   {searchResults.players.map((p: any) => (
-                    <Link key={p.id} to={`/player/${p.id}`} className="block hairline rounded-md p-2 bg-nexus-surface/40 hover:bg-nexus-surface">
+                    <Link key={p.id} to={`/players/${p.id}`} className="block hairline rounded-md p-2 bg-nexus-surface/40 hover:bg-nexus-surface">
                       <p className="text-sm font-medium truncate">{p.display_name || `${p.first_name || ""} ${p.last_name?.[0] || ""}.`}</p>
                       <p className="text-[10px] text-nexus-muted truncate">{p.school_name || "—"} · {p.nexus_sport || "—"}</p>
                     </Link>
@@ -86,7 +86,7 @@ export default function InterSchoolPage() {
                 </SearchColumn>
                 <SearchColumn title="Teams" empty="No teams">
                   {searchResults.teams.map((t: any) => (
-                    <Link key={t.id} to={`/team/${t.id}`} className="block hairline rounded-md p-2 bg-nexus-surface/40 hover:bg-nexus-surface">
+                    <Link key={t.id} to={t.school_id ? `/schools/${t.school_id}` : "#"} className="block hairline rounded-md p-2 bg-nexus-surface/40 hover:bg-nexus-surface">
                       <p className="text-sm font-medium truncate">{t.name}</p>
                       <p className="text-[10px] text-nexus-muted truncate">{t.discipline} · {t.age_group || "Open"}</p>
                     </Link>

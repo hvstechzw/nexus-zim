@@ -7,8 +7,10 @@ import { useHasRole } from "@/hooks/useHasRole";
 import { BrandLockup } from "@/components/Brand";
 
 const PUBLIC_LINKS = [
+  { label: "Feed", href: "/" },
   { label: "Live", href: "/live" },
   { label: "Schools", href: "/schools" },
+  { label: "Tournaments", href: "/competitions" },
   { label: "Inter-School", href: "/inter-school" },
 ];
 
