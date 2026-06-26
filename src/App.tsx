@@ -32,6 +32,7 @@ import MatchLivePage from "./pages/MatchLivePage.tsx";
 import TournamentWizardPage from "./pages/TournamentWizardPage.tsx";
 import BracketPage from "./pages/BracketPage.tsx";
 import StandingsPage from "./pages/StandingsPage.tsx";
+import FeedPage from "./pages/FeedPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -50,6 +51,7 @@ const App = () => (
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/live" element={<LivePage />} />
+              <Route path="/feed" element={<FeedPage />} />
               <Route path="/live/:fixtureId" element={<MatchLivePage />} />
               <Route path="/score/:fixtureId" element={<MatchConsolePage />} />
               <Route path="/admin" element={<AdminDashboard />} />

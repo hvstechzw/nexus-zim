@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { detectSport, getSport, type SportKey } from "@/lib/sports";
 import type { CommentaryRow, MatchEventRow, MatchStateRow } from "@/lib/matchEngine";
 import { formatClock } from "@/lib/matchEngine";
+import { MoMVote } from "@/components/community/MoMVote";
+import { ShareCard } from "@/components/community/ShareCard";
 
 export default function MatchLivePage() {
   const { fixtureId } = useParams();
@@ -167,6 +169,19 @@ export default function MatchLivePage() {
               ))}
             </div>
           </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-6">
+          <div className="rounded-xl border bg-card/50 p-3">
+            <MoMVote fixtureId={fixtureId!} />
+          </div>
+          <ShareCard
+            title={(fixture as any).competition?.name ?? "Nexus fixture"}
+            subtitle={`${cfg.label} · ${state?.period ?? ""}`}
+            home={homeName} away={awayName} homeScore={homeScore} awayScore={awayScore}
+            accent={accent}
+            footer="nexuszw.online · Powered by Scholastic Services"
+          />
         </div>
       </div>
     </Shell>
