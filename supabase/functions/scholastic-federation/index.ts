@@ -286,3 +286,232 @@ async function webhookRegister(cors: Record<string, string>, supabase: any, body
   console.log("[webhook-register]", JSON.stringify(body));
   return json(cors, { ok: true, received: true });
 }
+
+// ---------- Expanded actions ----------
+
+async function pushAthlete(cors: Record<string, string>, supabase: any, body: any) {
+  const {
+    studentId, external_student_id,
+    email, fullName, first_name, last_name,
+    schoolId, external_school_id,
+    sports, primarySport, primary_sport,
+    preferredPosition, secondaryPosition,
+    dominantHand, heightCm, weightKg,
+    jerseyNumber, yearsPlaying, previousClubs,
+    parentConsent, medicalCleared, bio,
+    photo_url, gender, date_of_birth, province,
+  } = body;
+
+  const sid = studentId || external_student_id;
+  if (!sid) return json(cors, { error: "studentId (external_student_id) required" }, 400);
+
+  let fn = first_name, ln = last_name;
+  if ((!fn || !ln) && fullName) {
+    const parts = String(fullName).trim().split(/\s+/);
+    fn = fn || parts[0] || "Unknown";
+    ln = ln || parts.slice(1).join(" ") || "—";
+  }
+  if (!fn || !ln) return json(cors, { error: "fullName or first_name/last_name required" }, 400);
+
+  const ssid = schoolId || external_school_id || null;
+  let schoolName: string | null = null;
+  if (ssid) {
+    const { data: t } = await supabase
+      .from("teams").select("name").eq("external_school_id", ssid).maybeSingle();
+    schoolName = t?.name || null;
+  }
+
+  const disciplines = Array.isArray(sports) && sports.length
+    ? sports
+    : (primarySport || primary_sport ? [primarySport || primary_sport] : ["Handball"]);
+
+  const patch: Record<string, any> = {
+    external_student_id: sid,
+    first_name: fn,
+    last_name: ln,
+    display_name: `${fn} ${ln[0] || ""}.`.trim(),
+    gender: gender || null,
+    date_of_birth: date_of_birth || null,
+    province: province || "Unknown",
+    school_name: schoolName,
+    ss_school_id: ssid,
+    disciplines,
+    primary_sport: primarySport || primary_sport || disciplines[0] || null,
+    nexus_sport: primarySport || primary_sport || disciplines[0] || null,
+    preferred_position: preferredPosition ?? null,
+    secondary_position: secondaryPosition ?? null,
+    dominant_hand: dominantHand ?? null,
+    height_cm: heightCm ?? null,
+    weight_kg: weightKg ?? null,
+    jersey_number: jerseyNumber ?? null,
+    years_playing: yearsPlaying ?? null,
+    previous_clubs: previousClubs ?? null,
+    parent_consent: parentConsent === true,
+    medical_cleared: medicalCleared === true,
+    bio: bio ?? null,
+    photo_url: photo_url ?? null,
+    is_active: true,
+    is_ss_linked: true,
+  };
+
+  const { data, error } = await supabase
+    .from("athletes")
+    .upsert(patch, { onConflict: "external_student_id" })
+    .select("id, external_student_id")
+    .maybeSingle();
+  if (error) throw error;
+
+  return json(cors, { ok: true, athleteId: data?.id, external_student_id: data?.external_student_id });
+}
+
+async function linkAccount(cors: Record<string, string>, supabase: any, body: any) {
+  const { external_student_id, email, user_id } = body;
+  if (!external_student_id) return json(cors, { error: "external_student_id required" }, 400);
+
+  const { data: athlete, error: aErr } = await supabase
+    .from("athletes").select("id, user_id").eq("external_student_id", external_student_id).maybeSingle();
+  if (aErr) throw aErr;
+  if (!athlete) return json(cors, { error: "athlete not found for this student id" }, 404);
+
+  let uid = user_id || null;
+  if (!uid && email) {
+    // Look up an existing auth user with this email (admin API)
+    const { data: list } = await supabase.auth.admin.listUsers({ page: 1, perPage: 200 });
+    const match = list?.users?.find((u: any) => (u.email || "").toLowerCase() === String(email).toLowerCase());
+    uid = match?.id || null;
+  }
+
+  if (uid) {
+    await supabase.from("athletes").update({ user_id: uid, is_ss_linked: true }).eq("id", athlete.id);
+  }
+  return json(cors, { ok: true, athleteId: athlete.id, linked_user_id: uid });
+}
+
+async function registerEntry(cors: Record<string, string>, supabase: any, body: any) {
+  const { competition_id, external_school_id, team_id, school_team_id, division, notes } = body;
+  if (!competition_id) return json(cors, { error: "competition_id required" }, 400);
+
+  let tid = team_id || null;
+  if (!tid && external_school_id) {
+    const { data: t } = await supabase
+      .from("teams").select("id").eq("external_school_id", external_school_id).maybeSingle();
+    tid = t?.id || null;
+  }
+  if (!tid && !school_team_id) {
+    return json(cors, { error: "team_id, school_team_id, or external_school_id required" }, 400);
+  }
+
+  const payload: Record<string, any> = {
+    competition_id,
+    team_id: tid,
+    school_team_id: school_team_id || null,
+    division: division || null,
+    notes: notes || null,
+    status: "pending",
+  };
+  const { data, error } = await supabase
+    .from("registrations").insert(payload).select("id").maybeSingle();
+  if (error) throw error;
+  return json(cors, { ok: true, registrationId: data?.id });
+}
+
+async function pushTeamPublished(cors: Record<string, string>, supabase: any, body: any) {
+  const { external_school_id, sport, name, age_group, gender, season, roster, coach_ss_staff_id, team_photo_url } = body;
+  if (!external_school_id || !sport || !name) {
+    return json(cors, { error: "external_school_id, sport, name required" }, 400);
+  }
+
+  const { data: team } = await supabase
+    .from("teams").select("id").eq("external_school_id", external_school_id).maybeSingle();
+  if (!team) return json(cors, { error: "school not found" }, 404);
+
+  const patch: Record<string, any> = {
+    team_id: team.id,
+    sport,
+    name,
+    age_group: age_group || null,
+    gender: gender || null,
+    season: season || null,
+    coach_ss_staff_id: coach_ss_staff_id || null,
+    team_photo_url: team_photo_url || null,
+    is_published: true,
+  };
+  const { data: st, error: stErr } = await supabase
+    .from("school_teams")
+    .upsert(patch, { onConflict: "team_id,sport,name,season" })
+    .select("id").maybeSingle();
+  if (stErr) throw stErr;
+
+  if (Array.isArray(roster) && st?.id) {
+    await supabase.from("school_team_players").delete().eq("school_team_id", st.id);
+    const rows = [];
+    for (const r of roster) {
+      const sid = r.external_student_id || r.studentId;
+      if (!sid) continue;
+      const { data: ath } = await supabase
+        .from("athletes").select("id").eq("external_student_id", sid).maybeSingle();
+      if (ath?.id) rows.push({
+        school_team_id: st.id, athlete_id: ath.id,
+        jersey_number: r.jersey_number || r.jerseyNumber || null,
+        position: r.position || null,
+      });
+    }
+    if (rows.length) await supabase.from("school_team_players").insert(rows);
+  }
+
+  return json(cors, { ok: true, school_team_id: st?.id });
+}
+
+async function pullInvitations(cors: Record<string, string>, supabase: any, body: any) {
+  const { external_school_id, status = "pending", limit = 50 } = body;
+  let q = supabase.from("external_invitations")
+    .select("id, kind, external_student_id, external_school_id, competition_id, payload, status, created_at")
+    .eq("status", status).order("created_at", { ascending: false })
+    .limit(Math.min(Number(limit) || 50, 200));
+  if (external_school_id) q = q.eq("external_school_id", external_school_id);
+  const { data, error } = await q;
+  if (error) throw error;
+  return json(cors, { invitations: data || [] });
+}
+
+async function pushInvitationResponse(cors: Record<string, string>, supabase: any, body: any) {
+  const { invitation_id, external_id, status, response } = body;
+  if (!status || (!invitation_id && !external_id)) {
+    return json(cors, { error: "invitation_id (or external_id) and status required" }, 400);
+  }
+  let q = supabase.from("external_invitations").update({
+    status, response: response || null, responded_at: new Date().toISOString(),
+  });
+  q = invitation_id ? q.eq("id", invitation_id) : q.eq("external_id", external_id);
+  const { data, error } = await q.select("id").maybeSingle();
+  if (error) throw error;
+  return json(cors, { ok: true, invitationId: data?.id });
+}
+
+async function pullRankings(cors: Record<string, string>, supabase: any, body: any) {
+  const { competition_id, discipline, limit = 100 } = body;
+  let q = supabase
+    .from("standings")
+    .select(`competition_id, position, played, won, drawn, lost, points, score_for, score_against,
+             school_team:school_team_id(id, name, team:team_id(external_school_id, name)),
+             competition:competition_id(name, discipline)`)
+    .order("position", { ascending: true })
+    .limit(Math.min(Number(limit) || 100, 500));
+  if (competition_id) q = q.eq("competition_id", competition_id);
+  const { data, error } = await q;
+  if (error) throw error;
+  const rows = (data || [])
+    .filter((r: any) => !discipline || r.competition?.discipline === discipline)
+    .map((r: any) => ({
+      competition_id: r.competition_id,
+      competition_name: r.competition?.name || null,
+      discipline: r.competition?.discipline || null,
+      position: r.position,
+      points: r.points,
+      played: r.played, won: r.won, drawn: r.drawn, lost: r.lost,
+      score_for: r.score_for, score_against: r.score_against,
+      team_name: r.school_team?.name || null,
+      external_school_id: r.school_team?.team?.external_school_id || null,
+    }));
+  return json(cors, { rankings: rows });
+}
