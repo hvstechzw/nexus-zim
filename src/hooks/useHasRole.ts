@@ -21,11 +21,27 @@ export type AppRole =
   | "national_admin"
   | "viewer";
 
+// Roles permitted to create/manage competitions & fixtures. Must stay in sync
+// with public.is_competition_organizer() in the database (RLS).
+export const ORGANIZER_ROLES: AppRole[] = [
+  "super_admin",
+  "admin",
+  "federation_official",
+  "national_admin",
+  "provincial_admin",
+  "district_admin",
+  "zonal_admin",
+  "hic",
+  "coach",
+];
+
 export interface RoleState {
   loading: boolean;
   roles: AppRole[];
   hasRole: (...roles: AppRole[]) => boolean;
   isAdmin: boolean;
+  /** Can create/manage competitions and fixtures (matches RLS). */
+  isOrganizer: boolean;
 }
 
 /**
@@ -76,5 +92,6 @@ export function useHasRole(): RoleState {
     roles,
     hasRole,
     isAdmin: hasRole("admin", "super_admin"),
+    isOrganizer: hasRole(...ORGANIZER_ROLES),
   };
 }

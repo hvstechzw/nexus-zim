@@ -37,8 +37,8 @@ interface GeneratedFixture {
 
 export default function FixturesPage() {
   const { user } = useAuth();
-  const { loading: rolesLoading, hasRole } = useHasRole();
-  const canGenerate = hasRole("super_admin", "admin", "hic", "coach");
+  const { loading: rolesLoading, isOrganizer } = useHasRole();
+  const canGenerate = isOrganizer;
   const queryClient = useQueryClient();
 
 

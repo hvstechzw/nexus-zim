@@ -25,9 +25,9 @@ export function NexusHeader() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const { user, signOut } = useAuth();
-  const { loading: rolesLoading, isAdmin, hasRole } = useHasRole();
+  const { loading: rolesLoading, isAdmin, isOrganizer, hasRole } = useHasRole();
 
-  const canSchedule = isAdmin || hasRole("hic", "coach");
+  const canSchedule = isOrganizer;
   const canScore = isAdmin || hasRole("hic", "umpire", "referee", "scorer");
 
   const NAV_LINKS = !user || rolesLoading
