@@ -8,6 +8,7 @@ import { NexusHeader } from "@/components/NexusHeader";
 import { NexusFooter } from "@/components/NexusFooter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { parseScholasticCard, buildVerifyCardBody } from "@/lib/scholasticCardScan";
 
 type Athlete = {
   id: string;
@@ -37,11 +38,25 @@ export default function PlayerVerifyPage() {
 
 
   async function lookup(idOrQr: string, isQr = false) {
-    if (!idOrQr.trim()) return;
+    const raw = (idOrQr || "").trim();
+    if (!raw) return;
     setLookupBusy(true);
     setAthlete(null);
-    setCardData(idOrQr.trim());
-    const body: any = isQr ? { qrData: idOrQr.trim() } : { student_id: idOrQr.trim() };
+    setCardData(raw);
+
+    let body: Record<string, unknown> | null;
+    if (isQr) {
+      const parsed = parseScholasticCard(raw);
+      body = buildVerifyCardBody(parsed);
+      if (!body) {
+        setLookupBusy(false);
+        toast({ title: "Unrecognized QR", description: "Scan didn't match any Scholastic Card format.", variant: "destructive" });
+        return;
+      }
+    } else {
+      body = { student_id: raw };
+    }
+
     const { data, error } = await supabase.functions.invoke("verify-card", { body });
     setLookupBusy(false);
     if (error) {
@@ -93,12 +108,9 @@ export default function PlayerVerifyPage() {
           const codes = await detector.detect(videoRef.current);
           if (codes?.length) {
             const raw = String(codes[0].rawValue || "");
-            // Card payload may be JSON {student_id:...} or raw id
-            let sid = raw;
-            try { const parsed = JSON.parse(raw); sid = parsed.student_id || parsed.id || raw; } catch {}
             stopCamera();
-            setStudentIdInput(sid);
-            await lookup(sid);
+            setStudentIdInput(raw);
+            await lookup(raw, true);
             return;
           }
         } catch (e) { console.warn("detect err", e); }
