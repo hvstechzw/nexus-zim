@@ -1,9 +1,11 @@
 import { useParams, Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { NexusHeader } from "@/components/NexusHeader";
 import { NexusFooter } from "@/components/NexusFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { athleteEligibility, allEventLabels, detectSport, playerSummary, type ScoreEntryLike } from "@/lib/sports";
+
 
 export default function PlayerProfilePage() {
   const { athleteId } = useParams<{ athleteId: string }>();

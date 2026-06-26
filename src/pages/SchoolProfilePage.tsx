@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
@@ -7,6 +8,7 @@ import { NexusHeader } from "@/components/NexusHeader";
 import { NexusFooter } from "@/components/NexusFooter";
 import { ScholasticBadge } from "@/components/ScholasticBadge";
 import { tierLabel } from "@/lib/schools";
+
 
 export default function SchoolProfilePage() {
   const { id } = useParams<{ id: string }>();
@@ -87,10 +89,29 @@ export default function SchoolProfilePage() {
   const initials = (school.school_name || school.name || "S").split(/\s+/).map((w: string) => w[0]).slice(0, 2).join("").toUpperCase();
   const teamLookup = new Map(schoolTeams.map((t: any) => [t.id, t]));
 
+  const schoolName = school.school_name || school.name;
+  const canonical = `https://nexuszw.online/schools/${id}`;
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <Helmet>
+        <title>{`${schoolName} — Nexus`}</title>
+        <meta name="description" content={`${schoolName} on Nexus — published handball and netball teams, fixtures and standings for ${school.province || "Zimbabwe"}.`} />
+        <link rel="canonical" href={canonical} />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:title" content={`${schoolName} — Nexus`} />
+        <meta property="og:description" content={`Published teams, fixtures and standings for ${schoolName}.`} />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "EducationalOrganization",
+          name: schoolName,
+          url: canonical,
+          address: { "@type": "PostalAddress", addressRegion: school.province || undefined, addressCountry: "ZW" },
+          logo: school.logo_url || undefined,
+        })}</script>
+      </Helmet>
       <NexusHeader />
       <main className="pt-16 sm:pt-20">
+
         {/* Banner */}
         <div className="relative h-40 sm:h-56 bg-gradient-to-br from-foreground/90 via-foreground/70 to-foreground/40 hairline-b overflow-hidden">
           <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: "radial-gradient(circle at 20% 30%, white 1px, transparent 1px), radial-gradient(circle at 70% 60%, white 1px, transparent 1px)", backgroundSize: "40px 40px, 60px 60px" }} />
