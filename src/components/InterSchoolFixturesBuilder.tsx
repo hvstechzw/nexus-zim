@@ -277,27 +277,67 @@ export function InterSchoolFixturesBuilder() {
       </div>
 
       <div>
-        <p className={labelCls + " mb-2"}>School Teams ({discipline} · {ageGroup}) — Selected: {selected.length}</p>
-        <div className="hairline rounded-lg max-h-64 overflow-y-auto">
-          {schoolTeams.length === 0 ? (
-            <div className="p-5 flex flex-col items-center gap-2 text-center">
-              <p className="text-xs text-nexus-muted">No published {discipline} teams for {ageGroup}.</p>
-              <p className="text-[11px] text-nexus-muted">Sports directors publish teams from the coach console. Fixtures list real teams (e.g. "Marist Handball U16"), not schools.</p>
-              <Link to="/admin/sync" className="text-xs font-semibold underline underline-offset-2 hover:opacity-70">
-                Sync schools from Scholastic Services →
-              </Link>
-            </div>
+        <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
+          <div className="inline-flex rounded-lg border border-nexus-surface p-0.5 text-xs">
+            <button type="button" onClick={() => setPickMode("teams")}
+              className={`px-3 py-1.5 rounded-md ${pickMode === "teams" ? "bg-foreground text-primary-foreground" : "text-nexus-muted"}`}>
+              Published Teams ({schoolTeams.length})
+            </button>
+            <button type="button" onClick={() => setPickMode("schools")}
+              className={`px-3 py-1.5 rounded-md ${pickMode === "schools" ? "bg-foreground text-primary-foreground" : "text-nexus-muted"}`}>
+              All Schools ({schools.length})
+            </button>
+          </div>
+          <button type="button" onClick={runSync} disabled={syncing}
+            className="text-[11px] mono uppercase px-3 py-1.5 rounded-md hairline hover:bg-nexus-surface disabled:opacity-50">
+            {syncing ? "Syncing…" : "↻ Sync from Scholastic"}
+          </button>
+        </div>
+        <p className={labelCls + " mb-2"}>
+          {pickMode === "teams"
+            ? `Published Teams (${discipline} · ${ageGroup}) — Selected: ${selected.length}`
+            : `Schools — Selected: ${selectedSchools.length} (auto-creates a ${discipline} ${ageGroup} team per school)`}
+        </p>
+        <div className="hairline rounded-lg max-h-72 overflow-y-auto">
+          {pickMode === "teams" ? (
+            schoolTeams.length === 0 ? (
+              <div className="p-5 flex flex-col items-center gap-2 text-center">
+                <p className="text-xs text-nexus-muted">No published {discipline} teams for {ageGroup}.</p>
+                <p className="text-[11px] text-nexus-muted">Switch to <b>All Schools</b> above to build a draw straight from schools — Nexus will auto-create the team sheet.</p>
+                <Link to="/admin/sync" className="text-xs font-semibold underline underline-offset-2 hover:opacity-70">
+                  Open full sync panel →
+                </Link>
+              </div>
+            ) : (
+              schoolTeams.map((t: any, i: number) => (
+                <label key={t.id} className={`flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-nexus-surface transition-colors ${i < schoolTeams.length - 1 ? "hairline-b" : ""}`}>
+                  <input type="checkbox" checked={selected.includes(t.id)} onChange={() => toggle(t.id)} className="w-3.5 h-3.5" />
+                  <span className="text-sm text-foreground flex-1">{t.name} <span className="text-nexus-muted text-xs">· {t.school?.school_name || t.school?.name}</span></span>
+                  <span className="text-[10px] mono uppercase text-nexus-muted">{t.school?.province}</span>
+                </label>
+              ))
+            )
           ) : (
-            schoolTeams.map((t: any, i: number) => (
-              <label key={t.id} className={`flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-nexus-surface transition-colors ${i < schoolTeams.length - 1 ? "hairline-b" : ""}`}>
-                <input type="checkbox" checked={selected.includes(t.id)} onChange={() => toggle(t.id)} className="w-3.5 h-3.5" />
-                <span className="text-sm text-foreground flex-1">{t.name} <span className="text-nexus-muted text-xs">· {t.school?.school_name || t.school?.name}</span></span>
-                <span className="text-[10px] mono uppercase text-nexus-muted">{t.school?.province}</span>
-              </label>
-            ))
+            schools.length === 0 ? (
+              <div className="p-5 text-center text-xs text-nexus-muted">
+                No schools synced yet. Tap <b>↻ Sync from Scholastic</b> above.
+              </div>
+            ) : (
+              schools.map((s: any, i: number) => (
+                <label key={s.id} className={`flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-nexus-surface transition-colors ${i < schools.length - 1 ? "hairline-b" : ""}`}>
+                  <input type="checkbox" checked={selectedSchools.includes(s.id)} onChange={() => toggleSchool(s.id)} className="w-3.5 h-3.5" />
+                  {s.logo_url
+                    ? <img src={s.logo_url} alt="" className="w-6 h-6 rounded object-cover" onError={(e) => ((e.currentTarget.style.display = "none"))} />
+                    : <div className="w-6 h-6 rounded bg-nexus-surface" />}
+                  <span className="text-sm text-foreground flex-1">{s.school_name || s.name}</span>
+                  <span className="text-[10px] mono uppercase text-nexus-muted">{s.district || s.province}</span>
+                </label>
+              ))
+            )
           )}
         </div>
       </div>
+
 
 
       <button onClick={generate} disabled={busy} className="h-11 px-6 text-sm font-semibold rounded-xl bg-foreground text-primary-foreground hover:opacity-85 disabled:opacity-50 btn-click">
