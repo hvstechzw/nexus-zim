@@ -57,7 +57,10 @@ const App = () => (
               <Route path="/admin/verify" element={<PlayerVerifyPage />} />
               <Route path="/admin/regions" element={<AdminRegionsPage />} />
               <Route path="/competitions" element={<Navigate to="/inter-school" replace />} />
+              <Route path="/admin/competitions/new" element={<TournamentWizardPage />} />
               <Route path="/competition/:id" element={<CompetitionDetailPage />} />
+              <Route path="/competition/:id/bracket" element={<BracketPage />} />
+              <Route path="/competition/:id/standings" element={<StandingsPage />} />
               <Route path="/scoring" element={<ScoringPage />} />
               <Route path="/scoring/:fixtureId" element={<FixtureScoringPage />} />
               <Route path="/fixtures" element={<FixturesPage />} />
