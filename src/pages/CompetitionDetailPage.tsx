@@ -266,7 +266,7 @@ export default function CompetitionDetailPage() {
 
           {/* Leaders */}
           {tab === "leaders" && (
-            <LeaderboardPanel fixtureIds={fixtures.map((f: any) => f.id)} />
+            <LeaderboardPanel fixtureIds={fixtures.map((f: any) => f.id)} competitionId={id} />)
           )}
 
           {/* Participants */}
