@@ -11,6 +11,7 @@ import { SchoolsDirectory } from "@/components/SchoolsDirectory";
 import { SportingCalendar } from "@/components/admin/SportingCalendar";
 import { UsersRolesPanel } from "@/components/admin/UsersRolesPanel";
 import { RegionRequestsPanel } from "@/components/admin/RegionRequestsPanel";
+import { RoleRequestsPanel } from "@/components/admin/RoleRequestsPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
