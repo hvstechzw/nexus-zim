@@ -8,7 +8,9 @@ import { NexusHeader } from "@/components/NexusHeader";
 import { NexusFooter } from "@/components/NexusFooter";
 import { Button } from "@/components/ui/button";
 
-import { detectSport as detectSportKey, getSport, type SportKey } from "@/lib/sports";
+import { athleteEligibility, detectSport as detectSportKey, getSport, type Eligibility, type SportKey } from "@/lib/sports";
+
+interface RosterPlayer { id: string; name: string; jersey: number | null; position: string | null; elig: Eligibility }
 
 // Single source of truth: the rule set (periods, events, point values) comes
 // from the shared sport domain layer so this per-fixture scorer and the main
@@ -42,6 +44,7 @@ export default function FixtureScoringPage() {
   const { toast } = useToast();
   const [activePeriod, setActivePeriod] = useState<string>("");
   const [activeSide, setActiveSide] = useState<"home" | "away">("home");
+  const [selectedPlayer, setSelectedPlayer] = useState<RosterPlayer | null>(null);
   const clockRef = useRef<HTMLSpanElement>(null);
 
   const { data: fixture, refetch } = useQuery({
@@ -71,9 +74,38 @@ export default function FixtureScoringPage() {
     },
   });
 
+  const homeSchoolTeamId = (fixture as any)?.home_school_team_id ?? null;
+  const awaySchoolTeamId = (fixture as any)?.away_school_team_id ?? null;
+
+  // Roster load for player attribution (mirrors the main scoring console).
+  const { data: rosters = { home: [], away: [] } } = useQuery({
+    queryKey: ["fixture-rosters", homeSchoolTeamId, awaySchoolTeamId],
+    enabled: !!(homeSchoolTeamId || awaySchoolTeamId),
+    queryFn: async () => {
+      const load = async (schoolTeamId: string | null): Promise<RosterPlayer[]> => {
+        if (!schoolTeamId) return [];
+        const { data } = await supabase
+          .from("school_team_players")
+          .select("athlete_id, jersey_number, position, athletes:athlete_id(first_name, last_name, display_name, is_active, is_suspended, scholastic_card_verified)")
+          .eq("school_team_id", schoolTeamId)
+          .order("jersey_number");
+        return (data || []).map((r: any) => ({
+          id: r.athlete_id,
+          name: r.athletes?.display_name || `${r.athletes?.first_name ?? ""} ${r.athletes?.last_name ?? ""}`.trim() || "Player",
+          jersey: r.jersey_number ?? null,
+          position: r.position ?? null,
+          elig: athleteEligibility({ is_active: r.athletes?.is_active, is_suspended: r.athletes?.is_suspended, scholastic_card_verified: r.athletes?.scholastic_card_verified }),
+        }));
+      };
+      const [home, away] = await Promise.all([load(homeSchoolTeamId), load(awaySchoolTeamId)]);
+      return { home, away };
+    },
+  });
+
   const sport: SportKey = useMemo(() => fixture ? detectSport(fixture as any) : "handball", [fixture]);
   const config = useMemo(() => buildConfig(sport), [sport]);
   const labels = useMemo(() => eventLabelMap(sport), [sport]);
+  const activeRoster: RosterPlayer[] = (rosters as any)[activeSide] || [];
 
   useEffect(() => {
     if (!activePeriod && config.periods.length) setActivePeriod(config.periods[0]);
@@ -139,9 +171,10 @@ export default function FixtureScoringPage() {
       scorer_id: user?.id ?? null,
       event_type: eventType,
       team_id: tId,
+      athlete_id: selectedPlayer ? selectedPlayer.id : null,
       period: activePeriod,
       value,
-      metadata: { side: activeSide, sport },
+      metadata: { side: activeSide, sport, player_name: selectedPlayer?.name ?? null },
     });
     if (error) { toast({ title: "Log failed", description: error.message, variant: "destructive" }); return; }
 
@@ -179,13 +212,13 @@ export default function FixtureScoringPage() {
         {/* Scoreboard */}
         <div className="hairline rounded-xl overflow-hidden mb-6">
           <div className="grid grid-cols-[1fr_auto_1fr] items-stretch">
-            <TeamPanel name={f.home_team?.name || "Home"} score={f.home_score ?? 0} active={activeSide === "home"} onSelect={() => setActiveSide("home")} />
+            <TeamPanel name={f.home_team?.name || "Home"} score={f.home_score ?? 0} active={activeSide === "home"} onSelect={() => { setActiveSide("home"); setSelectedPlayer(null); }} />
             <div className="px-4 sm:px-8 py-6 flex flex-col items-center justify-center gap-2 bg-nexus-surface/50 min-w-[120px]">
               <span className="text-[10px] mono tracking-widest uppercase text-nexus-muted">{config.periodLabel}</span>
               <span className="text-sm font-semibold">{activePeriod}</span>
               <span ref={clockRef} className="score-display text-lg text-nexus-muted">{isLive ? "00:00" : f.status}</span>
             </div>
-            <TeamPanel name={f.away_team?.name || "Away"} score={f.away_score ?? 0} active={activeSide === "away"} onSelect={() => setActiveSide("away")} align="right" />
+            <TeamPanel name={f.away_team?.name || "Away"} score={f.away_score ?? 0} active={activeSide === "away"} onSelect={() => { setActiveSide("away"); setSelectedPlayer(null); }} align="right" />
           </div>
           <div className="hairline-t px-4 py-3 flex flex-wrap gap-2 items-center justify-between">
             <div className="flex gap-1 flex-wrap">
@@ -207,6 +240,25 @@ export default function FixtureScoringPage() {
         {/* Event controls */}
         <div className="grid md:grid-cols-2 gap-4 mb-6">
           <Card title={`Score — ${activeSide === "home" ? f.home_team?.name : f.away_team?.name}`}>
+            {activeRoster.length > 0 && (
+              <div className="mb-3">
+                <p className="text-[9px] mono tracking-widest uppercase text-nexus-muted mb-1.5">Attribute to {selectedPlayer ? <span className="text-foreground">{selectedPlayer.name}</span> : "player (optional)"}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {activeRoster.map((p) => (
+                    <button key={p.id} disabled={!p.elig.eligible} title={p.elig.status !== "eligible" ? p.elig.label : undefined}
+                      onClick={() => p.elig.eligible && setSelectedPlayer(selectedPlayer?.id === p.id ? null : p)}
+                      className={`flex items-center gap-1 px-2 py-1 text-[10px] font-semibold rounded-md hairline btn-click transition-all ${
+                        !p.elig.eligible ? "opacity-40 cursor-not-allowed line-through"
+                        : selectedPlayer?.id === p.id ? "bg-foreground text-primary-foreground"
+                        : "bg-nexus-surface text-foreground hover:bg-nexus-silver"}`}>
+                      {p.elig.status === "suspended" && <span className="w-1.5 h-2.5 rounded-[1px] bg-red-500" />}
+                      {p.elig.status === "unverified" && <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />}
+                      {p.jersey != null && <span className="mono text-nexus-muted">#{p.jersey}</span>}{p.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-2">
               {config.scoreEvents.map(e => (
                 <button key={e.type} onClick={() => logEvent(e.type, e.value)}

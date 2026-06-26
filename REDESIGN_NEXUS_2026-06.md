@@ -93,9 +93,16 @@ Built on the attribution data Phase 1 began capturing.
   vocabulary, so analytics over `score_entries.event_type` are consistent
   regardless of which scorer recorded the match.
 
-## Phase 5 roadmap (next)
-- Full realtime hydration of the per-fixture scorer into the `match` reducer
-  (single in-memory model shared with the main console), incl. player attribution
-  on that path.
+## Phase 5 — attribution on the per-fixture scorer (shipped)
+
+- The per-fixture scorer (`/scoring/:fixtureId`) now loads school-team rosters
+  with the same eligibility gating as the main console and tags goals to players
+  (`score_entries.athlete_id` + `metadata.player_name`). Matches scored through
+  this realtime path now feed the competition **leaderboards** and **player
+  profiles** — previously they produced no attributed stats.
+
+## Phase 6 roadmap (next)
+- Single shared in-memory `match` reducer hydrated from realtime `score_entries`
+  (collapse the two scorer UIs onto one model).
 - IA/visual refresh of the public pages (live, fixtures, schools, competition)
   around the two-sport identity.
