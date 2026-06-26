@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { useScholasticAutoSync } from "@/hooks/useScholasticAutoSync";
 import { useToast } from "@/hooks/use-toast";
 import { SCHOOL_TERMS, COMPETITION_STAGES, type CompetitionStage } from "@/lib/schools";
 import { AgeGroupFilter } from "@/components/AgeGroupFilter";
@@ -12,6 +13,7 @@ const NEXUS_DISCIPLINES = ["Handball", "Netball"] as const;
 
 const inputCls = "bg-nexus-surface hairline rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-nexus-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground/20 transition-all w-full";
 const labelCls = "text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold";
+
 
 function roundRobin(ids: string[]): Array<[string, string]> {
   const list = [...ids];
