@@ -130,7 +130,16 @@ export default function MatchConsolePage() {
   const courtRef = useRef<HTMLDivElement>(null);
   const [pendingShot, setPendingShot] = useState<{ x: number; y: number } | null>(null);
 
-  const verifiedRoster = (list: Player[] | undefined) => (list || []).filter((p) => p.verified);
+  // Show every rostered player — verified ones first, then unverified.
+  // Scorers can still tap any name to attribute an action; verified status
+  // is shown as a small badge so the HIC can spot gaps without losing input.
+  const sortedRoster = (list: Player[] | undefined) =>
+    (list || []).slice().sort((a, b) =>
+      (Number(b.verified) - Number(a.verified)) ||
+      ((a.jersey ?? 999) - (b.jersey ?? 999)) ||
+      a.name.localeCompare(b.name)
+    );
+
 
   async function fire(eventType: string, value = 0, subType?: string) {
     if (!canScore) { toast({ title: "Not allowed", description: "Sign in as a scorer or official." }); return; }
