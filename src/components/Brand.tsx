@@ -1,20 +1,16 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
+import nexusLogo from "@/assets/nexus-logo.png.asset.json";
 
-// Theme-aware Nexus brand system. The supplied PNG logos are single-colour on
-// transparent (one needs a light bg, the other a dark bg), so they can't sit on
-// a translucent header or adapt to dark mode without hacks. This markup wordmark
-// reads crisply at any size and inverts automatically with the theme. The small
-// accent square nods to the pixel-"N" motif in the full logo.
+// Brand uses the official Nexus pixel-N mark on a dark tile so it reads in both themes.
 
-export function BrandGlyph({ className = "w-8 h-8 text-[15px] rounded-lg" }: { className?: string }) {
+export function BrandGlyph({ className = "w-9 h-9 rounded-lg" }: { className?: string }) {
   return (
     <span
-      className={`relative inline-flex items-center justify-center bg-foreground text-background font-bold display-font tracking-tighter flex-shrink-0 ${className}`}
+      className={`relative inline-flex items-center justify-center bg-foreground flex-shrink-0 overflow-hidden ${className}`}
       aria-hidden
     >
-      N
-      <span className="absolute top-[15%] right-[15%] w-[14%] h-[14%] bg-background/70 rounded-[1px]" />
+      <img src={nexusLogo.url} alt="" className="w-[70%] h-[70%] object-contain" />
     </span>
   );
 }
