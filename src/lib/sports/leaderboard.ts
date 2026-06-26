@@ -5,9 +5,19 @@
 export interface ScoreEntryLike {
   athlete_id?: string | null;
   team_id?: string | null;
+  fixture_id?: string | null;
   value?: number | null;
   event_type: string;
   metadata?: { side?: string; player_name?: string; card?: string | null } | null;
+}
+
+export interface PlayerSummary {
+  goals: number;
+  points: number;
+  appearances: number; // distinct fixtures with any logged event
+  yellow: number;
+  suspensions: number;
+  red: number;
 }
 
 export interface ScorerRow {
@@ -76,6 +86,26 @@ export function disciplineLeaders(entries: ScoreEntryLike[], names?: Record<stri
   return [...byId.values()].sort(
     (a, b) => b.weight - a.weight || b.red - a.red || b.suspensions - a.suspensions || a.name.localeCompare(b.name),
   );
+}
+
+/**
+ * Aggregate one athlete's entries into a season summary. Pass only the entries
+ * belonging to the athlete (e.g. filtered by athlete_id).
+ */
+export function playerSummary(entries: ScoreEntryLike[]): PlayerSummary {
+  const s: PlayerSummary = { goals: 0, points: 0, appearances: 0, yellow: 0, suspensions: 0, red: 0 };
+  const fixtures = new Set<string>();
+  for (const e of entries) {
+    const value = Number(e.value ?? 0);
+    if (value > 0) { s.goals += 1; s.points += value; }
+    if (e.fixture_id) fixtures.add(e.fixture_id);
+    const card = e.metadata?.card;
+    if (YELLOW_TYPES.has(e.event_type) || card === "yellow") s.yellow += 1;
+    if (SUSPENSION_TYPES.has(e.event_type)) s.suspensions += 1;
+    if (RED_TYPES.has(e.event_type) || card === "red") s.red += 1;
+  }
+  s.appearances = fixtures.size;
+  return s;
 }
 
 /** Total goals scored per team across the entries (for a team attack table). */

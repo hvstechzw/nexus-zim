@@ -26,6 +26,7 @@ import AdminSyncPage from "./pages/AdminSyncPage.tsx";
 import PlayerVerifyPage from "./pages/PlayerVerifyPage.tsx";
 import TeamBuilderPage from "./pages/TeamBuilderPage.tsx";
 import AdminRegionsPage from "./pages/AdminRegionsPage.tsx";
+import PlayerProfilePage from "./pages/PlayerProfilePage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -59,6 +60,7 @@ const App = () => (
               <Route path="/schools" element={<SchoolsPage />} />
               <Route path="/schools/:id" element={<SchoolProfilePage />} />
               <Route path="/schools/:id/teams/new" element={<TeamBuilderPage />} />
+              <Route path="/players/:athleteId" element={<PlayerProfilePage />} />
               <Route path="/inter-school" element={<InterSchoolPage />} />
               <Route path="/sports-day" element={<SportsDayPage />} />
               <Route path="/practice" element={<PracticeScoringPage />} />

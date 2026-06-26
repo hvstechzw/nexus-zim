@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { disciplineLeaders, teamGoals, topScorers, type ScoreEntryLike } from "./leaderboard";
+import { disciplineLeaders, playerSummary, teamGoals, topScorers, type ScoreEntryLike } from "./leaderboard";
 
 const entries: ScoreEntryLike[] = [
   { athlete_id: "a1", team_id: "t1", value: 1, event_type: "goal", metadata: { player_name: "Tariro" } },
@@ -40,6 +40,23 @@ describe("disciplineLeaders", () => {
     const rows = disciplineLeaders(disc);
     expect(rows.map((r) => r.athleteId)).toEqual(["p3", "p2", "p1"]);
     expect(rows.find((r) => r.athleteId === "p2")).toMatchObject({ yellow: 1, suspensions: 1, weight: 3 });
+  });
+});
+
+describe("playerSummary", () => {
+  it("aggregates goals, points, appearances and discipline for one athlete", () => {
+    const mine: ScoreEntryLike[] = [
+      { athlete_id: "a1", fixture_id: "f1", value: 1, event_type: "goal" },
+      { athlete_id: "a1", fixture_id: "f1", value: 2, event_type: "super_shot" },
+      { athlete_id: "a1", fixture_id: "f2", value: 1, event_type: "goal" },
+      { athlete_id: "a1", fixture_id: "f2", value: 0, event_type: "warning", metadata: { card: "yellow" } },
+      { athlete_id: "a1", fixture_id: "f2", value: 0, event_type: "suspension_2min" },
+    ];
+    expect(playerSummary(mine)).toEqual({ goals: 3, points: 4, appearances: 2, yellow: 1, suspensions: 1, red: 0 });
+  });
+
+  it("returns zeroes for an empty set", () => {
+    expect(playerSummary([])).toEqual({ goals: 0, points: 0, appearances: 0, yellow: 0, suspensions: 0, red: 0 });
   });
 });
 

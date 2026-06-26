@@ -74,10 +74,18 @@ Built on the attribution data Phase 1 began capturing.
   player picker (red bar = suspended, amber dot = unverified card).
 - Test count: 36 → **46**.
 
-## Phase 3 roadmap (next)
+## Phase 3 — player season profiles (shipped)
+
+- **`playerSummary`** in `src/lib/sports/leaderboard.ts` (pure, tested): goals,
+  points, appearances (distinct fixtures), and discipline for one athlete.
+- **Player profile page** `/players/:athleteId` (`PlayerProfilePage`): header with
+  sport / jersey / school / live eligibility badge, season stat cards, and a
+  recent-activity feed (event labels resolved from the sport config).
+- Leaderboard scorer names now link through to the player profile.
+- Test count: 46 → **48**.
+
+## Phase 4 roadmap (next)
 - Migrate the per-fixture scorer fully onto the `match` reducer (shared event
   vocabulary + realtime hydration from `score_entries`).
-- Player **season profile** page (goals, discipline, appearances) from
-  `score_entries.athlete_id`.
 - IA/visual refresh of the public pages (live, fixtures, schools, competition)
   around the two-sport identity.

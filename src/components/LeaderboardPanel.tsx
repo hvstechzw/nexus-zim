@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { disciplineLeaders, topScorers, type ScoreEntryLike } from "@/lib/sports";
@@ -45,7 +46,7 @@ export function LeaderboardPanel({ fixtureIds }: { fixtureIds: string[] }) {
             {scorers.slice(0, 20).map((s, i) => (
               <div key={s.athleteId} className="flex items-center gap-3 px-4 py-3 hairline-b last:border-b-0 hover:bg-nexus-surface/40 transition-colors">
                 <span className="text-sm font-bold w-6 text-nexus-muted">{i + 1}</span>
-                <span className="text-sm font-semibold text-foreground flex-1 truncate">{s.name}</span>
+                <Link to={`/players/${s.athleteId}`} className="text-sm font-semibold text-foreground flex-1 truncate hover:underline">{s.name}</Link>
                 <span className="text-[10px] mono text-nexus-muted">{s.goals} {s.goals === 1 ? "goal" : "goals"}</span>
                 <span className="text-base font-bold mono text-foreground w-10 text-right">{s.points}</span>
               </div>
