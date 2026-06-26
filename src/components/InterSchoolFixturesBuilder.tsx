@@ -106,12 +106,49 @@ export function InterSchoolFixturesBuilder() {
   const toggleSchool = (id: string) => setSelectedSchools((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
 
 
+  // Find-or-create a school_team (e.g. "Marist Handball U16") for a school.
+  // Lets admins build a draw straight from the schools list when sports
+  // directors haven't published team sheets yet.
+  async function ensureSchoolTeam(schoolId: string): Promise<{ id: string; school_id: string } | null> {
+    const school: any = schools.find((s: any) => s.id === schoolId);
+    if (!school) return null;
+    const existing = await supabase
+      .from("school_teams")
+      .select("id, school_id")
+      .eq("school_id", schoolId).eq("discipline", discipline).eq("age_group", ageGroup)
+      .maybeSingle();
+    if (existing.data) return existing.data as any;
+    const teamName = `${school.school_name || school.name} ${discipline} ${ageGroup}`;
+    const { data, error } = await supabase.from("school_teams").insert({
+      school_id: schoolId,
+      name: teamName,
+      discipline,
+      age_group: ageGroup,
+      gender: "Mixed",
+      is_published: true,
+      created_by: user?.id ?? null,
+    } as any).select("id, school_id").single();
+    if (error) throw error;
+    return data as any;
+  }
+
   const generate = async () => {
     if (!user) { toast({ title: "Sign in required", variant: "destructive" }); return; }
-    if (selected.length < 2) { toast({ title: "Pick at least 2 schools", variant: "destructive" }); return; }
     if (!name.trim()) { toast({ title: "Name your competition", variant: "destructive" }); return; }
+    const usingSchools = pickMode === "schools";
+    if (usingSchools && selectedSchools.length < 2) { toast({ title: "Pick at least 2 schools", variant: "destructive" }); return; }
+    if (!usingSchools && selected.length < 2) { toast({ title: "Pick at least 2 teams", variant: "destructive" }); return; }
     setBusy(true);
     try {
+      // Resolve to school_team ids — auto-create one per school when needed.
+      let teamIds: string[] = selected;
+      let schoolByTeam = new Map(schoolTeams.map((t: any) => [t.id, t.school_id]));
+      if (usingSchools) {
+        const created = await Promise.all(selectedSchools.map((sid) => ensureSchoolTeam(sid)));
+        teamIds = created.filter(Boolean).map((c: any) => c!.id);
+        created.forEach((c) => { if (c) schoolByTeam.set(c.id, c.school_id); });
+      }
+
       const { data: comp, error: cErr } = await supabase.from("competitions").insert({
         name: name.trim(),
         discipline,
@@ -126,9 +163,6 @@ export function InterSchoolFixturesBuilder() {
       } as any).select().single();
       if (cErr) throw cErr;
 
-      // selected[] are school_team ids. Look up their parent school for home_team_id/away_team_id.
-      const schoolByTeam = new Map(schoolTeams.map((t: any) => [t.id, t.school_id]));
-
       const pairToFixture = (p: [string, string], extra: Partial<any>) => ({
         competition_id: comp.id,
         home_team_id: schoolByTeam.get(p[0]) || null,
@@ -141,7 +175,7 @@ export function InterSchoolFixturesBuilder() {
 
       let fixtures: any[] = [];
       if (format === "pooled") {
-        const shuffled = [...selected];
+        const shuffled = [...teamIds];
         const numPools = Math.max(1, Math.ceil(shuffled.length / poolSize));
         const pools: string[][] = Array.from({ length: numPools }, () => []);
         shuffled.forEach((id, i) => pools[i % numPools].push(id));
@@ -156,8 +190,8 @@ export function InterSchoolFixturesBuilder() {
           });
         });
       } else {
-        const pairs = format === "round_robin" ? roundRobin(selected) : knockout(selected);
-        const half = Math.max(1, Math.floor(selected.length / 2));
+        const pairs = format === "round_robin" ? roundRobin(teamIds) : knockout(teamIds);
+        const half = Math.max(1, Math.floor(teamIds.length / 2));
         fixtures = pairs.map((p, i) => pairToFixture(p, {
           round_number: format === "single_elimination" ? 1 : Math.floor(i / half) + 1,
           round_label: format === "single_elimination" ? "Round 1" : `Round ${Math.floor(i / half) + 1}`,
@@ -169,7 +203,7 @@ export function InterSchoolFixturesBuilder() {
 
       toast({ title: "Bracket generated", description: `${comp.name} · ${fixtures.length} fixtures` });
       qc.invalidateQueries();
-      setSelected([]);
+      setSelected([]); setSelectedSchools([]);
       setName("");
     } catch (e: any) {
       toast({ title: "Failed", description: e.message, variant: "destructive" });
@@ -177,6 +211,7 @@ export function InterSchoolFixturesBuilder() {
       setBusy(false);
     }
   };
+
 
   return (
     <div className="hairline rounded-xl p-5 sm:p-6 bg-background card-shadow flex flex-col gap-5">
