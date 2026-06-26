@@ -318,6 +318,8 @@ export type Database = {
           end_date: string | null
           entry_fee: number | null
           format: Database["public"]["Enums"]["bracket_format"]
+          group_count: number | null
+          group_size: number | null
           id: string
           is_broadcast: boolean | null
           is_house_competition: boolean | null
@@ -327,6 +329,7 @@ export type Database = {
           max_participants: number | null
           name: string
           parent_id: string | null
+          points_config: Json | null
           prize_pool: number | null
           province: string | null
           registration_deadline: string | null
@@ -350,6 +353,8 @@ export type Database = {
           end_date?: string | null
           entry_fee?: number | null
           format?: Database["public"]["Enums"]["bracket_format"]
+          group_count?: number | null
+          group_size?: number | null
           id?: string
           is_broadcast?: boolean | null
           is_house_competition?: boolean | null
@@ -359,6 +364,7 @@ export type Database = {
           max_participants?: number | null
           name: string
           parent_id?: string | null
+          points_config?: Json | null
           prize_pool?: number | null
           province?: string | null
           registration_deadline?: string | null
@@ -382,6 +388,8 @@ export type Database = {
           end_date?: string | null
           entry_fee?: number | null
           format?: Database["public"]["Enums"]["bracket_format"]
+          group_count?: number | null
+          group_size?: number | null
           id?: string
           is_broadcast?: boolean | null
           is_house_competition?: boolean | null
@@ -391,6 +399,7 @@ export type Database = {
           max_participants?: number | null
           name?: string
           parent_id?: string | null
+          points_config?: Json | null
           prize_pool?: number | null
           province?: string | null
           registration_deadline?: string | null
@@ -517,15 +526,19 @@ export type Database = {
       }
       fixtures: {
         Row: {
+          advances_to_fixture_id: string | null
           away_athlete_id: string | null
           away_school_team_id: string | null
           away_score: number | null
           away_team_id: string | null
+          bracket_round: number | null
+          bracket_slot: string | null
           broadcast_url: string | null
           competition_id: string
           created_at: string
           ended_at: string | null
           extra_time_score: Json | null
+          group_label: string | null
           home_athlete_id: string | null
           home_school_team_id: string | null
           home_score: number | null
@@ -547,15 +560,19 @@ export type Database = {
           winner_id: string | null
         }
         Insert: {
+          advances_to_fixture_id?: string | null
           away_athlete_id?: string | null
           away_school_team_id?: string | null
           away_score?: number | null
           away_team_id?: string | null
+          bracket_round?: number | null
+          bracket_slot?: string | null
           broadcast_url?: string | null
           competition_id: string
           created_at?: string
           ended_at?: string | null
           extra_time_score?: Json | null
+          group_label?: string | null
           home_athlete_id?: string | null
           home_school_team_id?: string | null
           home_score?: number | null
@@ -577,15 +594,19 @@ export type Database = {
           winner_id?: string | null
         }
         Update: {
+          advances_to_fixture_id?: string | null
           away_athlete_id?: string | null
           away_school_team_id?: string | null
           away_score?: number | null
           away_team_id?: string | null
+          bracket_round?: number | null
+          bracket_slot?: string | null
           broadcast_url?: string | null
           competition_id?: string
           created_at?: string
           ended_at?: string | null
           extra_time_score?: Json | null
+          group_label?: string | null
           home_athlete_id?: string | null
           home_school_team_id?: string | null
           home_score?: number | null
@@ -607,6 +628,13 @@ export type Database = {
           winner_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "fixtures_advances_to_fixture_id_fkey"
+            columns: ["advances_to_fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "fixtures_away_athlete_id_fkey"
             columns: ["away_athlete_id"]
@@ -1513,11 +1541,13 @@ export type Database = {
           competition_id: string
           created_at: string
           division: string | null
+          group_label: string | null
           id: string
           notes: string | null
           payment_status: string | null
           registration_type: string
           reviewed_by: string | null
+          school_team_id: string | null
           seed_number: number | null
           status: Database["public"]["Enums"]["registration_status"]
           submitted_by: string | null
@@ -1529,11 +1559,13 @@ export type Database = {
           competition_id: string
           created_at?: string
           division?: string | null
+          group_label?: string | null
           id?: string
           notes?: string | null
           payment_status?: string | null
           registration_type: string
           reviewed_by?: string | null
+          school_team_id?: string | null
           seed_number?: number | null
           status?: Database["public"]["Enums"]["registration_status"]
           submitted_by?: string | null
@@ -1545,11 +1577,13 @@ export type Database = {
           competition_id?: string
           created_at?: string
           division?: string | null
+          group_label?: string | null
           id?: string
           notes?: string | null
           payment_status?: string | null
           registration_type?: string
           reviewed_by?: string | null
+          school_team_id?: string | null
           seed_number?: number | null
           status?: Database["public"]["Enums"]["registration_status"]
           submitted_by?: string | null
@@ -1569,6 +1603,13 @@ export type Database = {
             columns: ["competition_id"]
             isOneToOne: false
             referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "registrations_school_team_id_fkey"
+            columns: ["school_team_id"]
+            isOneToOne: false
+            referencedRelation: "school_teams"
             referencedColumns: ["id"]
           },
           {
@@ -1996,11 +2037,13 @@ export type Database = {
           competition_id: string
           drawn: number | null
           form: string[] | null
+          group_label: string | null
           id: string
           lost: number | null
           played: number | null
           points: number | null
           position: number | null
+          school_team_id: string | null
           score_against: number | null
           score_diff: number | null
           score_for: number | null
@@ -2014,11 +2057,13 @@ export type Database = {
           competition_id: string
           drawn?: number | null
           form?: string[] | null
+          group_label?: string | null
           id?: string
           lost?: number | null
           played?: number | null
           points?: number | null
           position?: number | null
+          school_team_id?: string | null
           score_against?: number | null
           score_diff?: number | null
           score_for?: number | null
@@ -2032,11 +2077,13 @@ export type Database = {
           competition_id?: string
           drawn?: number | null
           form?: string[] | null
+          group_label?: string | null
           id?: string
           lost?: number | null
           played?: number | null
           points?: number | null
           position?: number | null
+          school_team_id?: string | null
           score_against?: number | null
           score_diff?: number | null
           score_for?: number | null
@@ -2057,6 +2104,13 @@ export type Database = {
             columns: ["competition_id"]
             isOneToOne: false
             referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "standings_school_team_id_fkey"
+            columns: ["school_team_id"]
+            isOneToOne: false
+            referencedRelation: "school_teams"
             referencedColumns: ["id"]
           },
           {
@@ -2437,6 +2491,10 @@ export type Database = {
       }
       recompute_match_state: {
         Args: { _fixture_id: string }
+        Returns: undefined
+      }
+      recompute_standings: {
+        Args: { _competition_id: string }
         Returns: undefined
       }
     }
