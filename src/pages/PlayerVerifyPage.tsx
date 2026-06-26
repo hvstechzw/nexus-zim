@@ -9,6 +9,8 @@ import { NexusFooter } from "@/components/NexusFooter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { parseScholasticCard, buildVerifyCardBody } from "@/lib/scholasticCardScan";
+import jsQR from "jsqr";
+
 
 type Athlete = {
   id: string;
@@ -88,32 +90,44 @@ export default function PlayerVerifyPage() {
   }
 
   async function startCamera() {
-    const AnyWindow = window as any;
-    if (!("BarcodeDetector" in AnyWindow)) {
-      toast({ title: "QR not supported", description: "Use manual entry — your browser lacks BarcodeDetector.", variant: "destructive" });
-      return;
-    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
+        videoRef.current.setAttribute("playsinline", "true");
         await videoRef.current.play();
       }
-      const detector = new AnyWindow.BarcodeDetector({ formats: ["qr_code"] });
+      const AnyWindow = window as any;
+      const nativeDetector = "BarcodeDetector" in AnyWindow ? new AnyWindow.BarcodeDetector({ formats: ["qr_code"] }) : null;
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
       scanningRef.current = true;
       setScanning(true);
+
+      const onHit = async (raw: string) => {
+        stopCamera();
+        setStudentIdInput(raw);
+        await lookup(raw, true);
+      };
+
       const loop = async () => {
         if (!scanningRef.current || !videoRef.current) return;
-        try {
-          const codes = await detector.detect(videoRef.current);
-          if (codes?.length) {
-            const raw = String(codes[0].rawValue || "");
-            stopCamera();
-            setStudentIdInput(raw);
-            await lookup(raw, true);
-            return;
-          }
-        } catch (e) { console.warn("detect err", e); }
+        const v = videoRef.current;
+        if (v.readyState >= 2 && v.videoWidth > 0) {
+          try {
+            if (nativeDetector) {
+              const codes = await nativeDetector.detect(v);
+              if (codes?.length) return onHit(String(codes[0].rawValue || ""));
+            } else if (ctx) {
+              canvas.width = v.videoWidth;
+              canvas.height = v.videoHeight;
+              ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+              const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+              const code = jsQR(img.data, img.width, img.height, { inversionAttempts: "dontInvert" });
+              if (code?.data) return onHit(code.data);
+            }
+          } catch (e) { console.warn("detect err", e); }
+        }
         requestAnimationFrame(loop);
       };
       loop();
@@ -121,6 +135,7 @@ export default function PlayerVerifyPage() {
       toast({ title: "Camera blocked", description: e.message, variant: "destructive" });
     }
   }
+
 
   function stopCamera() {
     scanningRef.current = false;
