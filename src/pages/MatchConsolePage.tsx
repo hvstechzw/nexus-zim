@@ -130,7 +130,16 @@ export default function MatchConsolePage() {
   const courtRef = useRef<HTMLDivElement>(null);
   const [pendingShot, setPendingShot] = useState<{ x: number; y: number } | null>(null);
 
-  const verifiedRoster = (list: Player[] | undefined) => (list || []).filter((p) => p.verified);
+  // Show every rostered player — verified ones first, then unverified.
+  // Scorers can still tap any name to attribute an action; verified status
+  // is shown as a small badge so the HIC can spot gaps without losing input.
+  const sortedRoster = (list: Player[] | undefined) =>
+    (list || []).slice().sort((a, b) =>
+      (Number(b.verified) - Number(a.verified)) ||
+      ((a.jersey ?? 999) - (b.jersey ?? 999)) ||
+      a.name.localeCompare(b.name)
+    );
+
 
   async function fire(eventType: string, value = 0, subType?: string) {
     if (!canScore) { toast({ title: "Not allowed", description: "Sign in as a scorer or official." }); return; }
@@ -241,20 +250,31 @@ export default function MatchConsolePage() {
 
             {/* Roster */}
             <div className="rounded-xl border bg-card/50 p-3">
-              <div className="text-xs uppercase opacity-60 mb-2">Verified roster · {side === "home" ? homeName : awayName}</div>
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-xs uppercase opacity-60">Roster · {side === "home" ? homeName : awayName}</div>
+                <div className="text-[10px] opacity-60">Tap a player to attribute the next action</div>
+              </div>
               <div className="flex gap-2 flex-wrap">
-                {verifiedRoster(side === "home" ? rosters?.home : rosters?.away).map((p) => (
+                {sortedRoster(side === "home" ? rosters?.home : rosters?.away).map((p) => (
                   <button key={p.id} onClick={() => setSelected(p)}
-                    className={`px-3 py-1.5 rounded-full border text-sm ${selected?.id === p.id ? "bg-foreground text-background" : "bg-background"}`}>
-                    {p.jersey ? `#${p.jersey} ` : ""}{p.name}{p.position ? ` · ${p.position}` : ""}
+                    className={`px-3 py-1.5 rounded-full border text-sm inline-flex items-center gap-1.5 ${selected?.id === p.id ? "bg-foreground text-background" : "bg-background"}`}>
+                    {p.jersey ? <span className="font-mono opacity-70">#{p.jersey}</span> : null}
+                    <span>{p.name}</span>
+                    {p.position ? <span className="opacity-60 text-xs">· {p.position}</span> : null}
+                    {p.verified
+                      ? <span title="Scholastic-verified" className="text-[9px] px-1.5 py-px rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">✓</span>
+                      : <span title="Not yet Scholastic-verified" className="text-[9px] px-1.5 py-px rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 uppercase tracking-wider">unv</span>}
                   </button>
                 ))}
-                {!(verifiedRoster(side === "home" ? rosters?.home : rosters?.away).length) && (
-                  <div className="text-xs opacity-60">No Scholastic-verified players on this team sheet.</div>
+                {!(sortedRoster(side === "home" ? rosters?.home : rosters?.away).length) && (
+                  <div className="text-xs opacity-60">No players on this team sheet yet. <Link to={`/schools`} className="underline">Add roster →</Link></div>
                 )}
               </div>
               {selected && (
                 <div className="mt-2 text-xs opacity-70">Attributing actions to <b>{selected.name}</b>. <button className="underline" onClick={() => setSelected(null)}>clear</button></div>
+              )}
+              {!selected && (
+                <div className="mt-2 text-[11px] opacity-60">No player selected — events will be recorded as team-level.</div>
               )}
             </div>
 
@@ -299,18 +319,26 @@ export default function MatchConsolePage() {
                   ))}
                 </div>
               </div>
-              <div>
-                <div className="text-xs uppercase opacity-60 mb-2">Actions</div>
-                <div className="flex flex-wrap gap-2">
-                  {cfg.otherEvents.map((e) => (
-                    <Button key={e.type} variant="outline" size="sm" onClick={() => fire(e.type, 0, e.card ?? null)} disabled={!canScore}>
-                      {e.label}
-                    </Button>
-                  ))}
-                </div>
-              </div>
+              {(["shot","save","turnover","info","discipline","stoppage"] as const).map((kind) => {
+                const group = cfg.otherEvents.filter((e: any) => e.kind === kind);
+                if (!group.length) return null;
+                const label = ({shot:"Shots & Rebounds",save:"Defensive Actions",turnover:"Turnovers & Intercepts",info:"Play",discipline:"Discipline",stoppage:"Stoppages"} as const)[kind];
+                return (
+                  <div key={kind}>
+                    <div className="text-xs uppercase opacity-60 mb-2">{label}</div>
+                    <div className="flex flex-wrap gap-2">
+                      {group.map((e: any) => (
+                        <Button key={e.type} variant={kind === "discipline" ? "destructive" : "outline"} size="sm" onClick={() => fire(e.type, 0, e.card ?? null)} disabled={!canScore}>
+                          {e.label}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
+
 
           {/* Right: timeline + commentary */}
           <div className="space-y-4">
