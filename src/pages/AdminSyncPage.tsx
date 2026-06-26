@@ -8,7 +8,7 @@ import { NexusHeader } from "@/components/NexusHeader";
 import { NexusFooter } from "@/components/NexusFooter";
 import { Button } from "@/components/ui/button";
 
-type Action = "full-sync" | "sync-schools" | "sync-students";
+type Action = "full-sync" | "sync-schools" | "sync-students" | "sync-rosters";
 
 export default function AdminSyncPage() {
   const { loading, hasRole, isAdmin } = useHasRole();
@@ -56,7 +56,7 @@ export default function AdminSyncPage() {
       const d: any = data;
       toast({
         title: d?.ok ? "Sync complete" : "Sync had issues",
-        description: `Schools: ${d?.schoolsSynced ?? 0} · Students: ${d?.studentsSynced ?? 0}${d?.error ? ` · ${d.error}` : ""}`,
+        description: `Schools: ${d?.schoolsSynced ?? 0} · Students: ${d?.studentsSynced ?? 0} · Teams: ${d?.teamsSynced ?? 0} · Players: ${d?.playersSynced ?? 0}${d?.error ? ` · ${d.error}` : ""}`,
         variant: d?.ok ? "default" : "destructive",
       });
     }
@@ -93,6 +93,9 @@ export default function AdminSyncPage() {
             </Button>
             <Button variant="outline" onClick={() => run("sync-students")} disabled={!!busy}>
               {busy === "sync-students" ? "Syncing…" : "Students only"}
+            </Button>
+            <Button variant="outline" onClick={() => run("sync-rosters")} disabled={!!busy}>
+              {busy === "sync-rosters" ? "Syncing…" : "Rosters only"}
             </Button>
           </div>
           <p className="text-xs text-nexus-muted mt-3">

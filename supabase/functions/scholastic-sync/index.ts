@@ -174,6 +174,8 @@ Deno.serve(async (req) => {
   let schoolsSynced = 0;
   let studentsSynced = 0;
   let staffSynced = 0;
+  let teamsSynced = 0;
+  let playersSynced = 0;
   let upsertErrors = 0;
   let status: "success" | "failed" | "partial" = "success";
   let errorMessage: string | null = null;
@@ -279,7 +281,67 @@ Deno.serve(async (req) => {
       }
     }
 
-    if (!["sync-schools","sync-students","sync-staff","full-sync"].includes(action)) {
+    if (action === "sync-rosters" || action === "full-sync") {
+      // Pull sport squads (handball/netball) and mirror them into Nexus
+      // school_teams + school_team_players. Best-effort: if the bridge does not
+      // implement fetch-rosters yet, skip without failing the whole run.
+      try {
+        const res = await callBridge("fetch-rosters", sport ? { sport } : {});
+        const rosters: any[] = res.rosters || [];
+
+        // external school id -> Nexus team (school) id
+        const extSchoolIds = [...new Set(rosters.map((r) => r.school_id).filter(Boolean))];
+        const { data: teams } = await admin
+          .from("teams").select("id, external_school_id")
+          .in("external_school_id", extSchoolIds.length ? extSchoolIds : ["__none__"]);
+        const teamByExt = new Map((teams || []).map((t: any) => [t.external_school_id, t.id]));
+
+        // external student id -> Nexus athlete id (chunked to keep URLs short)
+        const extStudentIds = [...new Set(rosters.flatMap((r) => (r.members || []).map((m: any) => m.student_id)).filter(Boolean))];
+        const athleteByExt = new Map<string, string>();
+        for (let i = 0; i < extStudentIds.length; i += 400) {
+          const chunk = extStudentIds.slice(i, i + 400);
+          const { data: ath } = await admin
+            .from("athletes").select("id, external_student_id").in("external_student_id", chunk);
+          for (const a of ath || []) athleteByExt.set(a.external_student_id, a.id);
+        }
+
+        for (const r of rosters) {
+          const schoolTeamSchoolId = teamByExt.get(r.school_id);
+          if (!schoolTeamSchoolId || !r.external_team_id) continue; // school not synced yet
+          const { data: st, error: stErr } = await admin.from("school_teams").upsert({
+            external_ss_team_id: r.external_team_id,
+            school_id: schoolTeamSchoolId,
+            discipline: r.discipline,
+            name: r.name || `${r.discipline} Team`,
+            age_group: r.age_group || null,
+            gender: r.gender || null,
+            coach_name: r.coach_name || null,
+            is_published: true,
+          }, { onConflict: "external_ss_team_id" }).select("id").single();
+          if (stErr || !st) { upsertErrors++; continue; }
+          teamsSynced++;
+
+          for (const m of (r.members || [])) {
+            const athleteId = athleteByExt.get(m.student_id);
+            if (!athleteId) continue; // athlete not synced / not in Nexus
+            const jerseyNum = m.jersey_no != null ? parseInt(String(m.jersey_no).replace(/\D/g, ""), 10) : NaN;
+            const { error: pErr } = await admin.from("school_team_players").upsert({
+              school_team_id: st.id,
+              athlete_id: athleteId,
+              jersey_number: Number.isFinite(jerseyNum) ? jerseyNum : null,
+              position: m.position || null,
+              is_captain: r.captain_student_id ? m.student_id === r.captain_student_id : false,
+            }, { onConflict: "school_team_id,athlete_id" });
+            if (!pErr) playersSynced++; else upsertErrors++;
+          }
+        }
+      } catch (e) {
+        console.warn("[sync-rosters] skipped:", e instanceof Error ? e.message : e);
+      }
+    }
+
+    if (!["sync-schools","sync-students","sync-staff","sync-rosters","full-sync"].includes(action)) {
       return json(cors, { error: `unknown action: ${action}` }, 400);
     }
     if (upsertErrors > 0) {
@@ -309,6 +371,9 @@ Deno.serve(async (req) => {
     status,
     schoolsSynced,
     studentsSynced,
+    staffSynced,
+    teamsSynced,
+    playersSynced,
     error: errorMessage,
   }, status === "failed" ? 502 : 200);
 });
