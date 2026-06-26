@@ -2689,6 +2689,34 @@ export type Database = {
         }
         Relationships: []
       }
+      vw_competition_top_players: {
+        Row: {
+          _ignored: number | null
+          assists: number | null
+          athlete_id: string | null
+          competition_id: string | null
+          defensive_actions: number | null
+          goals: number | null
+          impact_score: number | null
+          points: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fixtures_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_events_player_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vw_mom_tally: {
         Row: {
           athlete_id: string | null
