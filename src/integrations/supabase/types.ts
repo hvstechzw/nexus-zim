@@ -1207,6 +1207,41 @@ export type Database = {
         }
         Relationships: []
       }
+      player_badges: {
+        Row: {
+          athlete_id: string
+          awarded_at: string
+          code: string
+          context: Json
+          id: string
+          label: string
+        }
+        Insert: {
+          athlete_id: string
+          awarded_at?: string
+          code: string
+          context?: Json
+          id?: string
+          label: string
+        }
+        Update: {
+          athlete_id?: string
+          awarded_at?: string
+          code?: string
+          context?: Json
+          id?: string
+          label?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_badges_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       poll_votes: {
         Row: {
           created_at: string
@@ -2317,6 +2352,79 @@ export type Database = {
           ss_student_id: string | null
         }
         Relationships: []
+      }
+      vw_player_career: {
+        Row: {
+          assists: number | null
+          athlete_id: string | null
+          cards: number | null
+          goals: number | null
+          intercepts: number | null
+          matches: number | null
+          misses: number | null
+          shooting_pct: number | null
+          turnovers: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_events_player_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vw_player_form: {
+        Row: {
+          assists: number | null
+          athlete_id: string | null
+          cards: number | null
+          competition_id: string | null
+          fixture_id: string | null
+          goals: number | null
+          intercepts: number | null
+          scheduled_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fixtures_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_events_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_events_player_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vw_player_records: {
+        Row: {
+          athlete_id: string | null
+          most_goals_in_match: number | null
+          total_goals: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_events_player_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
