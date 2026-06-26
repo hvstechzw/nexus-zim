@@ -41,7 +41,10 @@ export function NexusFooter() {
               subtitle="Inter-School Sports"
               className="mb-4 sm:mb-5"
             />
-            <p className="text-[10px] sm:text-xs text-nexus-muted tracking-wide uppercase mt-1">by Aetheris Innovative Enterprises</p>
+            <div className="flex items-center gap-2 mt-3">
+              <img src={aetherisLogo.url} alt="Aetheris Innovative Enterprises" className="w-7 h-7 rounded-md bg-white p-0.5" />
+              <p className="text-[10px] sm:text-xs text-nexus-muted tracking-wide uppercase">by Aetheris Innovative Enterprises</p>
+            </div>
           </div>
 
           <div>
