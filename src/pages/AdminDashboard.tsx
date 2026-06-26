@@ -29,6 +29,7 @@ type TabId =
   | "standings"
   | "broadcasts"
   | "users"
+  | "role_requests"
   | "regions"
   | "federation";
 
