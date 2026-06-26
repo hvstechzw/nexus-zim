@@ -173,6 +173,52 @@ export default function PlayerProfilePage() {
             </div>
           )}
         </div>
+
+        {(career || form.length > 0 || badges.length > 0) && (
+          <div className="py-8 space-y-6">
+            <div>
+              <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted mb-3">Career — Match Engine</p>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                {[
+                  { l: "Matches", v: career?.matches ?? 0 },
+                  { l: "Goals", v: career?.goals ?? 0 },
+                  { l: "Assists", v: career?.assists ?? 0 },
+                  { l: "Shooting %", v: `${career?.shooting_pct ?? 0}%` },
+                  { l: "Intercepts", v: career?.intercepts ?? 0 },
+                ].map((s) => (
+                  <div key={s.l} className="hairline rounded-xl p-4">
+                    <p className="text-[9px] mono tracking-[0.15em] uppercase text-nexus-muted">{s.l}</p>
+                    <p className="text-xl font-bold mt-1">{s.v}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {form.length > 0 && (
+              <div>
+                <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted mb-3">Last {form.length} matches</p>
+                <div className="hairline rounded-xl overflow-hidden">
+                  {form.map((m: any) => (
+                    <Link to={`/live/${m.fixture_id}`} key={m.fixture_id} className="flex items-center gap-3 px-4 py-3 hairline-b last:border-b-0 hover:bg-nexus-surface/40">
+                      <span className="text-[10px] mono text-nexus-muted w-20">{m.scheduled_at ? new Date(m.scheduled_at).toLocaleDateString("en-ZW", { month: "short", day: "numeric" }) : "—"}</span>
+                      <span className="text-sm flex-1 tabular-nums">{m.goals}G · {m.assists}A · {m.intercepts}I{m.cards ? ` · ${m.cards}C` : ""}</span>
+                      <span className="text-[10px] mono text-nexus-muted">view →</span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+            {badges.length > 0 && (
+              <div>
+                <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted mb-3">Achievements</p>
+                <div className="flex flex-wrap gap-2">
+                  {badges.map((b: any) => (
+                    <span key={b.id} className="hairline rounded-full px-3 py-1 text-xs">{b.label}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
       <NexusFooter />
     </div>
