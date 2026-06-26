@@ -20,7 +20,7 @@ export default function InterSchoolPage() {
   const [stage, setStage] = useState<CompetitionStage | "all">("all");
   const [q, setQ] = useState("");
   const { hasRole, loading: roleLoading } = useHasRole();
-  const canBuild = hasRole(...(FIXTURE_ROLES as unknown as Parameters<typeof hasRole>));
+  const canBuild = hasRole(...FIXTURE_ROLES);
 
   const { data: comps = [] } = useQuery({
     queryKey: ["inter-school-comps"],
