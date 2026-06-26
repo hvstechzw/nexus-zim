@@ -201,7 +201,53 @@ export default function PlayerVerifyPage() {
             </Button>
           </div>
           {!scanning ? (
-            <Button variant="outline" size="sm" onClick={startCamera}>Open camera scanner</Button>
+            <div className="flex flex-wrap gap-2 items-center">
+              <Button variant="outline" size="sm" onClick={startCamera}>Live camera scan</Button>
+              <label className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md hairline cursor-pointer hover:bg-nexus-surface btn-click">
+                Use device camera
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    e.target.value = "";
+                    if (!file) return;
+                    try {
+                      const bmp = await createImageBitmap(file);
+                      const canvas = document.createElement("canvas");
+                      canvas.width = bmp.width; canvas.height = bmp.height;
+                      const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
+                      ctx.drawImage(bmp, 0, 0);
+                      const AnyWindow = window as any;
+                      let raw: string | null = null;
+                      if ("BarcodeDetector" in AnyWindow) {
+                        try {
+                          const det = new AnyWindow.BarcodeDetector({ formats: ["qr_code"] });
+                          const codes = await det.detect(canvas);
+                          if (codes?.length) raw = String(codes[0].rawValue || "");
+                        } catch {}
+                      }
+                      if (!raw) {
+                        const img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        const code = jsQR(img.data, img.width, img.height);
+                        raw = code?.data || null;
+                      }
+                      if (!raw) {
+                        toast({ title: "No QR detected", description: "Try again with a clearer shot.", variant: "destructive" });
+                        return;
+                      }
+                      setStudentIdInput(raw);
+                      await lookup(raw, true);
+                    } catch (err: any) {
+                      toast({ title: "Could not read image", description: err.message, variant: "destructive" });
+                    }
+                  }}
+                />
+              </label>
+              <span className="text-[10px] text-nexus-muted">Live = continuous webcam · Device = opens your phone's camera app</span>
+            </div>
           ) : (
             <div className="space-y-2">
               <video ref={videoRef} className="w-full max-w-sm rounded-lg hairline" muted playsInline />
