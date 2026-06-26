@@ -101,8 +101,14 @@ Built on the attribution data Phase 1 began capturing.
   this realtime path now feed the competition **leaderboards** and **player
   profiles** — previously they produced no attributed stats.
 
-## Phase 6 roadmap (next)
+## Phase 6 — period breakdown on results (shipped)
+
+- Completed fixtures on the competition **Results** tab now show the per-period
+  (quarter/half) breakdown captured by the scorers in `fixtures.period_scores`
+  (e.g. `Q1 12-9 · Q2 10-11 · …`), completing the capture→display round-trip.
+
+## Phase 7 roadmap (next — needs live preview / product input)
 - Single shared in-memory `match` reducer hydrated from realtime `score_entries`
   (collapse the two scorer UIs onto one model).
-- IA/visual refresh of the public pages (live, fixtures, schools, competition)
-  around the two-sport identity.
+- IA/visual refresh of the public pages (live, fixtures, schools, home) around
+  the two-sport identity.

@@ -34,7 +34,7 @@ export default function CompetitionDetailPage() {
     queryFn: async () => {
       const { data } = await supabase
         .from("fixtures")
-        .select(`id, round_label, status, scheduled_at, home_score, away_score, started_at, ended_at,
+        .select(`id, round_label, status, scheduled_at, home_score, away_score, started_at, ended_at, period_scores,
           home_team:teams!fixtures_home_team_id_fkey(name, short_name, logo_url),
           away_team:teams!fixtures_away_team_id_fkey(name, short_name, logo_url)`)
         .eq("competition_id", id!)
@@ -290,8 +290,13 @@ export default function CompetitionDetailPage() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 mt-2 justify-center">
+                  <div className="flex items-center gap-2 mt-2 justify-center flex-wrap">
                     <span className="text-[10px] mono text-nexus-muted">{f.round_label || "—"}</span>
+                    {Array.isArray(f.period_scores) && f.period_scores.length > 0 && (
+                      <span className="text-[10px] mono text-nexus-muted">
+                        {(f.period_scores as any[]).map((p) => `${p.period} ${p.home}-${p.away}`).join(" · ")}
+                      </span>
+                    )}
                     <span className="text-[10px] mono px-2 py-0.5 rounded-full bg-nexus-surface text-nexus-muted">FT</span>
                   </div>
                 </div>
