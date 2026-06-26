@@ -54,7 +54,7 @@ export function SchoolsDirectory() {
               to={`/schools/${s.id}`}
               className={`p-4 sm:p-5 flex flex-col gap-2 hover:bg-nexus-surface transition-colors ${(i + 1) % 2 !== 0 ? "hairline-r sm:hairline-r" : ""} ${i < schools.length - (schools.length % 6 || 6) ? "hairline-b" : ""}`}
             >
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-gradient-to-br from-slate-200 to-slate-400 flex items-center justify-center p-1 hairline">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-white flex items-center justify-center p-1 hairline">
                 {s.logo_url ? (
                   <img src={s.logo_url} alt={`${s.school_name || s.name} logo`} className="w-full h-full object-contain" onError={(event) => { event.currentTarget.style.display = "none"; }} />
                 ) : (
