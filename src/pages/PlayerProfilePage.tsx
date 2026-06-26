@@ -37,6 +37,32 @@ export default function PlayerProfilePage() {
     },
   });
 
+  // Match Engine 2.0 career data
+  const { data: career } = useQuery({
+    queryKey: ["player-career", athleteId],
+    enabled: !!athleteId,
+    queryFn: async () => {
+      const { data } = await supabase.from("vw_player_career").select("*").eq("athlete_id", athleteId!).maybeSingle();
+      return data as any;
+    },
+  });
+  const { data: form = [] } = useQuery({
+    queryKey: ["player-form", athleteId],
+    enabled: !!athleteId,
+    queryFn: async () => {
+      const { data } = await supabase.from("vw_player_form").select("*").eq("athlete_id", athleteId!).order("scheduled_at", { ascending: false }).limit(10);
+      return (data || []) as any[];
+    },
+  });
+  const { data: badges = [] } = useQuery({
+    queryKey: ["player-badges", athleteId],
+    enabled: !!athleteId,
+    queryFn: async () => {
+      const { data } = await supabase.from("player_badges").select("*").eq("athlete_id", athleteId!).order("awarded_at", { ascending: false });
+      return (data || []) as any[];
+    },
+  });
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background text-foreground">
