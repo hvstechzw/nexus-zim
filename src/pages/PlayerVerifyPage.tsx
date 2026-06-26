@@ -9,6 +9,8 @@ import { NexusFooter } from "@/components/NexusFooter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { parseScholasticCard, buildVerifyCardBody } from "@/lib/scholasticCardScan";
+import jsQR from "jsqr";
+
 
 type Athlete = {
   id: string;
