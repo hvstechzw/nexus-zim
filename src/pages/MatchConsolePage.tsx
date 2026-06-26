@@ -347,7 +347,13 @@ export default function MatchConsolePage() {
               </div>
             </div>
             <div className="rounded-xl border bg-card/50 p-3 text-xs space-y-1">
-              <div>MVP (live): <b>{state?.mvp_player_id ? state.mvp_player_id.slice(0, 8) : "—"}</b></div>
+              <div>MVP (live): <b>{(() => {
+                const id = state?.mvp_player_id;
+                if (!id) return "—";
+                const p = [...(rosters?.home ?? []), ...(rosters?.away ?? [])].find((x) => x.id === id);
+                return p?.name ?? id.slice(0, 8);
+              })()}</b></div>
+              <div className="opacity-70">Auto-published as Player of the Match when fixture is marked completed.</div>
               <Link to={`/live/${fixtureId}`} className="underline opacity-80">Open public live page →</Link>
             </div>
           </div>
