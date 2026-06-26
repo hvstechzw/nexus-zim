@@ -80,14 +80,17 @@ export type Database = {
       }
       athletes: {
         Row: {
+          bio: string | null
           club_name: string | null
           created_at: string
           date_of_birth: string | null
           disciplines: string[]
           display_name: string | null
+          dominant_hand: string | null
           external_student_id: string | null
           first_name: string
           gender: string | null
+          height_cm: number | null
           house: string | null
           id: string
           id_card_number: string | null
@@ -96,29 +99,40 @@ export type Database = {
           is_suspended: boolean | null
           jersey_number: number | null
           last_name: string
+          medical_cleared: boolean | null
           medical_waiver_date: string | null
           medical_waiver_signed: boolean | null
           nexus_sport: string | null
           nfc_tag: string | null
+          parent_consent: boolean | null
           personal_bests: Json | null
           photo_url: string | null
+          preferred_position: string | null
+          previous_clubs: string | null
+          primary_sport: string | null
           province: string
           qr_code: string | null
           scholastic_card_verified: boolean
           school_name: string | null
+          secondary_position: string | null
           ss_school_id: string | null
           updated_at: string
           user_id: string | null
+          weight_kg: number | null
+          years_playing: number | null
         }
         Insert: {
+          bio?: string | null
           club_name?: string | null
           created_at?: string
           date_of_birth?: string | null
           disciplines: string[]
           display_name?: string | null
+          dominant_hand?: string | null
           external_student_id?: string | null
           first_name: string
           gender?: string | null
+          height_cm?: number | null
           house?: string | null
           id?: string
           id_card_number?: string | null
@@ -127,29 +141,40 @@ export type Database = {
           is_suspended?: boolean | null
           jersey_number?: number | null
           last_name: string
+          medical_cleared?: boolean | null
           medical_waiver_date?: string | null
           medical_waiver_signed?: boolean | null
           nexus_sport?: string | null
           nfc_tag?: string | null
+          parent_consent?: boolean | null
           personal_bests?: Json | null
           photo_url?: string | null
+          preferred_position?: string | null
+          previous_clubs?: string | null
+          primary_sport?: string | null
           province: string
           qr_code?: string | null
           scholastic_card_verified?: boolean
           school_name?: string | null
+          secondary_position?: string | null
           ss_school_id?: string | null
           updated_at?: string
           user_id?: string | null
+          weight_kg?: number | null
+          years_playing?: number | null
         }
         Update: {
+          bio?: string | null
           club_name?: string | null
           created_at?: string
           date_of_birth?: string | null
           disciplines?: string[]
           display_name?: string | null
+          dominant_hand?: string | null
           external_student_id?: string | null
           first_name?: string
           gender?: string | null
+          height_cm?: number | null
           house?: string | null
           id?: string
           id_card_number?: string | null
@@ -158,19 +183,27 @@ export type Database = {
           is_suspended?: boolean | null
           jersey_number?: number | null
           last_name?: string
+          medical_cleared?: boolean | null
           medical_waiver_date?: string | null
           medical_waiver_signed?: boolean | null
           nexus_sport?: string | null
           nfc_tag?: string | null
+          parent_consent?: boolean | null
           personal_bests?: Json | null
           photo_url?: string | null
+          preferred_position?: string | null
+          previous_clubs?: string | null
+          primary_sport?: string | null
           province?: string
           qr_code?: string | null
           scholastic_card_verified?: boolean
           school_name?: string | null
+          secondary_position?: string | null
           ss_school_id?: string | null
           updated_at?: string
           user_id?: string | null
+          weight_kg?: number | null
+          years_playing?: number | null
         }
         Relationships: []
       }
@@ -523,6 +556,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      external_invitations: {
+        Row: {
+          competition_id: string | null
+          created_at: string
+          external_id: string | null
+          external_school_id: string | null
+          external_student_id: string | null
+          id: string
+          kind: string
+          payload: Json
+          responded_at: string | null
+          response: Json | null
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          competition_id?: string | null
+          created_at?: string
+          external_id?: string | null
+          external_school_id?: string | null
+          external_student_id?: string | null
+          id?: string
+          kind: string
+          payload?: Json
+          responded_at?: string | null
+          response?: Json | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          competition_id?: string | null
+          created_at?: string
+          external_id?: string | null
+          external_school_id?: string | null
+          external_student_id?: string | null
+          id?: string
+          kind?: string
+          payload?: Json
+          responded_at?: string | null
+          response?: Json | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       feed_items: {
         Row: {
