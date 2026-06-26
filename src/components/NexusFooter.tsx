@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { BrandLockup } from "@/components/Brand";
 import { ScholasticBadge } from "@/components/ScholasticBadge";
+import aetherisLogo from "@/assets/aetheris-logo.png.asset.json";
+import scholasticLogo from "@/assets/scholastic-logo.png.asset.json";
 
 const FOOTER_LINKS: Record<string, { label: string; to: string }[]> = {
   Platform: [
@@ -39,7 +41,10 @@ export function NexusFooter() {
               subtitle="Inter-School Sports"
               className="mb-4 sm:mb-5"
             />
-            <p className="text-[10px] sm:text-xs text-nexus-muted tracking-wide uppercase mt-1">by Aetheris Innovative Enterprises</p>
+            <div className="flex items-center gap-2 mt-3">
+              <img src={aetherisLogo.url} alt="Aetheris Innovative Enterprises" className="w-7 h-7 rounded-md bg-white p-0.5" />
+              <p className="text-[10px] sm:text-xs text-nexus-muted tracking-wide uppercase">by Aetheris Innovative Enterprises</p>
+            </div>
           </div>
 
           <div>
@@ -84,7 +89,8 @@ export function NexusFooter() {
           <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
           <span className="text-[10px] mono tracking-wide uppercase text-nexus-muted font-semibold">Exclusively integrated with</span>
         </div>
-        <a href="https://scholasticservices.online" target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-foreground hover:opacity-70 transition-opacity">
+        <a href="https://scholasticservices.online" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs font-semibold text-foreground hover:opacity-70 transition-opacity">
+          <img src={scholasticLogo.url} alt="" className="w-5 h-5 rounded-md bg-white p-0.5" />
           Scholastic Services
         </a>
         <span className="text-[10px] text-nexus-muted">School vetting · Student registration · Sports tracking</span>

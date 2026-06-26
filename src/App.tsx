@@ -46,12 +46,14 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<FeedPage />} />
+              <Route path="/home" element={<Index />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/live" element={<LivePage />} />
-              <Route path="/feed" element={<FeedPage />} />
+              <Route path="/feed" element={<Navigate to="/" replace />} />
+
               <Route path="/live/:fixtureId" element={<MatchLivePage />} />
               <Route path="/score/:fixtureId" element={<MatchConsolePage />} />
               <Route path="/admin" element={<AdminDashboard />} />
