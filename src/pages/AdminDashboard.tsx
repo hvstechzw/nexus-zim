@@ -59,6 +59,7 @@ const ALL_TABS: TabDef[] = [
   { id: "standings", label: "Standings & Records", roles: ADMIN_ROLES },
   { id: "broadcasts", label: "Broadcasts & Media", roles: ["super_admin", "admin", "national_admin"] },
   { id: "users", label: "Users & Roles", roles: ["super_admin"] },
+  { id: "role_requests", label: "Role Applications", roles: ["super_admin", "admin"] },
   { id: "regions", label: "Region Requests", roles: ["super_admin"] },
   { id: "federation", label: "Federation Sync", roles: ["super_admin", "admin"] },
 ];
