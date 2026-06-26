@@ -47,6 +47,8 @@ const App = () => (
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/live" element={<LivePage />} />
+              <Route path="/live/:fixtureId" element={<MatchLivePage />} />
+              <Route path="/score/:fixtureId" element={<MatchConsolePage />} />
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/admin/sync" element={<AdminSyncPage />} />
               <Route path="/admin/verify" element={<PlayerVerifyPage />} />
