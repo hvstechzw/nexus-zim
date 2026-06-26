@@ -231,7 +231,9 @@ Deno.serve(async (req) => {
           return null;
         })();
         const team = teamMap.get(st.school_id);
-        const { error } = await admin.from("athletes").upsert({
+        // Base profile. Physical/position fields from the SS sports profile are
+        // only included when present so a full-sync never wipes manual edits.
+        const payload: Record<string, unknown> = {
           external_student_id: st.student_id,
           first_name: first || "Student",
           last_name: last,
@@ -246,7 +248,11 @@ Deno.serve(async (req) => {
           nexus_sport: nexusSport,
           is_ss_linked: true,
           is_active: (st.status || "active") === "active",
-        }, { onConflict: "external_student_id" });
+        };
+        if (st.preferred_position) payload.preferred_position = st.preferred_position;
+        const heightNum = st.height_cm != null ? Number(st.height_cm) : NaN;
+        if (Number.isFinite(heightNum) && heightNum > 0) payload.height_cm = heightNum;
+        const { error } = await admin.from("athletes").upsert(payload, { onConflict: "external_student_id" });
         if (!error) studentsSynced++;
         else { upsertErrors++; console.warn("[sync-students] upsert", st.student_id, error.message); }
       }
