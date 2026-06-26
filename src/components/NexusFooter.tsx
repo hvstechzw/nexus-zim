@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { BrandLockup } from "@/components/Brand";
 import { ScholasticBadge } from "@/components/ScholasticBadge";
+import aetherisLogo from "@/assets/aetheris-logo.png.asset.json";
+import scholasticLogo from "@/assets/scholastic-logo.png.asset.json";
 
 const FOOTER_LINKS: Record<string, { label: string; to: string }[]> = {
   Platform: [
