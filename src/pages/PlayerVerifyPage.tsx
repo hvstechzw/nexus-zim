@@ -120,6 +120,10 @@ export default function PlayerVerifyPage() {
 
   useEffect(() => () => stopCamera(), []);
 
+  if (loading) return <div className="p-12 text-center text-nexus-muted">Loading…</div>;
+  if (!isAdmin && !hasRole("hic")) return <Navigate to="/dashboard" replace />;
+
+
   async function verify(method: "scholastic_card" | "manual_confirm") {
     if (!athlete) return;
     setVerifyBusy(true);
