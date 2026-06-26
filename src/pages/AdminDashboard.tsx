@@ -11,6 +11,7 @@ import { SchoolsDirectory } from "@/components/SchoolsDirectory";
 import { SportingCalendar } from "@/components/admin/SportingCalendar";
 import { UsersRolesPanel } from "@/components/admin/UsersRolesPanel";
 import { RegionRequestsPanel } from "@/components/admin/RegionRequestsPanel";
+import { RoleRequestsPanel } from "@/components/admin/RoleRequestsPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
@@ -28,6 +29,7 @@ type TabId =
   | "standings"
   | "broadcasts"
   | "users"
+  | "role_requests"
   | "regions"
   | "federation";
 
@@ -57,6 +59,7 @@ const ALL_TABS: TabDef[] = [
   { id: "standings", label: "Standings & Records", roles: ADMIN_ROLES },
   { id: "broadcasts", label: "Broadcasts & Media", roles: ["super_admin", "admin", "national_admin"] },
   { id: "users", label: "Users & Roles", roles: ["super_admin"] },
+  { id: "role_requests", label: "Role Applications", roles: ["super_admin", "admin"] },
   { id: "regions", label: "Region Requests", roles: ["super_admin"] },
   { id: "federation", label: "Federation Sync", roles: ["super_admin", "admin"] },
 ];
@@ -1048,6 +1051,9 @@ export default function AdminDashboard() {
 
           {/* USERS & ROLES */}
           {activeTab === "users" && <UsersRolesPanel />}
+
+          {/* ROLE APPLICATIONS */}
+          {activeTab === "role_requests" && <RoleRequestsPanel />}
 
           {/* REGION REQUESTS */}
           {activeTab === "regions" && <RegionRequestsPanel />}
