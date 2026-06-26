@@ -5,6 +5,7 @@ import { NexusHeader } from "@/components/NexusHeader";
 import { NexusFooter } from "@/components/NexusFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { athleteEligibility, allEventLabels, detectSport, playerSummary, type ScoreEntryLike } from "@/lib/sports";
+import { FollowButton } from "@/components/community/FollowButton";
 
 
 export default function PlayerProfilePage() {
@@ -146,6 +147,7 @@ export default function PlayerProfilePage() {
               {athlete.gender && <span className="capitalize">{athlete.gender}</span>}
             </div>
           </div>
+          <div className="ml-auto"><FollowButton entityType="athlete" entityId={athlete.id} /></div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

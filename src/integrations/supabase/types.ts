@@ -524,6 +524,77 @@ export type Database = {
           },
         ]
       }
+      feed_items: {
+        Row: {
+          athlete_id: string | null
+          body: string | null
+          competition_id: string | null
+          created_at: string
+          fixture_id: string | null
+          id: string
+          image_url: string | null
+          kind: string
+          payload: Json
+          school_team_id: string | null
+          title: string
+        }
+        Insert: {
+          athlete_id?: string | null
+          body?: string | null
+          competition_id?: string | null
+          created_at?: string
+          fixture_id?: string | null
+          id?: string
+          image_url?: string | null
+          kind: string
+          payload?: Json
+          school_team_id?: string | null
+          title: string
+        }
+        Update: {
+          athlete_id?: string | null
+          body?: string | null
+          competition_id?: string | null
+          created_at?: string
+          fixture_id?: string | null
+          id?: string
+          image_url?: string | null
+          kind?: string
+          payload?: Json
+          school_team_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_items_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_items_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_items_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_items_school_team_id_fkey"
+            columns: ["school_team_id"]
+            isOneToOne: false
+            referencedRelation: "school_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fixtures: {
         Row: {
           advances_to_fixture_id: string | null
@@ -692,6 +763,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      follows: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       judge_scores: {
         Row: {
@@ -950,6 +1045,45 @@ export type Database = {
             columns: ["mvp_player_id"]
             isOneToOne: false
             referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mom_votes: {
+        Row: {
+          athlete_id: string
+          created_at: string
+          fixture_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          athlete_id: string
+          created_at?: string
+          fixture_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          athlete_id?: string
+          created_at?: string
+          fixture_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mom_votes_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mom_votes_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
             referencedColumns: ["id"]
           },
         ]
@@ -1950,6 +2084,73 @@ export type Database = {
           },
         ]
       }
+      share_cards: {
+        Row: {
+          athlete_id: string | null
+          created_at: string
+          created_by: string | null
+          fixture_id: string | null
+          id: string
+          image_url: string | null
+          kind: string
+          payload: Json
+          school_team_id: string | null
+          slug: string
+          subtitle: string | null
+          title: string
+        }
+        Insert: {
+          athlete_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          fixture_id?: string | null
+          id?: string
+          image_url?: string | null
+          kind: string
+          payload?: Json
+          school_team_id?: string | null
+          slug: string
+          subtitle?: string | null
+          title: string
+        }
+        Update: {
+          athlete_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          fixture_id?: string | null
+          id?: string
+          image_url?: string | null
+          kind?: string
+          payload?: Json
+          school_team_id?: string | null
+          slug?: string
+          subtitle?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "share_cards_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_cards_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "share_cards_school_team_id_fkey"
+            columns: ["school_team_id"]
+            isOneToOne: false
+            referencedRelation: "school_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sponsorships: {
         Row: {
           amount: number | null
@@ -2406,6 +2607,30 @@ export type Database = {
           ss_student_id: string | null
         }
         Relationships: []
+      }
+      vw_mom_tally: {
+        Row: {
+          athlete_id: string | null
+          fixture_id: string | null
+          rank: number | null
+          votes: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mom_votes_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mom_votes_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vw_player_career: {
         Row: {
