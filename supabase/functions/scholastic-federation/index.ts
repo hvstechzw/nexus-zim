@@ -49,12 +49,20 @@ Deno.serve(async (req) => {
 
   try {
     switch (action) {
-      case "pull-calendar": return await pullCalendar(cors, supabase, body);
-      case "pull-scores":   return await pullScores(cors, supabase, body);
-      case "pull-matrix":   return await pullMatrix(cors, supabase, body);
-      case "pull-player-data": return await pullPlayerData(cors, supabase, body);
+      case "pull-calendar":           return await pullCalendar(cors, supabase, body);
+      case "pull-events":             return await pullCalendar(cors, supabase, body);
+      case "pull-scores":             return await pullScores(cors, supabase, body);
+      case "pull-matrix":             return await pullMatrix(cors, supabase, body);
+      case "pull-rankings":           return await pullRankings(cors, supabase, body);
+      case "pull-player-data":        return await pullPlayerData(cors, supabase, body);
       case "register-athlete-mirror": return await registerAthleteMirror(cors, supabase, body);
-      case "webhook-register": return await webhookRegister(cors, supabase, body);
+      case "push-athlete":            return await pushAthlete(cors, supabase, body);
+      case "link-account":            return await linkAccount(cors, supabase, body);
+      case "register-entry":          return await registerEntry(cors, supabase, body);
+      case "push-team-published":     return await pushTeamPublished(cors, supabase, body);
+      case "pull-nexus-invitations":  return await pullInvitations(cors, supabase, body);
+      case "push-invitation-response":return await pushInvitationResponse(cors, supabase, body);
+      case "webhook-register":        return await webhookRegister(cors, supabase, body);
       default:
         return json(cors, { error: `unknown action: ${action || "(none)"}` }, 400);
     }
