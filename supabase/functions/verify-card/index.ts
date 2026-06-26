@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
 
   let body: any = {};
   try { body = await req.json(); } catch {}
-  const { qrData, student_id, schoolId, fixtureId } = body || {};
+  const { qrData, student_id, password, schoolId, fixtureId, temporal } = body || {};
   if (!qrData && !student_id) return json(cors, { error: "qrData or student_id required" }, 400);
 
   const url = bridgeUrl();
@@ -71,8 +71,10 @@ Deno.serve(async (req) => {
     action: "verify-student-card",
     jti, nonce,
     ...(qrData ? { qrData } : {}),
-    ...(student_id ? { student_id } : {}),
+    ...(student_id ? { student_id, portalId: student_id } : {}),
+    ...(password ? { password } : {}),
     ...(schoolId ? { schoolId } : {}),
+    ...(temporal ? { temporal: true } : {}),
   };
   const rawBody = JSON.stringify(payload);
   const ts = String(Math.floor(Date.now() / 1000));
