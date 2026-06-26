@@ -73,10 +73,28 @@ export default function PlayerProfilePage() {
     { label: "Cards / 2′", value: `${summary.yellow}Y · ${summary.suspensions}×2′ · ${summary.red}R` },
   ];
 
+  const canonical = `https://nexuszw.online/players/${athleteId}`;
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <Helmet>
+        <title>{`${name} — Nexus player profile`}</title>
+        <meta name="description" content={`${name} — ${sport} player profile on Nexus. Appearances, goals and discipline record from inter-school fixtures.`} />
+        <link rel="canonical" href={canonical} />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:title" content={`${name} — Nexus`} />
+        <meta property="og:description" content={`${sport} player profile on Nexus.`} />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Person",
+          name,
+          image: athlete.photo_url || undefined,
+          memberOf: athlete.school_name ? { "@type": "EducationalOrganization", name: athlete.school_name } : undefined,
+          url: canonical,
+        })}</script>
+      </Helmet>
       <NexusHeader />
       <div className="max-w-[1000px] mx-auto pt-20 px-4 sm:px-8">
+
         <Link to="/schools" className="text-xs mono text-nexus-muted hover:text-foreground">← Directory</Link>
 
         <div className="flex items-start gap-5 flex-wrap py-8">
