@@ -114,7 +114,7 @@ export default function SportsDayPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {/* Event queue */}
               <div className="hairline rounded-xl p-5 bg-background card-shadow">
-                <p className="display-font text-base font-bold mb-3">Event Queue</p>
+                <h2 className="display-font text-base font-bold mb-3">Event Queue</h2>
                 <div className="flex gap-2 mb-3">
                   <input value={eventName} onChange={(e) => setEventName(e.target.value)} placeholder="100m Sprint" className={inputCls} />
                   <select value={eventAge} onChange={(e) => setEventAge(e.target.value)} className={inputCls + " w-28"}>
@@ -138,7 +138,7 @@ export default function SportsDayPage() {
 
               {/* Live points table */}
               <div className="hairline rounded-xl p-5 bg-background card-shadow">
-                <p className="display-font text-base font-bold mb-3">Live Points (per school)</p>
+                <h2 className="display-font text-base font-bold mb-3">Live Points (per school)</h2>
                 {standings.length === 0 ? (
                   <p className="text-xs text-nexus-muted">No points yet.</p>
                 ) : (

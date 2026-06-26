@@ -62,8 +62,8 @@ export function NexusHero() {
           className="w-full max-w-3xl mt-6 sm:mt-10 mb-4 sm:mb-8"
         >
           <h1 className="text-xl sm:text-display-lg display-font font-semibold text-foreground max-w-[30ch] leading-snug">
-            Nexus for Schools.{" "}
-            <span className="text-nexus-muted font-normal">Zimbabwe's handball & netball network.</span>
+            Nexus — Zimbabwe's School Sports Network.{" "}
+            <span className="text-nexus-muted font-normal">Inter-school handball & netball, end to end.</span>
           </h1>
           <p className="mt-3 sm:mt-4 text-sm sm:text-base leading-relaxed text-nexus-muted max-w-[60ch]">
             A closed platform for inter-school handball and netball — fixtures, live scoring, standings and player verification between vetted Zimbabwean schools.

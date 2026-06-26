@@ -135,7 +135,7 @@ export default function SchoolProfilePage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Teams + minimal roster */}
             <div className="hairline rounded-xl p-5 bg-background card-shadow">
-              <p className="display-font text-base font-bold mb-3">Published Teams</p>
+              <h2 className="display-font text-base font-bold mb-3">Published Teams</h2>
               {!user ? (
                 <p className="text-xs text-nexus-muted">Sign in to view team rosters. Sensitive student information is never shown publicly.</p>
               ) : schoolTeams.length === 0 ? (
@@ -184,7 +184,7 @@ export default function SchoolProfilePage() {
 
             {/* Fixtures */}
             <div className="hairline rounded-xl p-5 bg-background card-shadow">
-              <p className="display-font text-base font-bold mb-3">Recent Fixtures</p>
+              <h2 className="display-font text-base font-bold mb-3">Recent Fixtures</h2>
               {fixtures.length === 0 ? (
                 <p className="text-xs text-nexus-muted">No fixtures yet for this school's teams.</p>
               ) : (
