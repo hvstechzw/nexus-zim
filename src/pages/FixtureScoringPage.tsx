@@ -19,9 +19,17 @@ function buildConfig(sport: SportKey) {
     label: c.label,
     periodLabel: c.periodNoun,
     periods: c.periods.map((p) => p.short),
-    scoreEvents: c.scoreEvents.map((e) => ({ label: e.label, value: e.value })),
-    otherEvents: c.otherEvents.map((e) => ({ label: e.label })),
+    scoreEvents: c.scoreEvents.map((e) => ({ type: e.type, label: e.label, value: e.value })),
+    otherEvents: c.otherEvents.map((e) => ({ type: e.type, label: e.label, value: 0 })),
   };
+}
+
+/** type → display label, so stored canonical event types render readably. */
+function eventLabelMap(sport: SportKey): Record<string, string> {
+  const c = getSport(sport);
+  const out: Record<string, string> = {};
+  for (const e of [...c.scoreEvents, ...c.otherEvents]) out[e.type] = e.label;
+  return out;
 }
 
 function detectSport(f: { match_data?: any; competition?: { discipline?: string } | null }): SportKey {
@@ -65,6 +73,7 @@ export default function FixtureScoringPage() {
 
   const sport: SportKey = useMemo(() => fixture ? detectSport(fixture as any) : "handball", [fixture]);
   const config = useMemo(() => buildConfig(sport), [sport]);
+  const labels = useMemo(() => eventLabelMap(sport), [sport]);
 
   useEffect(() => {
     if (!activePeriod && config.periods.length) setActivePeriod(config.periods[0]);
@@ -122,13 +131,13 @@ export default function FixtureScoringPage() {
     else toast({ title: "Match completed" });
   }
 
-  async function logEvent(eventLabel: string, value: number) {
+  async function logEvent(eventType: string, value: number) {
     const tId = teamId(activeSide);
     if (!tId) { toast({ title: "Missing team", variant: "destructive" }); return; }
     const { error } = await supabase.from("score_entries").insert({
       fixture_id: fixtureId!,
       scorer_id: user?.id ?? null,
-      event_type: eventLabel,
+      event_type: eventType,
       team_id: tId,
       period: activePeriod,
       value,
@@ -200,7 +209,7 @@ export default function FixtureScoringPage() {
           <Card title={`Score — ${activeSide === "home" ? f.home_team?.name : f.away_team?.name}`}>
             <div className="grid grid-cols-2 gap-2">
               {config.scoreEvents.map(e => (
-                <button key={e.label} onClick={() => logEvent(e.label, e.value)}
+                <button key={e.type} onClick={() => logEvent(e.type, e.value)}
                   className="hairline rounded-lg px-4 py-6 text-center hover:bg-nexus-surface transition btn-click">
                   <div className="text-base font-semibold">{e.label}</div>
                   <div className="text-[10px] mono text-nexus-muted mt-1">+{e.value}</div>
@@ -211,7 +220,7 @@ export default function FixtureScoringPage() {
           <Card title="Other events">
             <div className="grid grid-cols-2 gap-2">
               {config.otherEvents.map(e => (
-                <button key={e.label} onClick={() => logEvent(e.label, 0)}
+                <button key={e.type} onClick={() => logEvent(e.type, 0)}
                   className="hairline rounded-lg px-3 py-3 text-xs text-left hover:bg-nexus-surface transition btn-click">
                   {e.label}
                 </button>
@@ -231,7 +240,7 @@ export default function FixtureScoringPage() {
                 <div key={ev.id} className="py-2 flex items-center justify-between text-xs">
                   <div className="flex items-center gap-3 min-w-0">
                     <span className="mono text-nexus-muted w-12">{ev.period}</span>
-                    <span className="font-medium truncate">{ev.event_type}</span>
+                    <span className="font-medium truncate">{labels[ev.event_type] || ev.event_type}</span>
                     {Number(ev.value) > 0 && <span className="mono text-nexus-live">+{ev.value}</span>}
                   </div>
                   <span className="text-nexus-muted truncate ml-2">{teamName}</span>

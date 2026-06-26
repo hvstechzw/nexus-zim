@@ -84,8 +84,18 @@ Built on the attribution data Phase 1 began capturing.
 - Leaderboard scorer names now link through to the player profile.
 - Test count: 46 → **48**.
 
-## Phase 4 roadmap (next)
-- Migrate the per-fixture scorer fully onto the `match` reducer (shared event
-  vocabulary + realtime hydration from `score_entries`).
+## Phase 4 — unified scoring vocabulary (shipped)
+
+- The per-fixture scorer (`/scoring/:fixtureId`) now stores **canonical event
+  types** (`goal`, `goal_7m`, `suspension_2min`, …) from the shared sport config
+  instead of free-text display labels, and renders them back through the config's
+  label map. Both scorers and the stats/leaderboard layer now speak one
+  vocabulary, so analytics over `score_entries.event_type` are consistent
+  regardless of which scorer recorded the match.
+
+## Phase 5 roadmap (next)
+- Full realtime hydration of the per-fixture scorer into the `match` reducer
+  (single in-memory model shared with the main console), incl. player attribution
+  on that path.
 - IA/visual refresh of the public pages (live, fixtures, schools, competition)
   around the two-sport identity.
