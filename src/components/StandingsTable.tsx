@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { isNexusDiscipline } from "@/lib/nexusSports";
+import { SectionHeader } from "@/components/SectionHeader";
 
 export function StandingsTable() {
   const [activeCompId, setActiveCompId] = useState<string>("");
@@ -44,8 +45,8 @@ export function StandingsTable() {
 
   return (
     <section id="standings" className="hairline-b">
-      <div className="px-4 sm:px-8 py-4 sm:py-5 hairline-b flex items-center justify-between">
-        <p className="text-[10px] sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">League Standings</p>
+      <div className="px-4 sm:px-8 py-5 sm:py-6 hairline-b">
+        <SectionHeader eyebrow="Standings" title="League table" />
       </div>
 
       {competitions.length === 0 ? (

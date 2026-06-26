@@ -115,11 +115,14 @@ export function LiveScoreboard() {
   return (
     <section id="live" className="hairline-b">
       <div className="px-4 sm:px-8 py-3 sm:py-5 hairline-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-        <div className="flex items-center gap-2 sm:gap-3">
-          {liveCount > 0 && <span className="w-2 h-2 rounded-full bg-nexus-live animate-pulse" />}
-          <span className="text-[10px] sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">Scores & Schedule</span>
-          {liveCount > 0 && <span className="text-[10px] mono text-nexus-live">{liveCount} live</span>}
-          {totalScheduled > 0 && <span className="text-[10px] mono text-nexus-muted">{totalScheduled} upcoming</span>}
+        <div>
+          <div className="flex items-center gap-2 sm:gap-3">
+            {liveCount > 0 && <span className="w-2 h-2 rounded-full bg-nexus-live animate-pulse" />}
+            <span className="text-[10px] sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">Live</span>
+            {liveCount > 0 && <span className="text-[10px] mono text-nexus-live">{liveCount} live</span>}
+            {totalScheduled > 0 && <span className="text-[10px] mono text-nexus-muted">{totalScheduled} upcoming</span>}
+          </div>
+          <h2 className="display-font text-xl sm:text-2xl font-bold text-foreground mt-1 tracking-tight">Scores &amp; schedule</h2>
         </div>
         <div className="flex items-center gap-1">
           <div className="flex hairline rounded-lg overflow-hidden">

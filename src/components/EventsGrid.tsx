@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { isNexusDiscipline } from "@/lib/nexusSports";
+import { SectionHeader } from "@/components/SectionHeader";
 
 export function EventsGrid() {
   const { data: competitions = [], isLoading } = useQuery({
@@ -67,9 +68,12 @@ export function EventsGrid() {
 
   return (
     <section id="events" className="hairline-b">
-      <div className="px-4 sm:px-8 py-4 sm:py-5 hairline-b flex items-center justify-between">
-        <p className="text-[10px] sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">Upcoming & Active Events</p>
-        <span className="text-[10px] sm:text-xs mono text-nexus-muted">{competitions.length} event{competitions.length !== 1 ? "s" : ""}</span>
+      <div className="px-4 sm:px-8 py-5 sm:py-6 hairline-b">
+        <SectionHeader
+          eyebrow="Competitions"
+          title="Upcoming & active events"
+          right={<span className="text-[10px] sm:text-xs mono text-nexus-muted">{competitions.length} event{competitions.length !== 1 ? "s" : ""}</span>}
+        />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 p-4 sm:p-8">
