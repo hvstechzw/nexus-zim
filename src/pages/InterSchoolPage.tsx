@@ -66,9 +66,9 @@ export default function InterSchoolPage() {
           <InterSchoolFixturesBuilder />
 
           <div className="hairline rounded-xl p-5 bg-background card-shadow">
-            <p className="display-font text-base font-bold mb-3">
+            <h2 className="display-font text-base font-bold mb-3">
               {stage === "all" ? "Active School Competitions" : `${COMPETITION_STAGES.find(s => s.value === stage)?.label} Competitions`}
-            </p>
+            </h2>
             {filtered.length === 0 ? (
               <p className="text-xs text-nexus-muted">No competitions at this stage yet.</p>
             ) : (

@@ -12,3 +12,8 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /scoring
+
+Sitemap: https://nexuszw.online/sitemap.xml

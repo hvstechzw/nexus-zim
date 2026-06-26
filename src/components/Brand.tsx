@@ -50,7 +50,7 @@ export function BrandLockup({
 
   const cls = `flex items-center gap-2.5 ${className}`;
   return to ? (
-    <Link to={to} onClick={onClick} className={cls} aria-label="Nexus — home">
+    <Link to={to} onClick={onClick} className={cls} aria-label="Nexus school sports network — home">
       {inner}
     </Link>
   ) : (

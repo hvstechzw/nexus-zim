@@ -1,0 +1,19 @@
+# Nexus for Schools
+
+> Zimbabwe's closed inter-school handball and netball competition network — fixtures, live scoring, standings and player verification, powered exclusively by Scholastic Services.
+
+Nexus is a schools-only platform. Schools, student athletes and identity verification are sourced directly from Scholastic Services. There are no public sign-ups; accounts are provisioned for school staff (coaches, sports directors, HICs, scorers) and regional administrators across Zonal, District, Provincial and National pathways.
+
+## Pages
+
+- [Home](/): Overview of the Nexus network, live activity and partner schools.
+- [Live Scores](/live): Real-time handball and netball scoreboard across active fixtures.
+- [Fixtures](/fixtures): Upcoming and completed inter-school handball and netball fixtures.
+- [Schools](/schools): Directory of vetted Zimbabwean schools competing on Nexus.
+- [Inter-School](/inter-school): Competition pathway — Zonal → District → Provincial → National.
+- [Sports Day](/sports-day): One-day, multi-event meets with live points table per school.
+- [Broadcast](/broadcast): Broadcast character generator and graphics for live coverage.
+
+## Optional
+
+- [Practice Scoring](/practice): Off-record scoring sandbox for officials.

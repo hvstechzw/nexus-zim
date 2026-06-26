@@ -1,11 +1,13 @@
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Helmet } from "react-helmet-async";
 import { NexusHeader } from "@/components/NexusHeader";
 import { NexusFooter } from "@/components/NexusFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { LeaderboardPanel } from "@/components/LeaderboardPanel";
+
 
 const tabCls = (active: boolean) =>
   `px-5 py-3 text-xs font-semibold tracking-wide whitespace-nowrap border-b-2 transition-all btn-click ${
@@ -98,9 +100,31 @@ export default function CompetitionDetailPage() {
     );
   }
 
+  const canonical = `https://nexuszw.online/competition/${id}`;
+  const compDesc = comp.description || `${comp.discipline} competition at ${comp.level?.replace(/_/g, " ")} level on Nexus.`;
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <Helmet>
+        <title>{`${comp.name} — Nexus`}</title>
+        <meta name="description" content={compDesc.slice(0, 155)} />
+        <link rel="canonical" href={canonical} />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:title" content={`${comp.name} — Nexus`} />
+        <meta property="og:description" content={compDesc.slice(0, 155)} />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "SportsEvent",
+          name: comp.name,
+          sport: comp.discipline,
+          startDate: comp.start_date || undefined,
+          endDate: comp.end_date || undefined,
+          eventStatus: comp.status === "completed" ? "https://schema.org/EventCompleted" : "https://schema.org/EventScheduled",
+          location: comp.venue ? { "@type": "Place", name: comp.venue.name, address: comp.venue.city } : undefined,
+          url: canonical,
+        })}</script>
+      </Helmet>
       <NexusHeader />
+
 
       {/* Hero Banner */}
       <div className="max-w-[1200px] mx-auto pt-20 px-4 sm:px-8">
