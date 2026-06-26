@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import aieLogoLight from "@/assets/aie-logo-light.png";
+import { BrandLockup } from "@/components/Brand";
 import { ScholasticBadge } from "@/components/ScholasticBadge";
 
 const FOOTER_LINKS: Record<string, { label: string; to: string }[]> = {
@@ -32,10 +32,13 @@ export function NexusFooter() {
         {/* Brand */}
         <div className="p-6 sm:p-10 md:p-14 lg:hairline-r flex flex-col justify-between gap-8 sm:gap-10">
           <div>
-            <div className="bg-foreground rounded-xl p-4 sm:p-5 inline-flex mb-4 sm:mb-5">
-              <img src={aieLogoLight} alt="Aetheris" className="w-20 sm:w-28 h-auto object-contain" style={{ filter: "brightness(10)" }} />
-            </div>
-            <p className="display-font text-lg sm:text-xl font-bold text-foreground tracking-tight">Nexus for Schools</p>
+            <BrandLockup
+              to="/"
+              glyphClass="w-11 h-11 text-xl rounded-xl"
+              wordClass="text-xl sm:text-2xl"
+              subtitle="Inter-School Sports"
+              className="mb-4 sm:mb-5"
+            />
             <p className="text-[10px] sm:text-xs text-nexus-muted tracking-wide uppercase mt-1">by Aetheris Innovative Enterprises</p>
           </div>
 

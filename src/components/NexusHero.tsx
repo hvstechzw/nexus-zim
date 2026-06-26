@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import nexusLogo from "@/assets/nexus-logo.png";
+import { BrandLockup } from "@/components/Brand";
 import { ScholasticBadge } from "@/components/ScholasticBadge";
 
 export function NexusHero() {
@@ -45,21 +45,14 @@ export function NexusHero() {
           transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           className="w-full max-w-3xl"
         >
-          {/* Logo card */}
-          <div className="bg-white rounded-2xl px-8 py-10 sm:px-12 sm:py-14 md:px-20 md:py-20 flex items-center justify-center card-shadow-md">
-            <img src={nexusLogo} alt="Nexus" className="w-full max-w-[180px] sm:max-w-[240px] md:max-w-[280px] h-auto object-contain" />
-          </div>
-
-          <div className="mt-3 sm:mt-4 px-4 sm:px-6 py-4 sm:py-5 hairline bg-background rounded-xl flex items-center justify-between card-shadow">
-            <div>
-              <p className="text-[9px] sm:text-[10px] mono tracking-[0.25em] uppercase text-nexus-muted">Product</p>
-              <h1 className="display-font text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mt-0.5 tracking-tight">Nexus</h1>
-            </div>
-            <div className="text-right hidden sm:block">
-              <p className="text-[10px] mono tracking-[0.25em] uppercase text-nexus-muted">By</p>
-              <p className="display-font text-xs sm:text-sm font-semibold text-foreground mt-0.5">Aetheris Innovative Enterprises</p>
-            </div>
-          </div>
+          <BrandLockup
+            glyphClass="w-12 h-12 sm:w-14 sm:h-14 text-2xl sm:text-3xl rounded-xl"
+            wordClass="text-3xl sm:text-4xl"
+            subtitle="Inter-School Sports · Zimbabwe"
+          />
+          <p className="text-[10px] sm:text-[11px] mono tracking-[0.2em] uppercase text-nexus-muted mt-4">
+            by Aetheris Innovative Enterprises
+          </p>
         </motion.div>
 
         <motion.div
@@ -68,10 +61,10 @@ export function NexusHero() {
           transition={{ delay: 0.25, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           className="w-full max-w-3xl mt-6 sm:mt-10 mb-4 sm:mb-8"
         >
-          <p className="text-xl sm:text-display-lg display-font font-semibold text-foreground max-w-[30ch] leading-snug">
+          <h1 className="text-xl sm:text-display-lg display-font font-semibold text-foreground max-w-[30ch] leading-snug">
             Nexus for Schools.{" "}
             <span className="text-nexus-muted font-normal">Zimbabwe's handball & netball network.</span>
-          </p>
+          </h1>
           <p className="mt-3 sm:mt-4 text-sm sm:text-base leading-relaxed text-nexus-muted max-w-[60ch]">
             A closed platform for inter-school handball and netball — fixtures, live scoring, standings and player verification between vetted Zimbabwean schools.
             Schools and student athletes are sourced directly from{" "}

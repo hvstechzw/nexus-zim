@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
 import { useHasRole } from "@/hooks/useHasRole";
-import nexusLogo from "@/assets/nexus-logo.png";
+import { BrandLockup } from "@/components/Brand";
 
 const PUBLIC_LINKS = [
   { label: "Live", href: "/live" },
@@ -55,18 +55,16 @@ export function NexusHeader() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled
-            ? "bg-background/95 backdrop-blur-md shadow-sm hairline-b"
-            : "bg-background/80 backdrop-blur-sm"
+          mobileOpen
+            ? "bg-background hairline-b"
+            : scrolled
+              ? "bg-background/95 backdrop-blur-md shadow-sm hairline-b"
+              : "bg-background/80 backdrop-blur-sm"
         }`}
       >
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10 h-14 sm:h-16 flex items-center justify-between gap-4">
-          {/* Brand — always white bg behind logo */}
-          <Link to="/" className="flex items-center gap-2.5 flex-shrink-0">
-            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-md bg-white flex items-center justify-center p-0.5">
-              <img src={nexusLogo} alt="Nexus" className="w-full h-full object-contain" />
-            </div>
-          </Link>
+          {/* Brand — theme-aware wordmark */}
+          <BrandLockup to="/" onClick={() => setMobileOpen(false)} className="flex-shrink-0" />
 
           {/* Desktop Navigation */}
           <nav className="hidden lg:flex items-center gap-0.5">
@@ -147,10 +145,11 @@ export function NexusHeader() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-background/98 backdrop-blur-xl lg:hidden"
+            className="fixed inset-0 z-40 bg-background lg:hidden"
           >
-            <div className="pt-20 px-6 pb-10 flex flex-col h-full overflow-y-auto">
-              <nav className="flex flex-col gap-1 flex-1">
+            <div className="pt-[4.5rem] px-5 sm:px-6 pb-8 flex flex-col h-full overflow-y-auto">
+              <p className="text-[10px] mono tracking-[0.22em] uppercase text-nexus-muted px-1 pt-2 pb-3">Menu</p>
+              <nav className="flex flex-col gap-0.5 flex-1">
                 {NAV_LINKS.map((link, i) => (
                   <motion.div
                     key={link.label}
@@ -161,16 +160,19 @@ export function NexusHeader() {
                     <Link
                       to={link.href}
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-3 px-4 py-4 rounded-xl text-lg display-font font-semibold text-foreground hover:bg-nexus-surface transition-colors"
+                      className="flex items-center justify-between gap-3 px-3 py-3.5 rounded-xl text-lg display-font font-semibold text-foreground hover:bg-nexus-surface transition-colors"
                     >
-                      {link.label === "Live" && <span className="w-2 h-2 rounded-full bg-nexus-live animate-pulse" />}
-                      {link.label}
+                      <span className="flex items-center gap-3">
+                        {link.label === "Live" && <span className="w-2 h-2 rounded-full bg-nexus-live animate-pulse" />}
+                        {link.label}
+                      </span>
+                      <span className="text-nexus-muted text-sm">→</span>
                     </Link>
                   </motion.div>
                 ))}
               </nav>
 
-              <div className="flex flex-col gap-3 mt-6">
+              <div className="flex flex-col gap-3 mt-5 pt-5 hairline-t">
                 {user ? (
                   <>
                     <Link to="/dashboard" onClick={() => setMobileOpen(false)} className="h-12 px-6 bg-foreground text-primary-foreground text-sm font-semibold rounded-xl btn-click flex items-center justify-center">
@@ -190,6 +192,20 @@ export function NexusHeader() {
                     </Link>
                   </>
                 )}
+
+                <div className="flex items-center justify-between mt-2">
+                  <button
+                    onClick={toggleTheme}
+                    className="flex items-center gap-2 h-9 px-3 rounded-lg bg-nexus-surface text-foreground text-xs font-medium btn-click"
+                  >
+                    {theme === "dark" ? "Light mode" : "Dark mode"}
+                  </button>
+                  <a href="https://scholasticservices.online" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[10px] mono uppercase tracking-wide text-nexus-muted">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    Scholastic Services
+                  </a>
+                </div>
+                <p className="text-[10px] mono text-nexus-muted text-center mt-1">Nexus by Aetheris Innovative Enterprises</p>
               </div>
             </div>
           </motion.div>
