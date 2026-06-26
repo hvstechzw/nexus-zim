@@ -5,6 +5,7 @@ import { NexusFooter } from "@/components/NexusFooter";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { LeaderboardPanel } from "@/components/LeaderboardPanel";
 
 const tabCls = (active: boolean) =>
   `px-5 py-3 text-xs font-semibold tracking-wide whitespace-nowrap border-b-2 transition-all btn-click ${
@@ -13,7 +14,7 @@ const tabCls = (active: boolean) =>
 
 export default function CompetitionDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const [tab, setTab] = useState<"fixtures" | "standings" | "teams" | "results">("fixtures");
+  const [tab, setTab] = useState<"fixtures" | "standings" | "leaders" | "teams" | "results">("fixtures");
 
   const { data: comp, isLoading } = useQuery({
     queryKey: ["comp-detail", id],
@@ -159,7 +160,7 @@ export default function CompetitionDetailPage() {
 
         {/* Tabs */}
         <div className="flex overflow-x-auto hairline-b scrollbar-hide -mx-4 sm:-mx-8 px-4 sm:px-8">
-          {(["fixtures", "standings", "teams", "results"] as const).map(t => (
+          {(["fixtures", "standings", "leaders", "teams", "results"] as const).map(t => (
             <button key={t} onClick={() => setTab(t)} className={tabCls(tab === t)}>{t === "teams" ? "Participants" : t.charAt(0).toUpperCase() + t.slice(1)}</button>
           ))}
         </div>
@@ -237,6 +238,11 @@ export default function CompetitionDetailPage() {
                 </div>
               )}
             </div>
+          )}
+
+          {/* Leaders */}
+          {tab === "leaders" && (
+            <LeaderboardPanel fixtureIds={fixtures.map((f: any) => f.id)} />
           )}
 
           {/* Participants */}

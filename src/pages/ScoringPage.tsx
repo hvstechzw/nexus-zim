@@ -10,9 +10,11 @@ import { pushFixtureMirror } from "@/lib/scholasticPush";
 import {
   activeSuspensions,
   applyEvent,
+  athleteEligibility,
   cardTally,
   createEvent,
   detectSport,
+  type Eligibility,
   formatClock,
   getSport,
   matchMinute,
@@ -30,7 +32,7 @@ import {
 } from "@/lib/sports";
 
 type SessionMode = "official" | "friendly" | "local";
-interface RosterPlayer { id: string; name: string; jersey: number | null; position: string | null }
+interface RosterPlayer { id: string; name: string; jersey: number | null; position: string | null; elig: Eligibility }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -113,7 +115,7 @@ export default function ScoringPage() {
         if (!schoolTeamId) return [];
         const { data } = await supabase
           .from("school_team_players")
-          .select("athlete_id, jersey_number, position, athletes:athlete_id(first_name, last_name, display_name)")
+          .select("athlete_id, jersey_number, position, athletes:athlete_id(first_name, last_name, display_name, is_active, is_suspended, scholastic_card_verified)")
           .eq("school_team_id", schoolTeamId)
           .order("jersey_number");
         return (data || []).map((r: any) => ({
@@ -121,6 +123,11 @@ export default function ScoringPage() {
           name: r.athletes?.display_name || `${r.athletes?.first_name ?? ""} ${r.athletes?.last_name ?? ""}`.trim() || "Player",
           jersey: r.jersey_number ?? null,
           position: r.position ?? null,
+          elig: athleteEligibility({
+            is_active: r.athletes?.is_active,
+            is_suspended: r.athletes?.is_suspended,
+            scholastic_card_verified: r.athletes?.scholastic_card_verified,
+          }),
         }));
       };
       const [home, away] = await Promise.all([load(fixtureMeta.homeSchoolTeamId), load(fixtureMeta.awaySchoolTeamId)]);
@@ -371,8 +378,15 @@ export default function ScoringPage() {
                 <p className="text-[10px] mono tracking-widest uppercase text-nexus-muted mb-2">Attribute to player {selectedPlayer && <span className="text-foreground">· {selectedPlayer.name}</span>}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {activeRoster.map((p) => (
-                    <button key={p.id} onClick={() => setSelectedPlayer(selectedPlayer?.id === p.id ? null : p)}
-                      className={`px-2.5 py-1.5 text-[11px] font-semibold rounded-lg hairline btn-click transition-all ${selectedPlayer?.id === p.id ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-foreground hover:bg-nexus-silver"}`}>
+                    <button key={p.id} onClick={() => p.elig.eligible && setSelectedPlayer(selectedPlayer?.id === p.id ? null : p)}
+                      disabled={!p.elig.eligible}
+                      title={p.elig.status !== "eligible" ? p.elig.label : undefined}
+                      className={`flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold rounded-lg hairline btn-click transition-all ${
+                        !p.elig.eligible ? "opacity-40 cursor-not-allowed line-through"
+                        : selectedPlayer?.id === p.id ? "bg-foreground text-primary-foreground"
+                        : "bg-nexus-surface text-foreground hover:bg-nexus-silver"}`}>
+                      {p.elig.status === "suspended" && <span className="w-2 h-3 rounded-[1px] bg-red-500" title="Suspended" />}
+                      {p.elig.status === "unverified" && <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" title="Card unverified" />}
                       {p.jersey != null && <span className="mono text-nexus-muted mr-1">#{p.jersey}</span>}{p.name}{p.position ? ` · ${p.position}` : ""}
                     </button>
                   ))}

@@ -59,11 +59,25 @@ definitions in finding #2.
 `tsc` 0 errors · `vite build` ✅ · `vitest` **36/36** · new domain layer is
 lint-clean.
 
-## Phase 2 roadmap (not in this change)
+## Phase 2 — competition intelligence (shipped)
+
+Built on the attribution data Phase 1 began capturing.
+
+- **Competition leaderboards** — `src/lib/sports/leaderboard.ts` (pure, tested):
+  `topScorers` (goals + points, Super Shot aware), `disciplineLeaders`
+  (weighted yellow/2-min/red), `teamGoals`. Surfaced as a new **Leaders** tab on
+  the competition page (`LeaderboardPanel`), reading `score_entries` for the
+  competition's fixtures.
+- **Roster eligibility gating** — `src/lib/sports/eligibility.ts` (pure, tested):
+  suspended/inactive athletes are blocked from goal attribution in the scorer;
+  unverified-card athletes are allowed but flagged. Wired into the live scorer's
+  player picker (red bar = suspended, amber dot = unverified card).
+- Test count: 36 → **46**.
+
+## Phase 3 roadmap (next)
 - Migrate the per-fixture scorer fully onto the `match` reducer (shared event
   vocabulary + realtime hydration from `score_entries`).
-- Competition-wide **leaderboards** (top scorers, best discipline) from
-  `score_entries.athlete_id`, and a player season profile.
-- Roster eligibility gating in the scorer (Scholastic card verification status).
+- Player **season profile** page (goals, discipline, appearances) from
+  `score_entries.athlete_id`.
 - IA/visual refresh of the public pages (live, fixtures, schools, competition)
   around the two-sport identity.

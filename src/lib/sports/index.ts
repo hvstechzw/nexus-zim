@@ -5,5 +5,7 @@ export * from "./registry";
 export * from "./clock";
 export * from "./match";
 export * from "./standings";
+export * from "./leaderboard";
+export * from "./eligibility";
 export { NETBALL } from "./netball";
 export { HANDBALL } from "./handball";
