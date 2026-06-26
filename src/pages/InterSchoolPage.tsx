@@ -86,7 +86,7 @@ export default function InterSchoolPage() {
                 </SearchColumn>
                 <SearchColumn title="Teams" empty="No teams">
                   {searchResults.teams.map((t: any) => (
-                    <Link key={t.id} to={`/team/${t.id}`} className="block hairline rounded-md p-2 bg-nexus-surface/40 hover:bg-nexus-surface">
+                    <Link key={t.id} to={t.school_id ? `/schools/${t.school_id}` : "#"} className="block hairline rounded-md p-2 bg-nexus-surface/40 hover:bg-nexus-surface">
                       <p className="text-sm font-medium truncate">{t.name}</p>
                       <p className="text-[10px] text-nexus-muted truncate">{t.discipline} · {t.age_group || "Open"}</p>
                     </Link>
