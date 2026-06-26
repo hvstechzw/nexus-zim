@@ -726,6 +726,206 @@ export type Database = {
           },
         ]
       }
+      match_commentary: {
+        Row: {
+          auto_generated: boolean
+          created_at: string
+          event_id: string | null
+          fixture_id: string
+          id: string
+          text: string
+          tone: string
+        }
+        Insert: {
+          auto_generated?: boolean
+          created_at?: string
+          event_id?: string | null
+          fixture_id: string
+          id?: string
+          text: string
+          tone?: string
+        }
+        Update: {
+          auto_generated?: boolean
+          created_at?: string
+          event_id?: string | null
+          fixture_id?: string
+          id?: string
+          text?: string
+          tone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_commentary_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "match_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_commentary_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      match_events: {
+        Row: {
+          assist_player_id: string | null
+          clock_seconds: number
+          created_at: string
+          created_by: string | null
+          event_type: string
+          fixture_id: string
+          id: string
+          is_void: boolean
+          notes: string | null
+          period: string
+          player_id: string | null
+          sequence: number
+          sub_type: string | null
+          team_side: string
+          value: number
+          x: number | null
+          y: number | null
+        }
+        Insert: {
+          assist_player_id?: string | null
+          clock_seconds?: number
+          created_at?: string
+          created_by?: string | null
+          event_type: string
+          fixture_id: string
+          id?: string
+          is_void?: boolean
+          notes?: string | null
+          period?: string
+          player_id?: string | null
+          sequence: number
+          sub_type?: string | null
+          team_side: string
+          value?: number
+          x?: number | null
+          y?: number | null
+        }
+        Update: {
+          assist_player_id?: string | null
+          clock_seconds?: number
+          created_at?: string
+          created_by?: string | null
+          event_type?: string
+          fixture_id?: string
+          id?: string
+          is_void?: boolean
+          notes?: string | null
+          period?: string
+          player_id?: string | null
+          sequence?: number
+          sub_type?: string | null
+          team_side?: string
+          value?: number
+          x?: number | null
+          y?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_events_assist_player_id_fkey"
+            columns: ["assist_player_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_events_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: false
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_events_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      match_state: {
+        Row: {
+          away_on_court: Json
+          away_score: number
+          clock_running: boolean
+          clock_seconds: number
+          fixture_id: string
+          home_on_court: Json
+          home_score: number
+          last_event_id: string | null
+          mvp_player_id: string | null
+          period: string
+          possession: string | null
+          suspensions: Json
+          updated_at: string
+          win_prob_home: number
+        }
+        Insert: {
+          away_on_court?: Json
+          away_score?: number
+          clock_running?: boolean
+          clock_seconds?: number
+          fixture_id: string
+          home_on_court?: Json
+          home_score?: number
+          last_event_id?: string | null
+          mvp_player_id?: string | null
+          period?: string
+          possession?: string | null
+          suspensions?: Json
+          updated_at?: string
+          win_prob_home?: number
+        }
+        Update: {
+          away_on_court?: Json
+          away_score?: number
+          clock_running?: boolean
+          clock_seconds?: number
+          fixture_id?: string
+          home_on_court?: Json
+          home_score?: number
+          last_event_id?: string | null
+          mvp_player_id?: string | null
+          period?: string
+          possession?: string | null
+          suspensions?: Json
+          updated_at?: string
+          win_prob_home?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_state_fixture_id_fkey"
+            columns: ["fixture_id"]
+            isOneToOne: true
+            referencedRelation: "fixtures"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_state_last_event_id_fkey"
+            columns: ["last_event_id"]
+            isOneToOne: false
+            referencedRelation: "match_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_state_mvp_player_id_fkey"
+            columns: ["mvp_player_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nexus_coaches: {
         Row: {
           certification: string | null
@@ -2126,6 +2326,10 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      recompute_match_state: {
+        Args: { _fixture_id: string }
+        Returns: undefined
       }
     }
     Enums: {
