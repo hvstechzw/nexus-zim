@@ -34,6 +34,7 @@ import BracketPage from "./pages/BracketPage.tsx";
 import StandingsPage from "./pages/StandingsPage.tsx";
 import FeedPage from "./pages/FeedPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import { InstallPrompt } from "@/components/InstallPrompt";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
+          <InstallPrompt />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<FeedPage />} />
