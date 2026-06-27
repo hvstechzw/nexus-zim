@@ -83,12 +83,13 @@ export default function ScoringPage() {
     queryKey: ["scoring-competitions", sport],
     enabled: !!sport && sessionMode === "official",
     queryFn: async () => {
+      // Any competition that isn't finished or cancelled is scorable.
       const { data } = await supabase
         .from("competitions")
-        .select("id, name, discipline, level")
-        .in("status", ["ongoing", "registration_closed"])
-        .order("name")
-        .limit(100);
+        .select("id, name, discipline, level, status")
+        .not("status", "in", "(completed,cancelled)")
+        .order("created_at", { ascending: false })
+        .limit(200);
       return (data || []).filter((c) => detectSport(c.discipline) === sport);
     },
   });
@@ -103,7 +104,7 @@ export default function ScoringPage() {
           home_school_team_id, away_school_team_id,
           home_team:home_team_id(name), away_team:away_team_id(name)`)
         .eq("competition_id", selectedCompId)
-        .in("status", ["scheduled", "live"])
+        .not("status", "in", "(completed,cancelled,awarded)")
         .order("scheduled_at");
       return data || [];
     },
