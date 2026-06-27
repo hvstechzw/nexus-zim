@@ -7,6 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { pushFixtureMirror } from "@/lib/scholasticPush";
+import { enqueue, queued, queueSize, removeOp } from "@/lib/offlineQueue";
 import {
   activeSuspensions,
   applyEvent,
@@ -61,6 +62,8 @@ export default function ScoringPage() {
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const dbIdMap = useRef<Record<string, string>>({});
+  const offlineIdMap = useRef<Record<string, string>>({});
+  const [pendingOffline, setPendingOffline] = useState(0);
   const cfg = sport ? getSport(sport) : null;
   const period = cfg ? periodByKey(cfg, periodKey) : undefined;
   const isDbMode = sessionMode === "official" && !!user && !!selectedFixtureId;
@@ -163,8 +166,9 @@ export default function ScoringPage() {
     }
   }
 
+  // Skips when offline; the fixture score is reconciled to local truth on flush.
   async function persistScores(list: MatchEvent[]) {
-    if (!isDbMode || !sport) return;
+    if (!isDbMode || !sport || !navigator.onLine) return;
     await supabase.from("fixtures").update({
       home_score: scoreFor(list, "home"),
       away_score: scoreFor(list, "away"),
@@ -172,6 +176,41 @@ export default function ScoringPage() {
       period_scores: periodScores(sport, list) as any,
     }).eq("id", selectedFixtureId!);
   }
+
+  function scoreEntryPayload(evt: MatchEvent) {
+    return {
+      fixture_id: selectedFixtureId!,
+      event_type: evt.type,
+      value: evt.value || null,
+      period: evt.period,
+      minute: matchMinute(getSport(sport!), evt.period, evt.clock),
+      team_id: teamIdFor(evt.side),
+      athlete_id: evt.playerId && UUID_RE.test(evt.playerId) ? evt.playerId : null,
+      scorer_id: user!.id,
+      metadata: { side: evt.side, sport, player_name: evt.playerName, clock: evt.clock, card: evt.card ?? null },
+    };
+  }
+
+  // Replay queued score entries on reconnect, then reconcile fixture scores.
+  async function flushOffline() {
+    if (!isDbMode) return;
+    for (const op of queued()) {
+      if (op.table !== "score_entries") continue;
+      const { error } = await supabase.from("score_entries").insert(op.payload as any);
+      if (!error) removeOp(op.id);
+    }
+    setPendingOffline(queueSize());
+    await persistScores(events);
+  }
+
+  useEffect(() => {
+    const onOnline = () => { flushOffline(); };
+    window.addEventListener("online", onOnline);
+    setPendingOffline(queueSize());
+    if (navigator.onLine) flushOffline();
+    return () => window.removeEventListener("online", onOnline);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDbMode, selectedFixtureId]);
 
   async function logEvent(type: string) {
     if (!sport || !period) return;
@@ -183,21 +222,23 @@ export default function ScoringPage() {
     setEvents(next);
 
     if (isDbMode) {
-      try {
-        const { data } = await supabase.from("score_entries").insert({
-          fixture_id: selectedFixtureId!,
-          event_type: evt.type,
-          value: evt.value || null,
-          period: evt.period,
-          minute: matchMinute(getSport(sport), evt.period, evt.clock),
-          team_id: teamIdFor(evt.side),
-          athlete_id: evt.playerId && UUID_RE.test(evt.playerId) ? evt.playerId : null,
-          scorer_id: user!.id,
-          metadata: { side: evt.side, sport, player_name: evt.playerName, clock: evt.clock, card: evt.card ?? null },
-        }).select("id").single();
-        if (data?.id) dbIdMap.current[evt.id] = data.id;
-        await persistScores(next);
-      } catch { /* keep local state authoritative */ }
+      const payload = scoreEntryPayload(evt);
+      if (navigator.onLine) {
+        try {
+          const { data, error } = await supabase.from("score_entries").insert(payload).select("id").single();
+          if (error) throw error;
+          if (data?.id) dbIdMap.current[evt.id] = data.id;
+          await persistScores(next);
+        } catch {
+          const op = enqueue({ table: "score_entries", action: "insert", payload });
+          offlineIdMap.current[evt.id] = op.id;
+          setPendingOffline(queueSize());
+        }
+      } else {
+        const op = enqueue({ table: "score_entries", action: "insert", payload });
+        offlineIdMap.current[evt.id] = op.id;
+        setPendingOffline(queueSize());
+      }
     }
   }
 
@@ -207,6 +248,8 @@ export default function ScoringPage() {
     const next = undoLast(events);
     setEvents(next);
     if (isDbMode) {
+      const offId = offlineIdMap.current[last.id];
+      if (offId) { removeOp(offId); delete offlineIdMap.current[last.id]; setPendingOffline(queueSize()); }
       const dbId = dbIdMap.current[last.id];
       if (dbId) { await supabase.from("score_entries").delete().eq("id", dbId); delete dbIdMap.current[last.id]; }
       await persistScores(next);
@@ -421,6 +464,11 @@ export default function ScoringPage() {
               <button onClick={undo} disabled={events.length === 0}
                 className="h-9 px-4 text-xs font-semibold rounded-lg hairline text-foreground hover:bg-nexus-surface btn-click disabled:opacity-40 disabled:cursor-not-allowed">↶ Undo last</button>
               <span className="text-[10px] mono text-nexus-muted">{events.length} events {isDbMode ? "· saving to DB" : sessionMode !== "official" ? `· ${sessionMode}` : "· local"}</span>
+              {pendingOffline > 0 && (
+                <span className="text-[10px] mono text-nexus-live flex items-center gap-1" title="Will sync when back online">
+                  <span className="w-1.5 h-1.5 rounded-full bg-nexus-live animate-pulse" />{pendingOffline} queued offline
+                </span>
+              )}
             </div>
           </div>
 
@@ -492,6 +540,8 @@ export default function ScoringPage() {
     const next = events.filter((e) => e.id !== id);
     setEvents(next);
     if (isDbMode && target) {
+      const offId = offlineIdMap.current[id];
+      if (offId) { removeOp(offId); delete offlineIdMap.current[id]; setPendingOffline(queueSize()); }
       const dbId = dbIdMap.current[id];
       if (dbId) { await supabase.from("score_entries").delete().eq("id", dbId); delete dbIdMap.current[id]; }
       await persistScores(next);

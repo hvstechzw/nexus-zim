@@ -5,6 +5,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
 import { useHasRole } from "@/hooks/useHasRole";
 import { BrandLockup } from "@/components/Brand";
+import { NotificationBell } from "@/components/NotificationBell";
 
 const PUBLIC_LINKS = [
   { label: "Feed", href: "/" },
@@ -99,6 +100,8 @@ export function NexusHeader() {
                 </svg>
               )}
             </button>
+
+            {user && <NotificationBell />}
 
             {user ? (
               <>
