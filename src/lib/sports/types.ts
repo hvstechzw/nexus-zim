@@ -4,7 +4,12 @@
 // that needs to know "how a match is scored" reads from a single SportConfig so
 // the live scorer, the broadcast overlay, and the stats engine never disagree.
 
-export type SportKey = "netball" | "handball";
+export type SportKey =
+  | "netball" | "handball"
+  | "football" | "basketball" | "volleyball"
+  | "cricket" | "rugby" | "hockey" | "tennis"
+  | "athletics" | "swimming" | "cross_country"
+  | "table_tennis" | "badminton" | "chess";
 export type Side = "home" | "away";
 export type CardKind = "yellow" | "red" | "blue";
 
