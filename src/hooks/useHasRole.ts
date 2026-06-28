@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 
 export type AppRole =
+  // Legacy roles (preserved for backward compatibility)
   | "super_admin"
   | "admin"
   | "federation_official"
@@ -15,25 +16,47 @@ export type AppRole =
   | "coach"
   | "hic"
   | "umpire"
-  | "zonal_admin"
-  | "district_admin"
-  | "provincial_admin"
   | "national_admin"
-  | "viewer";
+  | "viewer"
+  // NASH 20-role hierarchy
+  | "platform_admin"
+  | "nash_national"
+  | "naph_national"
+  | "national_technical_director"
+  | "provincial_admin"
+  | "provincial_technical_director"
+  | "district_admin"
+  | "district_technical_director"
+  | "zonal_admin"
+  | "school_head"
+  | "timekeeper"
+  | "technical_delegate"
+  | "parent"
+  | "public"
+  | "competition_organiser";
 
 // Roles permitted to create/manage competitions & fixtures. Must stay in sync
 // with public.is_competition_organizer() in the database (RLS).
 export const ORGANIZER_ROLES: AppRole[] = [
   "super_admin",
   "admin",
+  "platform_admin",
   "federation_official",
   "national_admin",
+  "nash_national",
+  "naph_national",
+  "national_technical_director",
   "provincial_admin",
+  "provincial_technical_director",
   "district_admin",
+  "district_technical_director",
   "zonal_admin",
+  "competition_organiser",
   "hic",
   "coach",
 ];
+
+const ADMIN_ROLES: AppRole[] = ["admin", "super_admin", "platform_admin", "nash_national", "naph_national"];
 
 export interface RoleState {
   loading: boolean;
@@ -91,7 +114,7 @@ export function useHasRole(): RoleState {
     loading,
     roles,
     hasRole,
-    isAdmin: hasRole("admin", "super_admin"),
+    isAdmin: hasRole(...ADMIN_ROLES),
     isOrganizer: hasRole(...ORGANIZER_ROLES),
   };
 }

@@ -1,5 +1,6 @@
 /* Dark mode CSS variables */
 @import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -15,38 +16,49 @@
   :root {
     /* Surfaces — pure grayscale */
     --background: 0 0% 100%;
-    --foreground: 0 0% 9%;
+    --foreground: 216 61% 12%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
+    --card-foreground: 216 61% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
+    --popover-foreground: 216 61% 12%;
 
-    /* Brand — deep charcoal */
-    --primary: 0 0% 9%;
+    /* Brand — NASH Zimbabwe green */
+    --primary: 124 55% 24%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 9%;
+    --secondary: 140 30% 95%;
+    --secondary-foreground: 124 55% 24%;
 
     /* Muted */
-    --muted: 0 0% 95%;
-    --muted-foreground: 0 0% 44%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 14% 40%;
 
-    --accent: 0 0% 92%;
-    --accent-foreground: 0 0% 9%;
+    /* Accent — Zimbabwe gold */
+    --accent: 40 95% 56%;
+    --accent-foreground: 216 61% 12%;
 
-    --destructive: 0 0% 20%;
+    --destructive: 1 77% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders — grayscale hairline */
-    --border: 0 0% 9% / 0.10;
-    --input: 0 0% 9% / 0.14;
-    --ring: 0 0% 9%;
+    /* Borders */
+    --border: 216 30% 12% / 0.12;
+    --input: 216 30% 12% / 0.16;
+    --ring: 124 55% 24%;
 
-    /* Radius — reference-matched rounded */
-    --radius: 10px;
+    /* Radius — sharp/competitive feel */
+    --radius: 4px;
+
+    /* NASH semantic tokens */
+    --nash-green: 124 55% 24%;
+    --nash-green-mid: 123 46% 34%;
+    --nash-gold: 40 95% 56%;
+    --nash-gold-light: 50 98% 60%;
+    --nash-success: 123 40% 45%;
+    --nash-warning: 33 98% 49%;
+    --nash-error: 1 77% 55%;
+    --nash-info: 208 79% 51%;
 
     /* Signal colors — grayscale only */
     --live-red: 0 0% 18%;
@@ -55,9 +67,9 @@
     --silver-line: 0 0% 87%;
 
     /* Typography */
-    --font-display: "Segoe UI", "Segoe UI Historic", system-ui, sans-serif;
-    --font-mono: "Geist Mono", Consolas, monospace;
-    --font-body: "Segoe UI", "Segoe UI Historic", system-ui, sans-serif;
+    --font-display: "Rajdhani", "Segoe UI", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", "Geist Mono", Consolas, monospace;
+    --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
 
     /* Motion */
     --precision-curve: cubic-bezier(0.16, 1, 0.3, 1);
@@ -84,47 +96,47 @@
   }
 
   .dark {
-    --background: 0 0% 7%;
-    --foreground: 0 0% 94%;
+    --background: 216 61% 10%;
+    --foreground: 0 0% 100%;
 
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 94%;
+    --card: 216 45% 16%;
+    --card-foreground: 0 0% 100%;
 
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 94%;
+    --popover: 221 54% 16%;
+    --popover-foreground: 0 0% 100%;
 
-    --primary: 0 0% 94%;
-    --primary-foreground: 0 0% 7%;
+    --primary: 123 46% 34%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 14%;
-    --secondary-foreground: 0 0% 94%;
+    --secondary: 221 54% 18%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 0 0% 14%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 216 40% 20%;
+    --muted-foreground: 200 14% 73%;
 
-    --accent: 0 0% 18%;
-    --accent-foreground: 0 0% 94%;
+    --accent: 40 95% 56%;
+    --accent-foreground: 216 61% 10%;
 
-    --destructive: 0 0% 75%;
-    --destructive-foreground: 0 0% 7%;
+    --destructive: 1 77% 55%;
+    --destructive-foreground: 0 0% 100%;
 
     --border: 0 0% 100% / 0.10;
     --input: 0 0% 100% / 0.14;
-    --ring: 0 0% 94%;
+    --ring: 40 95% 56%;
 
     --live-red: 0 0% 72%;
     --silver-mid: 0 0% 55%;
     --silver-light: 0 0% 14%;
     --silver-line: 0 0% 18%;
 
-    --sidebar-background: 0 0% 9%;
-    --sidebar-foreground: 0 0% 94%;
-    --sidebar-primary: 0 0% 94%;
-    --sidebar-primary-foreground: 0 0% 7%;
-    --sidebar-accent: 0 0% 14%;
-    --sidebar-accent-foreground: 0 0% 94%;
-    --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 0 0% 94%;
+    --sidebar-background: 221 54% 13%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 40 95% 56%;
+    --sidebar-primary-foreground: 216 61% 10%;
+    --sidebar-accent: 216 45% 20%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 100% / 0.08;
+    --sidebar-ring: 40 95% 56%;
 
     --nexus-surface: 0 0% 13%;
     --nexus-silver: 0 0% 22%;
