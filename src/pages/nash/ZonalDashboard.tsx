@@ -1,12 +1,4 @@
-import { PagePlaceholder } from "@/components/nash/PagePlaceholder";
-
+import { TierDashboard } from "@/components/nash/TierDashboard";
 export default function ZonalDashboard() {
-  return (
-    <PagePlaceholder
-      title="Zonal Sport Coordination"
-      tier="zonal"
-      routeHint="src/pages/nash/ZonalDashboard.tsx"
-      description="Zone competition organisation, host school assignment, member-school coordination and initial eligibility checks."
-    />
-  );
+  return <TierDashboard tier="zonal" tierLabel="Zonal" description="Member-school coordination and zonal competition organisation." />;
 }

@@ -1,12 +1,4 @@
-import { PagePlaceholder } from "@/components/nash/PagePlaceholder";
-
+import { TierDashboard } from "@/components/nash/TierDashboard";
 export default function DistrictDashboard() {
-  return (
-    <PagePlaceholder
-      title="District Sport Coordination"
-      tier="district"
-      routeHint="src/pages/nash/DistrictDashboard.tsx"
-      description="Zone completion status, district championship management, registration tracker per zone and eligibility flags for this district."
-    />
-  );
+  return <TierDashboard tier="district" tierLabel="District" description="Receives zonal winners and runs district championship." />;
 }

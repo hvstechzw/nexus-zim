@@ -7,6 +7,7 @@ import { NexusFooter } from "@/components/NexusFooter";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { dashboardForRoles } from "@/lib/nashRoles";
 
 export default function DashboardPage() {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -25,9 +26,14 @@ export default function DashboardPage() {
   });
 
   useEffect(() => {
-    // Admins go straight to admin panel
-    if (!loading && isAdmin) navigate("/admin", { replace: true });
-  }, [loading, isAdmin, navigate]);
+    // Route signed-in users to their role-appropriate NASH dashboard.
+    // Falls through to the legacy tile view only for users with no recognised role.
+    if (loading || !user) return;
+    const home = dashboardForRoles(roles);
+    if (home && home !== "/" && home !== "/dashboard") {
+      navigate(home, { replace: true });
+    }
+  }, [loading, user, roles, navigate]);
 
   if (!authLoading && !user) return <Navigate to="/login" replace />;
 
