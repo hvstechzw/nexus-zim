@@ -15,9 +15,10 @@ const ThemeContext = createContext<ThemeContextType>({
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof window !== "undefined") {
-      return (localStorage.getItem("nexus-theme") as Theme) || "light";
+      // NASH platform is dark-first; honour an explicit saved preference.
+      return (localStorage.getItem("nexus-theme") as Theme) || "dark";
     }
-    return "light";
+    return "dark";
   });
 
   useEffect(() => {
