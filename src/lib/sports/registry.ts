@@ -1,32 +1,78 @@
 import type { ScoreEventDef, SportConfig, SportKey } from "./types";
 import { NETBALL } from "./netball";
 import { HANDBALL } from "./handball";
+import {
+  FOOTBALL, BASKETBALL, VOLLEYBALL, CRICKET, RUGBY, HOCKEY, TENNIS,
+  TABLE_TENNIS, BADMINTON, ATHLETICS, SWIMMING, CROSS_COUNTRY, CHESS,
+} from "./nashSports";
 
 export const SPORTS: Record<SportKey, SportConfig> = {
   netball: NETBALL,
   handball: HANDBALL,
+  football: FOOTBALL,
+  basketball: BASKETBALL,
+  volleyball: VOLLEYBALL,
+  cricket: CRICKET,
+  rugby: RUGBY,
+  hockey: HOCKEY,
+  tennis: TENNIS,
+  table_tennis: TABLE_TENNIS,
+  badminton: BADMINTON,
+  athletics: ATHLETICS,
+  swimming: SWIMMING,
+  cross_country: CROSS_COUNTRY,
+  chess: CHESS,
 };
 
-/** The two codes Nexus supports, in display order. */
-export const SPORT_LIST: SportConfig[] = [NETBALL, HANDBALL];
+/** All NASH sports, in display order (legacy two first for compatibility). */
+export const SPORT_LIST: SportConfig[] = [
+  NETBALL, HANDBALL, FOOTBALL, BASKETBALL, VOLLEYBALL, CRICKET, RUGBY, HOCKEY,
+  TENNIS, TABLE_TENNIS, BADMINTON, ATHLETICS, SWIMMING, CROSS_COUNTRY, CHESS,
+];
 
 export function getSport(key: SportKey): SportConfig {
   return SPORTS[key];
 }
 
+const VALID_KEYS = new Set<string>(Object.keys(SPORTS));
 export function isSportKey(value: unknown): value is SportKey {
-  return value === "netball" || value === "handball";
+  return typeof value === "string" && VALID_KEYS.has(value);
 }
 
 /**
  * Resolve a sport from a free-form discipline string (competition.discipline,
- * match_data.sport, etc.). Defaults to handball so an ambiguous fixture still
- * opens in a usable scorer, matching the historic FixtureScoringPage behaviour.
+ * match_data.sport, NASH sport code, etc.). Defaults to handball so an
+ * ambiguous fixture still opens in a usable scorer, matching the historic
+ * FixtureScoringPage behaviour.
  */
 export function detectSport(raw?: string | null): SportKey {
-  const v = (raw ?? "").toString().toLowerCase();
-  if (v.includes("net")) return "netball";
-  if (v.includes("hand")) return "handball";
+  const v = (raw ?? "").toString().toLowerCase().replace(/[^a-z_]/g, "");
+  if (!v) return "handball";
+  // Direct key match (already canonical)
+  if (isSportKey(v)) return v as SportKey;
+  // NASH 2-letter codes
+  const codeMap: Record<string, SportKey> = {
+    nb: "netball", hb: "handball", fb: "football", bk: "basketball", vb: "volleyball",
+    cr: "cricket", rg: "rugby", hk: "hockey", tn: "tennis", at: "athletics",
+    sw: "swimming", xc: "cross_country", tt: "table_tennis", bd: "badminton", ch: "chess",
+  };
+  if (codeMap[v]) return codeMap[v];
+  // Substring detection — order matters (basket before bask, table_tennis before tennis)
+  if (v.includes("netball")) return "netball";
+  if (v.includes("handball")) return "handball";
+  if (v.includes("basket")) return "basketball";
+  if (v.includes("volley")) return "volleyball";
+  if (v.includes("football") || v.includes("soccer")) return "football";
+  if (v.includes("cricket")) return "cricket";
+  if (v.includes("rugby")) return "rugby";
+  if (v.includes("hockey")) return "hockey";
+  if (v.includes("tabletennis") || v.includes("table_tennis") || v.includes("pingpong")) return "table_tennis";
+  if (v.includes("tennis")) return "tennis";
+  if (v.includes("badminton")) return "badminton";
+  if (v.includes("crosscountry") || v.includes("cross_country")) return "cross_country";
+  if (v.includes("athletic") || v.includes("track") || v.includes("field")) return "athletics";
+  if (v.includes("swim")) return "swimming";
+  if (v.includes("chess")) return "chess";
   return "handball";
 }
 
