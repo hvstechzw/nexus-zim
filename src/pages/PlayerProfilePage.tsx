@@ -9,9 +9,28 @@ import { FollowButton } from "@/components/community/FollowButton";
 
 
 export default function PlayerProfilePage() {
-  const { athleteId } = useParams<{ athleteId: string }>();
+  // Route accepts either :nashId (NASH-YYYY-NNNNNN) for the new public profile,
+  // or :athleteId (legacy UUID) for backward compatibility. We resolve to a
+  // legacy athletes.id so the existing stats/career/form/badges queries still work.
+  const params = useParams<{ nashId?: string; athleteId?: string }>();
+  const inputKey = params.nashId || params.athleteId || "";
+  const looksLikeNashId = /^NASH-\d{4}-\d{6}$/i.test(inputKey);
 
-  const { data: athlete, isLoading } = useQuery({
+  const { data: athleteId, isLoading: resolvingId } = useQuery({
+    queryKey: ["player-resolve", inputKey, looksLikeNashId],
+    enabled: !!inputKey,
+    queryFn: async () => {
+      if (!looksLikeNashId) return inputKey; // already a legacy UUID
+      // NASH ID → resolve via nash_athlete_registry → athletes table
+      const sb = supabase as any;
+      const { data: reg } = await sb.from("nash_athlete_registry").select("id").eq("nash_id", inputKey).maybeSingle();
+      if (!reg?.id) return null;
+      const { data: legacy } = await sb.from("athletes").select("id").eq("nash_athlete_id", reg.id).maybeSingle();
+      return legacy?.id ?? null;
+    },
+  });
+
+  const { data: athlete, isLoading: loadingAthlete } = useQuery({
     queryKey: ["player", athleteId],
     enabled: !!athleteId,
     queryFn: async () => {
@@ -23,6 +42,8 @@ export default function PlayerProfilePage() {
       return data;
     },
   });
+
+  const isLoading = resolvingId || loadingAthlete;
 
   const { data: entries = [] } = useQuery({
     queryKey: ["player-entries", athleteId],
