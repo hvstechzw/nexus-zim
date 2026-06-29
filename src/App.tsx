@@ -52,6 +52,7 @@ import OfficialAssignmentsPage from "./pages/official/OfficialAssignmentsPage.ts
 import AthleteDashboard from "./pages/athlete/AthleteDashboard.tsx";
 import OrganiserDashboard from "./pages/organiser/OrganiserDashboard.tsx";
 import AthletesRegistryPage from "./pages/admin/AthletesRegistryPage.tsx";
+import AthleteRegisterPage from "./pages/admin/AthleteRegisterPage.tsx";
 import OfficialRegistryPage from "./pages/admin/OfficialRegistryPage.tsx";
 import EligibilityFlagsPage from "./pages/admin/EligibilityFlagsPage.tsx";
 import NashSeasonsPage from "./pages/admin/NashSeasonsPage.tsx";
@@ -163,6 +164,7 @@ const App = () => (
               <Route path="/admin/organisations" element={<NashOrganisationsPage />} />
               <Route path="/admin/members" element={<NashMembersPage />} />
               <Route path="/admin/athletes" element={<AthletesRegistryPage />} />
+              <Route path="/admin/athletes/new" element={<AthleteRegisterPage />} />
               <Route path="/admin/officials" element={<OfficialRegistryPage />} />
               <Route path="/admin/venues" element={<VenuesDatabasePage />} />
               <Route path="/admin/competitions/new" element={<TournamentWizardPage />} />
