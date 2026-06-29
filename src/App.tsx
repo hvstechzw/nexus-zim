@@ -53,6 +53,7 @@ import AthleteDashboard from "./pages/athlete/AthleteDashboard.tsx";
 import OrganiserDashboard from "./pages/organiser/OrganiserDashboard.tsx";
 import AthletesRegistryPage from "./pages/admin/AthletesRegistryPage.tsx";
 import AthleteRegisterPage from "./pages/admin/AthleteRegisterPage.tsx";
+import BroadcastGalleryPage from "./pages/BroadcastGalleryPage.tsx";
 import OfficialRegistryPage from "./pages/admin/OfficialRegistryPage.tsx";
 import EligibilityFlagsPage from "./pages/admin/EligibilityFlagsPage.tsx";
 import NashSeasonsPage from "./pages/admin/NashSeasonsPage.tsx";
@@ -150,7 +151,8 @@ const App = () => (
               <Route path="/organiser/dashboard" element={<OrganiserDashboard />} />
               <Route path="/organiser/competitions" element={<OrganiserDashboard />} />
 
-              <Route path="/broadcast" element={<BroadcastCGPage />} />
+              <Route path="/broadcast" element={<BroadcastGalleryPage />} />
+              <Route path="/broadcast/gallery" element={<BroadcastGalleryPage />} />
               <Route path="/broadcast/:fixtureId" element={<BroadcastCGPage />} />
               <Route path="/score/:fixtureId" element={<MatchConsolePage />} />
               <Route path="/scoring" element={<ScoringPage />} />
