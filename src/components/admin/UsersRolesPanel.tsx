@@ -79,7 +79,7 @@ export function UsersRolesPanel() {
 
   async function grant(userId: string, role: AppRole) {
     setBusy(userId + role);
-    const { error } = await supabase.from("user_roles").insert({ user_id: userId, role });
+    const { error } = await (supabase.from("user_roles") as any).insert({ user_id: userId, role });
     setBusy(null);
     if (error && !error.message.includes("duplicate")) {
       toast({ title: "Grant failed", description: error.message, variant: "destructive" });
@@ -92,7 +92,7 @@ export function UsersRolesPanel() {
   async function revoke(userId: string, role: AppRole) {
     if (!confirm(`Revoke ${role}?`)) return;
     setBusy(userId + role);
-    const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", role);
+    const { error } = await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", role as any);
     setBusy(null);
     if (error) {
       toast({ title: "Revoke failed", description: error.message, variant: "destructive" });

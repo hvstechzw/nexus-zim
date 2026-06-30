@@ -66,7 +66,7 @@ export function RegionRequestsPanel() {
     if (!user) return;
     setBusy(a.id);
     const role = LEVEL_TO_ROLE[a.level];
-    const { error: roleErr } = await supabase.from("user_roles").insert({ user_id: a.user_id, role });
+    const { error: roleErr } = await (supabase.from("user_roles") as any).insert({ user_id: a.user_id, role });
     if (roleErr && !roleErr.message.includes("duplicate")) {
       setBusy(null);
       toast({ title: "Could not grant role", description: roleErr.message, variant: "destructive" });
@@ -89,7 +89,7 @@ export function RegionRequestsPanel() {
     if (!confirm("Revoke this regional admin assignment?")) return;
     setBusy(a.id);
     const role = LEVEL_TO_ROLE[a.level];
-    await supabase.from("user_roles").delete().eq("user_id", a.user_id).eq("role", role);
+    await supabase.from("user_roles").delete().eq("user_id", a.user_id).eq("role", role as any);
     const { error } = await supabase.from("region_admin_assignments").update({ status: "revoked" }).eq("id", a.id);
     setBusy(null);
     if (error) {

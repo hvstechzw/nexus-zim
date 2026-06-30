@@ -60,7 +60,7 @@ export function RoleRequestsPanel() {
   async function approve(r: RoleRequest) {
     if (!user) return;
     setBusy(r.id);
-    const { error: roleErr } = await supabase.from("user_roles").insert({ user_id: r.user_id, role: r.requested_role });
+    const { error: roleErr } = await (supabase.from("user_roles") as any).insert({ user_id: r.user_id, role: r.requested_role });
     if (roleErr && !roleErr.message.includes("duplicate")) {
       setBusy(null);
       toast({ title: "Could not grant role", description: roleErr.message, variant: "destructive" });
@@ -90,7 +90,7 @@ export function RoleRequestsPanel() {
   async function revoke(r: RoleRequest) {
     if (!confirm(`Revoke ${r.requested_role}?`)) return;
     setBusy(r.id);
-    await supabase.from("user_roles").delete().eq("user_id", r.user_id).eq("role", r.requested_role);
+    await supabase.from("user_roles").delete().eq("user_id", r.user_id).eq("role", r.requested_role as any);
     const { error } = await supabase.from("role_requests").update({ status: "revoked" }).eq("id", r.id);
     setBusy(null);
     if (error) { toast({ title: "Update failed", description: error.message, variant: "destructive" }); return; }
