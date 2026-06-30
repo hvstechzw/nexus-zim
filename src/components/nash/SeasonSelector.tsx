@@ -9,6 +9,7 @@ export interface NashSeason {
   name: string | null;
   is_current: boolean | null;
   is_active: boolean | null;
+  registration_deadline?: string | null;
 }
 
 interface Props {
