@@ -2047,6 +2047,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           discipline: string
+          external_ss_team_id: string | null
           gender: string | null
           id: string
           is_published: boolean
@@ -2064,6 +2065,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           discipline: string
+          external_ss_team_id?: string | null
           gender?: string | null
           id?: string
           is_published?: boolean
@@ -2081,6 +2083,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           discipline?: string
+          external_ss_team_id?: string | null
           gender?: string | null
           id?: string
           is_published?: boolean
@@ -2822,6 +2825,17 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      is_competition_organizer: { Args: { _uid: string }; Returns: boolean }
+      notify_users: {
+        Args: {
+          _body: string
+          _data: Json
+          _title: string
+          _type: string
+          _user_ids: string[]
+        }
+        Returns: undefined
       }
       recompute_match_state: {
         Args: { _fixture_id: string }
