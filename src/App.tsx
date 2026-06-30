@@ -54,6 +54,8 @@ import OrganiserDashboard from "./pages/organiser/OrganiserDashboard.tsx";
 import AthletesRegistryPage from "./pages/admin/AthletesRegistryPage.tsx";
 import AthleteRegisterPage from "./pages/admin/AthleteRegisterPage.tsx";
 import BroadcastGalleryPage from "./pages/BroadcastGalleryPage.tsx";
+import CompetitionsAdminPage from "./pages/admin/CompetitionsAdminPage.tsx";
+import TeamsAdminPage from "./pages/admin/TeamsAdminPage.tsx";
 import OfficialRegistryPage from "./pages/admin/OfficialRegistryPage.tsx";
 import EligibilityFlagsPage from "./pages/admin/EligibilityFlagsPage.tsx";
 import NashSeasonsPage from "./pages/admin/NashSeasonsPage.tsx";
@@ -170,7 +172,8 @@ const App = () => (
               <Route path="/admin/officials" element={<OfficialRegistryPage />} />
               <Route path="/admin/venues" element={<VenuesDatabasePage />} />
               <Route path="/admin/competitions/new" element={<TournamentWizardPage />} />
-              <Route path="/admin/competitions" element={<InterSchoolPage />} />
+              <Route path="/admin/competitions" element={<CompetitionsAdminPage />} />
+              <Route path="/admin/teams" element={<TeamsAdminPage />} />
               <Route path="/admin/eligibility" element={<EligibilityFlagsPage />} />
               <Route path="/admin/sync" element={<AdminSyncPage />} />
               <Route path="/admin/reports" element={<MoPSEReportPage />} />
