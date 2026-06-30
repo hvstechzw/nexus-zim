@@ -62,9 +62,9 @@
 
     /* Signal colors — grayscale only */
     --live-red: 0 0% 18%;
-    --silver-mid: 0 0% 44%;
-    --silver-light: 0 0% 95%;
-    --silver-line: 0 0% 87%;
+    --silver-mid: 215 14% 40%;
+    --silver-light: 140 30% 96%;
+    --silver-line: 124 30% 80%;
 
     /* Typography */
     --font-display: "Rajdhani", "Segoe UI", system-ui, sans-serif;
@@ -85,10 +85,12 @@
     --sidebar-ring: 0 0% 9%;
 
     /* Nexus semantic */
-    --nexus-surface: 0 0% 96%;
-    --nexus-silver: 0 0% 87%;
-    --nexus-muted-fg: 0 0% 44%;
-    --nexus-live: 0 0% 18%;
+    /* Legacy compat tokens — re-aimed at the NASH palette so pages still on
+       bg-nexus-surface / text-nexus-muted / etc. inherit the new look. */
+    --nexus-surface: 140 30% 95%;
+    --nexus-silver: 124 30% 80%;
+    --nexus-muted-fg: 215 14% 40%;
+    --nexus-live: 1 77% 55%;
 
     /* Sport accents (used sparingly as pills/dots only — grayscale UI overall) */
     --sport-handball: 18 90% 56%;   /* #FF6B35 */
@@ -125,9 +127,9 @@
     --ring: 40 95% 56%;
 
     --live-red: 0 0% 72%;
-    --silver-mid: 0 0% 55%;
-    --silver-light: 0 0% 14%;
-    --silver-line: 0 0% 18%;
+    --silver-mid: 200 14% 73%;
+    --silver-light: 216 40% 18%;
+    --silver-line: 124 30% 25%;
 
     --sidebar-background: 221 54% 13%;
     --sidebar-foreground: 0 0% 100%;
@@ -138,10 +140,10 @@
     --sidebar-border: 0 0% 100% / 0.08;
     --sidebar-ring: 40 95% 56%;
 
-    --nexus-surface: 0 0% 13%;
-    --nexus-silver: 0 0% 22%;
-    --nexus-muted-fg: 0 0% 55%;
-    --nexus-live: 0 0% 72%;
+    --nexus-surface: 216 45% 16%;
+    --nexus-silver: 124 30% 25%;
+    --nexus-muted-fg: 200 14% 73%;
+    --nexus-live: 1 77% 60%;
   }
 }
 
