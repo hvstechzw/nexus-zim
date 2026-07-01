@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useHasRole } from "@/hooks/useHasRole";
 import { useTheme } from "@/context/ThemeContext";
 import { dashboardForRoles, primaryRole, roleLabel } from "@/lib/nashRoles";
-import { Menu, Moon, Sun, LogOut, LayoutDashboard, Trophy, ShieldCheck, User as UserIcon } from "lucide-react";
+import { Menu, Moon, Sun, LogOut, LayoutDashboard, Trophy, ShieldCheck, User as UserIcon, LayoutGrid } from "lucide-react";
 
 interface NavItem { label: string; to: string; }
 
@@ -42,7 +42,7 @@ export function NashHeader() {
           <ShieldCheck className="h-5 w-5 text-accent" />
           <div className="flex flex-col leading-none">
             <span className="font-display font-bold text-lg tracking-wide">NEXUS</span>
-            <span className="text-[9px] font-mono text-accent tracking-[0.18em] uppercase">Powered by NASH</span>
+            <span className="text-[9px] font-mono text-accent tracking-[0.18em] uppercase">NASH &amp; NAPH · Zimbabwe</span>
           </div>
         </Link>
 
@@ -102,6 +102,9 @@ export function NashHeader() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate(dashboardHref)}>
                     <LayoutDashboard className="h-4 w-4 mr-2" /> Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/tools")}>
+                    <LayoutGrid className="h-4 w-4 mr-2" /> All Tools
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/records")}>
                     <Trophy className="h-4 w-4 mr-2" /> Records

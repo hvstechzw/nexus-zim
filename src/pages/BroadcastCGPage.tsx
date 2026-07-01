@@ -3,6 +3,13 @@ import { useParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { useHasRole, ORGANIZER_ROLES } from "@/hooks/useHasRole";
+
+// Roles trusted with the CG control panel (score bug, lower thirds, sponsor
+// ticker, custom graphics). The transparent ?overlay=1 render used as an OBS
+// Browser Source stays public since it's read-only and its URL is only ever
+// shared privately by a broadcaster.
+const BROADCAST_ROLES = [...ORGANIZER_ROLES, "broadcaster", "technical_delegate"] as const;
 
 // ─── Live broadcast CG overlay page ───
 // Designed for OBS Browser Source capture.
@@ -432,6 +439,8 @@ export default function BroadcastCGPage() {
   const { fixtureId } = useParams<{ fixtureId: string }>();
   const isOverlay = new URLSearchParams(window.location.search).get("overlay") === "1";
   const [elapsed, setElapsed] = useState(0);
+  const { hasRole, loading: rolesLoading } = useHasRole();
+  const canBroadcast = hasRole(...(BROADCAST_ROLES as unknown as Parameters<typeof hasRole>));
 
   const { data: fixture, isLoading } = useQuery({
     queryKey: ["cg-fixture", fixtureId],
@@ -466,6 +475,33 @@ export default function BroadcastCGPage() {
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [fixtureId]);
+
+  // Pure overlay (OBS Browser Source) is read-only and stays public — the URL
+  // is only ever shared privately by the broadcaster who copied it from the
+  // control panel below, which IS gated.
+  if (!isOverlay) {
+    if (rolesLoading) {
+      return (
+        <div className="min-h-screen bg-black flex items-center justify-center">
+          <p className="text-white/40 mono text-sm animate-pulse">Checking access…</p>
+        </div>
+      );
+    }
+    if (!canBroadcast) {
+      return (
+        <div className="min-h-screen bg-background text-foreground flex items-center justify-center px-6">
+          <div className="text-center max-w-md">
+            <p className="text-[10px] font-mono tracking-[0.2em] uppercase text-destructive mb-3">403 Forbidden</p>
+            <h1 className="text-2xl font-display font-bold mb-3">Broadcast access required</h1>
+            <p className="text-sm text-muted-foreground">
+              The Broadcast CG control panel is restricted to organisers, technical delegates and broadcasters. Request the broadcaster role via <Link to="/register" className="underline">registration</Link>.
+            </p>
+            <Link to="/broadcast" className="inline-block mt-6 text-xs font-mono uppercase tracking-widest text-accent hover:underline">Back to Broadcast Hub</Link>
+          </div>
+        </div>
+      );
+    }
+  }
 
   if (!fixtureId) return <FixtureSelector />;
 
@@ -513,7 +549,7 @@ function FixtureSelector() {
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
       <div className="max-w-2xl mx-auto w-full pt-20 px-6">
-        <p className="text-[10px] tracking-[0.3em] uppercase text-white/30 font-semibold mb-2">Broadcast CG</p>
+        <p className="text-[10px] tracking-[0.3em] uppercase text-[hsl(var(--accent))] font-semibold mb-2">NASH · NAPH Broadcast CG</p>
         <h1 className="text-3xl font-black mb-8">Select a Fixture</h1>
         {isLoading ? (
           <div className="space-y-3">

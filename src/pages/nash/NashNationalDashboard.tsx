@@ -229,7 +229,7 @@ export default function NashNationalDashboard({ federation = "NASH" }: { federat
         </Card>
 
         <p className="text-[10px] text-muted-foreground text-center pt-2">
-          Powered by NASH · Built by Aetheris Innovative Enterprises
+          Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises
         </p>
       </div>
     </div>

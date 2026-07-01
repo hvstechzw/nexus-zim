@@ -545,7 +545,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           <p className="text-xs text-muted-foreground mt-0.5">11 focused steps to register a sanctioned NASH/NAPH competition with all metadata.</p>
         </div>
         {children}
-        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH · Built by Aetheris Innovative Enterprises</p>
+        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
       </div>
     </div>
   );

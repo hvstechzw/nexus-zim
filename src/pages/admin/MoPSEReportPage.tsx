@@ -136,7 +136,7 @@ export default function MoPSEReportPage() {
         <div className="bg-card text-card-foreground rounded border border-border print:border-0 print:shadow-none p-8 md:p-12 print:p-8 space-y-6 print-document">
           {/* Letterhead */}
           <div className="text-center pb-6 border-b-2 border-accent">
-            <p className="text-[10px] font-display tracking-[0.3em] uppercase text-accent">National Association of Secondary School Heads</p>
+            <p className="text-[10px] font-display tracking-[0.3em] uppercase text-accent">National Association of Secondary School Heads (NASH) &amp; National Association of Primary School Heads (NAPH)</p>
             <h1 className="text-3xl font-display font-bold mt-2">ZIMBABWE</h1>
             <p className="text-xs text-muted-foreground mt-1">Annual School Sport Report · {season?.name ?? "—"}</p>
             <p className="text-[10px] text-muted-foreground mt-3 font-mono">Prepared for the Ministry of Primary and Secondary Education · {new Date().toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" })}</p>
@@ -242,7 +242,7 @@ export default function MoPSEReportPage() {
 
           <div className="border-t-2 border-accent pt-4 text-center">
             <p className="text-xs">Submitted by the NASH Secretary General · {new Date().getFullYear()}</p>
-            <p className="text-[10px] text-muted-foreground mt-1">Produced by Nexus Zimbabwe · Powered by NASH · Built by Aetheris Innovative Enterprises</p>
+            <p className="text-[10px] text-muted-foreground mt-1">Produced by Nexus Zimbabwe · Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
             <Badge variant="outline" className="mt-2 text-[9px] font-mono">Report ID: MOPSE-{season?.academic_year ?? "----"}-T{season?.term ?? "-"}</Badge>
           </div>
         </div>

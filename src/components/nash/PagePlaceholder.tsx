@@ -47,7 +47,7 @@ export function PagePlaceholder({ title, description, tier, routeHint }: Props) 
                 {description || "This NASH module is scaffolded. Functionality lands in a later overhaul session."}
               </p>
             </div>
-            <p className="text-xs text-muted-foreground">Powered by NASH · Built by Aetheris Innovative Enterprises</p>
+            <p className="text-xs text-muted-foreground">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
           </CardContent>
         </Card>
       </div>
