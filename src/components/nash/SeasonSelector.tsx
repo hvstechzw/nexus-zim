@@ -39,7 +39,9 @@ export function SeasonSelector({ value, onChange, className, autoSelectCurrent =
         .order("academic_year", { ascending: false })
         .order("term", { ascending: false });
       if (cancelled) return;
-      if (!error && Array.isArray(data)) {
+      if (error) {
+        console.error("SeasonSelector: failed to load nash_seasons", error.message, error);
+      } else if (Array.isArray(data)) {
         setSeasons(data as NashSeason[]);
         if (autoSelectCurrent && !value && data.length > 0) {
           const current = (data as NashSeason[]).find((s) => s.is_current) ?? data[0];
@@ -55,7 +57,7 @@ export function SeasonSelector({ value, onChange, className, autoSelectCurrent =
   return (
     <Select value={value} onValueChange={(id) => onChange?.(id, seasons.find((s) => s.id === id))} disabled={loading}>
       <SelectTrigger className={className}>
-        <SelectValue placeholder={loading ? "Loading seasons…" : "Select season"} />
+        <SelectValue placeholder={loading ? "Loading seasons…" : seasons.length === 0 ? "No seasons configured" : "Select season"} />
       </SelectTrigger>
       <SelectContent>
         {seasons.map((s) => (

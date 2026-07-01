@@ -4,8 +4,10 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { NexusHeader } from "@/components/NexusHeader";
 import { NexusFooter } from "@/components/NexusFooter";
+import { detectSport as detectSportKey, SPORT_LIST } from "@/lib/sports/registry";
+import type { SportKey } from "@/lib/sports/types";
 
-type Sport = "all" | "handball" | "netball";
+type Sport = "all" | SportKey;
 
 interface FixtureRow {
   id: string;
@@ -21,16 +23,14 @@ interface FixtureRow {
   venue: { name: string | null; city: string | null } | null;
 }
 
-function detectSport(f: FixtureRow): "handball" | "netball" | "other" {
+function detectSport(f: FixtureRow): SportKey {
   const blob = [
     f.competition?.discipline,
     f.home_team?.sport,
     f.away_team?.sport,
     f.competition?.name,
-  ].filter(Boolean).join(" ").toLowerCase();
-  if (blob.includes("handball")) return "handball";
-  if (blob.includes("netball")) return "netball";
-  return "other";
+  ].filter(Boolean).join(" ");
+  return detectSportKey(blob);
 }
 
 export default function LivePage() {
@@ -83,19 +83,19 @@ export default function LivePage() {
             <p className="text-[10px] mono tracking-[0.2em] uppercase text-nexus-muted">Realtime</p>
             <h1 className="text-display-lg display-font font-semibold mt-1">Live matches</h1>
             <p className="text-sm text-nexus-muted mt-1">
-              Handball &amp; netball fixtures across Nexus, updating in realtime.
+              All 15 NASH &amp; NAPH sports across Nexus, updating in realtime.
             </p>
           </div>
-          <div className="flex hairline rounded-lg overflow-hidden self-start">
-            {(["all", "handball", "netball"] as Sport[]).map((s) => (
+          <div className="flex hairline rounded-lg overflow-x-auto scrollbar-hide self-start max-w-full">
+            {(["all", ...SPORT_LIST.map((s) => s.key)] as Sport[]).map((s) => (
               <button
                 key={s}
                 onClick={() => setSport(s)}
-                className={`px-3 py-2 text-[10px] mono font-semibold tracking-widest uppercase transition-colors ${
+                className={`px-3 py-2 text-[10px] mono font-semibold tracking-widest uppercase transition-colors whitespace-nowrap ${
                   sport === s ? "bg-foreground text-primary-foreground" : "bg-background text-nexus-muted hover:text-foreground"
                 }`}
               >
-                {s}
+                {s === "all" ? "all" : SPORT_LIST.find((x) => x.key === s)?.label ?? s}
               </button>
             ))}
           </div>

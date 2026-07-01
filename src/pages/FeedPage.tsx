@@ -138,7 +138,7 @@ export default function FeedPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <Helmet>
-        <title>Nexus Zimbabwe | Powered by NASH — Official School Sport Network</title>
+        <title>Nexus Zimbabwe | Powered by NASH & NAPH — Official School Sport Network</title>
         <meta name="description" content="Live results, competitions, and rankings across all 15 sports under NASH and NAPH. Zimbabwe's official school sport network — powered by Scholastic Services, built by Aetheris." />
         <link rel="canonical" href="https://nexuszw.online/" />
       </Helmet>
@@ -326,7 +326,7 @@ export default function FeedPage() {
         <footer className="border-t border-border bg-primary/5 mt-auto">
           <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 text-center space-y-1">
             <p className="text-xs font-display tracking-wider uppercase">Nexus Zimbabwe</p>
-            <p className="text-[10px] text-muted-foreground">Powered by NASH · Integrated with Scholastic Services · Built by Aetheris Innovative Enterprises</p>
+            <p className="text-[10px] text-muted-foreground">Powered by NASH & NAPH · Integrated with Scholastic Services · Built by Aetheris Innovative Enterprises</p>
           </div>
         </footer>
       </main>

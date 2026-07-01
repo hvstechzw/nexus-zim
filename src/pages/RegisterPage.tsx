@@ -9,13 +9,14 @@ import { Label } from "@/components/ui/label";
 import { NexusHeader } from "@/components/NexusHeader";
 
 const PROVINCES = ["Harare","Bulawayo","Manicaland","Mashonaland Central","Mashonaland East","Mashonaland West","Masvingo","Matabeleland North","Matabeleland South","Midlands"];
-const SPORTS = ["Handball", "Netball", "Both"];
+const SPORTS = ["Handball", "Netball", "Football", "Basketball", "Volleyball", "Cricket", "Rugby", "Hockey", "Tennis", "Table Tennis", "Badminton", "Athletics", "Swimming", "Cross Country", "Chess", "Multiple"];
+const FEDERATIONS = ["NASH", "NAPH"] as const;
 
 type RoleKey =
-  | "viewer"
-  | "coach" | "hic" | "team_manager" | "school_coordinator"
-  | "umpire" | "referee" | "scorer"
-  | "broadcaster" | "federation_official"
+  | "viewer" | "athlete" | "parent"
+  | "coach" | "school_head" | "hic" | "team_manager" | "school_coordinator"
+  | "umpire" | "referee" | "scorer" | "timekeeper" | "technical_delegate"
+  | "broadcaster" | "federation_official" | "competition_organiser"
   | "zonal_admin" | "district_admin" | "provincial_admin" | "national_admin";
 
 interface RoleDef {
@@ -23,29 +24,37 @@ interface RoleDef {
   label: string;
   group: "Supporter" | "School Personnel" | "Match Officials" | "Federation & Media" | "Regional Administration";
   auto?: boolean;
-  fields: Array<"school" | "sport" | "qualification" | "certification" | "organisation" | "media_house" | "team_name" | "zone" | "district" | "province" | "experience_years">;
+  /** Applies to NASH (secondary schools) and/or NAPH (primary schools) — most roles span both federations. */
+  federationScoped?: boolean;
+  fields: Array<"school" | "sport" | "qualification" | "certification" | "organisation" | "media_house" | "team_name" | "zone" | "district" | "province" | "experience_years" | "federation">;
   weight: number; // higher = more scrutiny required
 }
 
 const ROLES: RoleDef[] = [
   { value: "viewer", label: "Supporter / Viewer", group: "Supporter", auto: true, fields: [], weight: 0 },
+  { value: "athlete", label: "Athlete", group: "Supporter", fields: ["school", "sport", "federation"], federationScoped: true, weight: 1 },
+  { value: "parent", label: "Parent / Guardian", group: "Supporter", fields: ["school"], weight: 1 },
 
-  { value: "coach", label: "School Coach", group: "School Personnel", fields: ["school", "sport", "qualification", "experience_years"], weight: 2 },
-  { value: "hic", label: "Head in Charge (HIC)", group: "School Personnel", fields: ["school", "sport"], weight: 2 },
+  { value: "coach", label: "School Coach", group: "School Personnel", fields: ["school", "sport", "federation", "qualification", "experience_years"], federationScoped: true, weight: 2 },
+  { value: "school_head", label: "School Head", group: "School Personnel", fields: ["school", "federation"], federationScoped: true, weight: 3 },
+  { value: "hic", label: "Head in Charge (HIC)", group: "School Personnel", fields: ["school", "sport", "federation"], federationScoped: true, weight: 2 },
   { value: "team_manager", label: "Team Manager", group: "School Personnel", fields: ["school", "team_name", "sport"], weight: 1 },
-  { value: "school_coordinator", label: "School Sports Coordinator", group: "School Personnel", fields: ["school"], weight: 2 },
+  { value: "school_coordinator", label: "School Sports Coordinator", group: "School Personnel", fields: ["school", "federation"], federationScoped: true, weight: 2 },
 
   { value: "umpire", label: "Umpire", group: "Match Officials", fields: ["sport", "certification", "experience_years"], weight: 2 },
   { value: "referee", label: "Referee", group: "Match Officials", fields: ["sport", "certification", "experience_years"], weight: 2 },
   { value: "scorer", label: "Scorer", group: "Match Officials", fields: ["sport"], weight: 1 },
+  { value: "timekeeper", label: "Timekeeper", group: "Match Officials", fields: ["sport"], weight: 1 },
+  { value: "technical_delegate", label: "Technical Delegate", group: "Match Officials", fields: ["sport", "certification", "experience_years"], weight: 3 },
 
   { value: "broadcaster", label: "Broadcaster", group: "Federation & Media", fields: ["media_house"], weight: 2 },
-  { value: "federation_official", label: "Federation Official", group: "Federation & Media", fields: ["organisation"], weight: 3 },
+  { value: "federation_official", label: "Federation Official", group: "Federation & Media", fields: ["organisation", "federation"], federationScoped: true, weight: 3 },
+  { value: "competition_organiser", label: "Competition Organiser", group: "Federation & Media", fields: ["organisation", "sport"], weight: 3 },
 
-  { value: "zonal_admin", label: "Zonal / Cluster Admin", group: "Regional Administration", fields: ["zone", "district", "province"], weight: 3 },
-  { value: "district_admin", label: "District Admin", group: "Regional Administration", fields: ["district", "province"], weight: 3 },
-  { value: "provincial_admin", label: "Provincial Admin", group: "Regional Administration", fields: ["province"], weight: 4 },
-  { value: "national_admin", label: "National Admin", group: "Regional Administration", fields: [], weight: 4 },
+  { value: "zonal_admin", label: "Zonal / Cluster Admin", group: "Regional Administration", fields: ["zone", "district", "province", "federation"], federationScoped: true, weight: 3 },
+  { value: "district_admin", label: "District Admin", group: "Regional Administration", fields: ["district", "province", "federation"], federationScoped: true, weight: 3 },
+  { value: "provincial_admin", label: "Provincial Admin", group: "Regional Administration", fields: ["province", "federation"], federationScoped: true, weight: 4 },
+  { value: "national_admin", label: "National Admin (NASH / NAPH Executive)", group: "Regional Administration", fields: ["federation"], federationScoped: true, weight: 4 },
 ];
 
 const REGIONAL: RoleKey[] = ["zonal_admin", "district_admin", "provincial_admin", "national_admin"];
@@ -150,7 +159,7 @@ export default function RegisterPage() {
         <div className="w-full max-w-2xl hairline rounded-xl p-8">
           <h1 className="text-2xl font-semibold mb-1">Create account</h1>
           <p className="text-xs text-nexus-muted mb-6">
-            Choose the role you're applying for — additional details are requested based on its scope. Non-supporter roles need super admin approval.
+            Nexus serves both NASH (secondary schools) and NAPH (primary schools). Choose the role you're applying for — additional details are requested based on its scope, including which federation you belong to. Non-supporter roles need super admin approval.
           </p>
 
           <form onSubmit={onSubmit} className="space-y-5">
@@ -267,6 +276,16 @@ export default function RegisterPage() {
                     <select id="province" value={payload.province || ""} onChange={e => setField("province", e.target.value)} className={inputCls}>
                       <option value="">Select province</option>
                       {PROVINCES.map(p => <option key={p}>{p}</option>)}
+                    </select>
+                  </div>
+                )}
+                {def.fields.includes("federation") && (
+                  <div>
+                    <Label htmlFor="federation">Federation</Label>
+                    <select id="federation" value={payload.federation || ""} onChange={e => setField("federation", e.target.value)} className={inputCls}>
+                      <option value="">Select federation</option>
+                      <option value="NASH">NASH — Secondary Schools</option>
+                      <option value="NAPH">NAPH — Primary Schools</option>
                     </select>
                   </div>
                 )}

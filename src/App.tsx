@@ -69,6 +69,7 @@ import CalendarPage from "./pages/CalendarPage.tsx";
 import RecordsPage from "./pages/RecordsPage.tsx";
 import NashGamesPage from "./pages/NashGamesPage.tsx";
 import ResultsPage from "./pages/ResultsPage.tsx";
+import ToolsPage from "./pages/ToolsPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -115,6 +116,7 @@ const App = () => (
 
               {/* ───────────────────── ROLE DASHBOARDS ───────────────────── */}
               <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/tools" element={<ToolsPage />} />
               <Route path="/platform" element={<AdminDashboard />} />
 
               <Route path="/federation/nash" element={<NashNationalDashboard />} />

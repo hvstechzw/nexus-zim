@@ -15,7 +15,7 @@ import { RoleRequestsPanel } from "@/components/admin/RoleRequestsPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
-import { useHasRole, AppRole } from "@/hooks/useHasRole";
+import { useHasRole, AppRole, ORGANIZER_ROLES } from "@/hooks/useHasRole";
 import { useToast } from "@/hooks/use-toast";
 import { Navigate } from "react-router-dom";
 
@@ -39,15 +39,18 @@ interface TabDef {
   roles: AppRole[]; // empty = any admin role
 }
 
-// Admin-tier roles allowed in /admin (super_admin always allowed elsewhere)
-const ADMIN_ROLES: AppRole[] = [
+// Admin-tier roles allowed in /admin — covers the full NASH/NAPH hierarchy
+// (platform, federation, provincial, district, zonal + legacy roles) plus the
+// competition-organiser tier, so newly seeded NASH/NAPH accounts aren't 403'd.
+const ADMIN_ROLES: AppRole[] = Array.from(new Set([
   "super_admin",
   "admin",
   "national_admin",
   "provincial_admin",
   "district_admin",
   "zonal_admin",
-];
+  ...ORGANIZER_ROLES,
+])) as AppRole[];
 
 const ALL_TABS: TabDef[] = [
   { id: "overview", label: "Overview", roles: ADMIN_ROLES },
@@ -70,7 +73,7 @@ const PROVINCES = ["Harare","Bulawayo","Manicaland","Mashonaland Central","Masho
 const LEVELS = ["primary_school","secondary_school","club_academy","provincial","national_league","national_cup","international"] as const;
 const FORMATS = ["round_robin","single_elimination","double_elimination","swiss","league","ladder","custom_heats"] as const;
 const STATUSES = ["draft","registration_open","registration_closed","ongoing","completed","cancelled"] as const;
-const DISCIPLINES = ["Handball","Netball"];
+const DISCIPLINES = ["Handball","Netball","Football","Basketball","Volleyball","Cricket","Rugby","Hockey","Tennis","Table Tennis","Badminton","Athletics","Swimming","Cross Country","Chess"];
 
 
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
@@ -689,7 +692,7 @@ export default function AdminDashboard() {
           <p className="text-[10px] mono tracking-[0.2em] uppercase text-nexus-muted mb-3">403 Forbidden</p>
           <h1 className="text-2xl font-semibold mb-3">Admin access required</h1>
           <p className="text-nexus-muted text-sm">
-            Your account doesn't carry an admin role (super_admin, admin, national_admin, provincial_admin, district_admin or zonal_admin). Request access via <Link to="/register" className="underline">registration</Link>.
+            Your account doesn't carry an admin-tier NASH or NAPH role (platform, federation, provincial, district, zonal or organiser). Request access via <Link to="/register" className="underline">registration</Link>.
           </p>
         </div>
       </div>

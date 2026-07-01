@@ -20,8 +20,9 @@ export default function NashSeasonsPage() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await (supabase as any).from("nash_seasons").select("*")
+      const { data, error } = await (supabase as any).from("nash_seasons").select("*")
         .order("academic_year", { ascending: false }).order("term", { ascending: false });
+      if (error) console.error("NashSeasonsPage: failed to load nash_seasons", error.message, error);
       setSeasons((data || []) as Season[]);
       setLoading(false);
     })();
@@ -71,7 +72,7 @@ export default function NashSeasonsPage() {
             </Table>
           </CardContent>
         </Card>
-        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH · Built by Aetheris Innovative Enterprises</p>
+        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
       </div>
     </div>
   );

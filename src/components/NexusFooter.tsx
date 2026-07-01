@@ -9,7 +9,7 @@ export function NexusFooter() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-3">
           <div className="text-center md:text-left">
             <p className="text-xs font-display tracking-wider uppercase">Nexus Zimbabwe</p>
-            <p className="text-[10px] text-muted-foreground">Powered by NASH · Integrated with Scholastic Services · Built by Aetheris Innovative Enterprises</p>
+            <p className="text-[10px] text-muted-foreground">Powered by NASH & NAPH · Integrated with Scholastic Services · Built by Aetheris Innovative Enterprises</p>
           </div>
           <nav className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
             <Link to="/live" className="hover:text-accent">Live</Link>
