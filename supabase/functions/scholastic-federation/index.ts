@@ -66,9 +66,16 @@ Deno.serve(async (req) => {
       default:
         return json(cors, { error: `unknown action: ${action || "(none)"}` }, 400);
     }
-  } catch (e) {
+  } catch (e: any) {
     console.error("[scholastic-federation]", action, e);
-    return json(cors, { error: e instanceof Error ? e.message : "internal error" }, 500);
+    const detail = e?.message || e?.hint || e?.details || (typeof e === "string" ? e : JSON.stringify(e));
+    return json(cors, {
+      error: detail || "internal error",
+      action,
+      code: e?.code || null,
+      hint: e?.hint || null,
+      details: e?.details || null,
+    }, 500);
   }
 });
 
