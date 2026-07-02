@@ -104,7 +104,7 @@ export function RegionRequestsPanel() {
 
   return (
     <div className="p-4 sm:p-8 space-y-6">
-      <div className="hairline rounded-xl p-6 bg-background card-shadow">
+      <div className="hairline rounded-xl p-6 bg-card card-shadow">
         <h2 className="display-font text-xl font-bold text-foreground">Region Admin Requests</h2>
         <p className="text-xs text-nexus-muted mt-1 mb-4">
           Approve or revoke zonal, district, provincial and national admin assignments. Approved admins can authorise sporting
@@ -126,7 +126,7 @@ export function RegionRequestsPanel() {
         </div>
       </div>
 
-      <div className="hairline rounded-xl bg-background overflow-hidden">
+      <div className="hairline rounded-xl bg-card overflow-hidden">
         {filtered.length === 0 && (
           <p className="p-12 text-center text-xs text-nexus-muted mono">No {filter === "all" ? "" : filter} assignments.</p>
         )}

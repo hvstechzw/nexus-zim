@@ -6,6 +6,7 @@ import { NashHeader } from "@/components/nash/NashHeader";
 import { StatCard } from "@/components/nash/StatCard";
 import { CompetitionCard, type Competition } from "@/components/nash/CompetitionCard";
 import { SeasonSelector, type NashSeason } from "@/components/nash/SeasonSelector";
+import { useNashScope } from "@/hooks/useNashScope";
 import { supabase } from "@/integrations/supabase/client";
 import { Trophy, Users, AlertTriangle, ShieldCheck, Plus, FileText, Activity } from "lucide-react";
 
@@ -26,7 +27,13 @@ interface Props {
  */
 export function TierDashboard({ tier, tierLabel, description }: Props) {
   const params = useParams<Record<string, string>>();
-  const scope = params.provinceId || params.districtId || params.zoneId || "";
+  const urlScope = params.provinceId || params.districtId || params.zoneId || "";
+  const nashScope = useNashScope();
+  // Prefer an explicit URL scope (admins browsing another region); otherwise
+  // fall back to the signed-in user's own organisation membership so a
+  // district/zonal admin lands on THEIR region instead of a national-wide view.
+  const ownScope = tier === "provincial" ? nashScope.province : tier === "district" ? nashScope.district : nashScope.zone;
+  const scope = urlScope || ownScope || "";
   const [seasonId, setSeasonId] = useState("");
   const [season, setSeason] = useState<NashSeason | undefined>();
   const [stats, setStats] = useState({ competitions: 0, athletes: 0, officials: 0, openFlags: 0 });
@@ -34,26 +41,42 @@ export function TierDashboard({ tier, tierLabel, description }: Props) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!seasonId) return;
+    if (!seasonId || nashScope.loading) return;
     let cancelled = false;
     setLoading(true);
     (async () => {
       const sb = supabase as any;
+
+      // District/zonal competitions don't carry a flat district/zone column
+      // (only organisation_id), so resolve the matching organisation(s) for
+      // this scope first and filter by id — best-effort: if no org row
+      // matches, fall through unfiltered rather than silently showing zero.
+      let orgIds: string[] | null = null;
+      if (scope && (tier === "district" || tier === "zonal")) {
+        const col = tier === "district" ? "district" : "zone";
+        const { data: orgs } = await sb.from("nash_organisations")
+          .select("id").eq("level", tier).or(`${col}.eq.${scope},name.eq.${scope}`);
+        if (orgs && orgs.length > 0) orgIds = orgs.map((o: any) => o.id);
+      }
+
       let compQ = sb.from("competitions")
         .select("id,name,discipline,province,tier,age_group,gender,start_date,end_date,host_school_name,total_entries,status,is_nash_sanctioned")
         .eq("season_id", seasonId)
         .eq("tier", tier)
         .order("start_date", { ascending: false }).limit(50);
-      // District/zonal competitions don't carry a flat district/zone column
-      // (only organisation_id, which isn't resolvable from the URL scope
-      // param), so only provincial-tier scoping is precise here.
       if (scope && tier === "provincial") compQ = compQ.eq("province", scope);
+      if (orgIds) compQ = compQ.in("organisation_id", orgIds);
 
       let athleteQ = sb.from("nash_athlete_registry").select("id", { count: "exact", head: true });
       let officialQ = sb.from("nash_officials").select("id", { count: "exact", head: true }).eq("is_active", true);
       if (scope && tier === "provincial") {
         athleteQ = athleteQ.eq("province", scope);
         officialQ = officialQ.eq("province", scope);
+      } else if (scope && tier === "district") {
+        // nash_officials carries a district column; nash_athlete_registry
+        // doesn't go finer than province, so athlete count stays national
+        // for district/zonal scopes — a known schema limitation, not a bug.
+        officialQ = officialQ.eq("district", scope);
       }
 
       const [comps, athletes, officials, flags] = await Promise.all([
@@ -73,7 +96,7 @@ export function TierDashboard({ tier, tierLabel, description }: Props) {
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [seasonId, tier, scope]);
+  }, [seasonId, tier, scope, nashScope.loading]);
 
   return (
     <div className="min-h-screen bg-background">

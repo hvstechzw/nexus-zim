@@ -136,7 +136,7 @@ export function SportingCalendar() {
 
   return (
     <div className="p-4 sm:p-8 space-y-6">
-      <div className="hairline rounded-xl p-6 bg-background card-shadow">
+      <div className="hairline rounded-xl p-6 bg-card card-shadow">
         <div className="flex flex-wrap items-end justify-between gap-4 mb-4">
           <div>
             <p className="text-[10px] mono tracking-[0.2em] uppercase text-nexus-muted">NASH-style</p>
@@ -182,7 +182,7 @@ export function SportingCalendar() {
       </div>
 
       {showForm && canCreate && (
-        <form onSubmit={save} className="hairline rounded-xl p-6 bg-background grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={save} className="hairline rounded-xl p-6 bg-card grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
             <label className={labelCls}>Title *</label>
             <input
@@ -263,7 +263,7 @@ export function SportingCalendar() {
         </form>
       )}
 
-      <div className="hairline rounded-xl bg-background overflow-hidden">
+      <div className="hairline rounded-xl bg-card overflow-hidden">
         {loading ? (
           <p className="p-12 text-center text-xs text-nexus-muted mono">Loading…</p>
         ) : filtered.length === 0 ? (
