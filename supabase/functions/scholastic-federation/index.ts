@@ -344,7 +344,7 @@ async function pushAthlete(cors: Record<string, string>, supabase: any, body: an
     ss_school_id: ssid,
     disciplines,
     primary_sport: primarySport || primary_sport || disciplines[0] || null,
-    nexus_sport: primarySport || primary_sport || disciplines[0] || null,
+    nexus_sport: normalizeNexusSport(primarySport || primary_sport || disciplines[0]),
     preferred_position: preferredPosition ?? null,
     secondary_position: secondaryPosition ?? null,
     dominant_hand: dominantHand ?? null,
