@@ -528,11 +528,22 @@ async function pushInvitationResponse(cors: Record<string, string>, supabase: an
 }
 
 async function pullRankings(cors: Record<string, string>, supabase: any, body: any) {
-  const { competition_id, discipline, limit = 100 } = body;
+  const { competition_id, discipline, external_student_id, external_school_id, limit = 100 } = body;
+
+  // If asked for a specific athlete, resolve their school to filter rankings
+  let filterSchoolId: string | null = null;
+  if (external_student_id) {
+    const { data: ath } = await supabase
+      .from("athletes").select("ss_school_id").eq("external_student_id", external_student_id).maybeSingle();
+    filterSchoolId = ath?.ss_school_id || external_school_id || null;
+  } else if (external_school_id) {
+    filterSchoolId = external_school_id;
+  }
+
   let q = supabase
     .from("standings")
     .select(`competition_id, position, played, won, drawn, lost, points, score_for, score_against,
-             school_team:school_team_id(id, name, team:team_id(external_school_id, name)),
+             school_team:school_team_id(id, name, school:school_id(external_school_id, name)),
              competition:competition_id(name, discipline)`)
     .order("position", { ascending: true })
     .limit(Math.min(Number(limit) || 100, 500));
