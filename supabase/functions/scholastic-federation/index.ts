@@ -17,6 +17,15 @@ const json = (cors: Record<string, string>, body: unknown, status = 200) =>
     headers: { ...cors, "Content-Type": "application/json" },
   });
 
+function normalizeNexusSport(v: any): "handball" | "netball" | "both" | null {
+  if (!v) return null;
+  const s = String(v).toLowerCase().trim();
+  if (s === "handball" || s === "netball" || s === "both") return s;
+  if (s.includes("hand")) return "handball";
+  if (s.includes("net")) return "netball";
+  return null;
+}
+
 Deno.serve(async (req) => {
   const cors = buildCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
@@ -66,9 +75,16 @@ Deno.serve(async (req) => {
       default:
         return json(cors, { error: `unknown action: ${action || "(none)"}` }, 400);
     }
-  } catch (e) {
+  } catch (e: any) {
     console.error("[scholastic-federation]", action, e);
-    return json(cors, { error: e instanceof Error ? e.message : "internal error" }, 500);
+    const detail = e?.message || e?.hint || e?.details || (typeof e === "string" ? e : JSON.stringify(e));
+    return json(cors, {
+      error: detail || "internal error",
+      action,
+      code: e?.code || null,
+      hint: e?.hint || null,
+      details: e?.details || null,
+    }, 500);
   }
 });
 
@@ -337,7 +353,7 @@ async function pushAthlete(cors: Record<string, string>, supabase: any, body: an
     ss_school_id: ssid,
     disciplines,
     primary_sport: primarySport || primary_sport || disciplines[0] || null,
-    nexus_sport: primarySport || primary_sport || disciplines[0] || null,
+    nexus_sport: normalizeNexusSport(primarySport || primary_sport || disciplines[0]),
     preferred_position: preferredPosition ?? null,
     secondary_position: secondaryPosition ?? null,
     dominant_hand: dominantHand ?? null,
@@ -365,17 +381,40 @@ async function pushAthlete(cors: Record<string, string>, supabase: any, body: an
 }
 
 async function linkAccount(cors: Record<string, string>, supabase: any, body: any) {
-  const { external_student_id, email, user_id } = body;
+  const { external_student_id, email, user_id, first_name, last_name, fullName } = body;
   if (!external_student_id) return json(cors, { error: "external_student_id required" }, 400);
 
-  const { data: athlete, error: aErr } = await supabase
+  let { data: athlete, error: aErr } = await supabase
     .from("athletes").select("id, user_id").eq("external_student_id", external_student_id).maybeSingle();
   if (aErr) throw aErr;
-  if (!athlete) return json(cors, { error: "athlete not found for this student id" }, 404);
+
+  // Auto-create a stub athlete so link can succeed before push-athlete
+  if (!athlete) {
+    let fn = first_name, ln = last_name;
+    if ((!fn || !ln) && fullName) {
+      const parts = String(fullName).trim().split(/\s+/);
+      fn = fn || parts[0] || "Pending";
+      ln = ln || parts.slice(1).join(" ") || "—";
+    }
+    const stub = {
+      external_student_id,
+      first_name: fn || "Pending",
+      last_name: ln || "—",
+      display_name: `${fn || "Pending"} ${(ln || "").charAt(0)}.`.trim(),
+      province: "Unknown",
+      disciplines: ["Handball"],
+      is_active: true,
+      is_ss_linked: true,
+    };
+    const { data: created, error: cErr } = await supabase
+      .from("athletes").upsert(stub, { onConflict: "external_student_id" })
+      .select("id, user_id").maybeSingle();
+    if (cErr) throw cErr;
+    athlete = created;
+  }
 
   let uid = user_id || null;
   if (!uid && email) {
-    // Look up an existing auth user with this email (admin API)
     const { data: list } = await supabase.auth.admin.listUsers({ page: 1, perPage: 200 });
     const match = list?.users?.find((u: any) => (u.email || "").toLowerCase() === String(email).toLowerCase());
     uid = match?.id || null;
@@ -384,7 +423,7 @@ async function linkAccount(cors: Record<string, string>, supabase: any, body: an
   if (uid) {
     await supabase.from("athletes").update({ user_id: uid, is_ss_linked: true }).eq("id", athlete.id);
   }
-  return json(cors, { ok: true, athleteId: athlete.id, linked_user_id: uid });
+  return json(cors, { ok: true, athleteId: athlete.id, linked_user_id: uid, auto_created: !user_id && !athlete.user_id });
 }
 
 async function registerEntry(cors: Record<string, string>, supabase: any, body: any) {
@@ -489,11 +528,22 @@ async function pushInvitationResponse(cors: Record<string, string>, supabase: an
 }
 
 async function pullRankings(cors: Record<string, string>, supabase: any, body: any) {
-  const { competition_id, discipline, limit = 100 } = body;
+  const { competition_id, discipline, external_student_id, external_school_id, limit = 100 } = body;
+
+  // If asked for a specific athlete, resolve their school to filter rankings
+  let filterSchoolId: string | null = null;
+  if (external_student_id) {
+    const { data: ath } = await supabase
+      .from("athletes").select("ss_school_id").eq("external_student_id", external_student_id).maybeSingle();
+    filterSchoolId = ath?.ss_school_id || external_school_id || null;
+  } else if (external_school_id) {
+    filterSchoolId = external_school_id;
+  }
+
   let q = supabase
     .from("standings")
     .select(`competition_id, position, played, won, drawn, lost, points, score_for, score_against,
-             school_team:school_team_id(id, name, team:team_id(external_school_id, name)),
+             school_team:school_team_id(id, name, school:school_id(external_school_id, name)),
              competition:competition_id(name, discipline)`)
     .order("position", { ascending: true })
     .limit(Math.min(Number(limit) || 100, 500));
@@ -502,6 +552,7 @@ async function pullRankings(cors: Record<string, string>, supabase: any, body: a
   if (error) throw error;
   const rows = (data || [])
     .filter((r: any) => !discipline || r.competition?.discipline === discipline)
+    .filter((r: any) => !filterSchoolId || r.school_team?.school?.external_school_id === filterSchoolId)
     .map((r: any) => ({
       competition_id: r.competition_id,
       competition_name: r.competition?.name || null,
@@ -511,7 +562,7 @@ async function pullRankings(cors: Record<string, string>, supabase: any, body: a
       played: r.played, won: r.won, drawn: r.drawn, lost: r.lost,
       score_for: r.score_for, score_against: r.score_against,
       team_name: r.school_team?.name || null,
-      external_school_id: r.school_team?.team?.external_school_id || null,
+      external_school_id: r.school_team?.school?.external_school_id || null,
     }));
   return json(cors, { rankings: rows });
 }

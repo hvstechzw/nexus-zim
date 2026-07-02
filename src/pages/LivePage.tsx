@@ -142,8 +142,8 @@ function FixtureCard({ f }: { f: FixtureRow }) {
       className="hairline rounded-xl p-4 bg-background hover:bg-nexus-surface/60 transition-colors card-shadow block"
     >
       <div className="flex items-center justify-between mb-3">
-        <span className="pill-sport" data-sport={sport === "other" ? undefined : sport}>
-          {sport === "other" ? (f.competition?.discipline || "match") : sport}
+        <span className="pill-sport" data-sport={(sport as string) === "other" ? undefined : sport}>
+          {(sport as string) === "other" ? (f.competition?.discipline || "match") : sport}
         </span>
         {f.status === "live" ? (
           <span className="flex items-center gap-1.5 text-[9px] mono uppercase tracking-widest text-nexus-live">

@@ -113,7 +113,7 @@ export default function RegisterPage() {
     const newUserId = data.user?.id;
     if (newUserId && needsApproval) {
       // Unified role_requests entry (all non-auto roles)
-      const { error: rrErr } = await supabase.from("role_requests").insert({
+      const { error: rrErr } = await (supabase as any).from("role_requests").insert({
         user_id: newUserId,
         requested_role: requestedRole,
         payload: { ...payload, display_name: displayName, phone },
