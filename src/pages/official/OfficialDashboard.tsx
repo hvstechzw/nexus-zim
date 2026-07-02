@@ -17,17 +17,40 @@ interface OfficialProfile {
   performance_rating: number | null; province: string | null; district: string | null;
 }
 
+interface Assignment {
+  id: string; role: string; status: string | null;
+  fixture: { scheduled_at: string | null; status: string | null; home_team: { name: string } | null; away_team: { name: string } | null } | null;
+  competition: { name: string } | null;
+}
+
 export default function OfficialDashboard() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<OfficialProfile | null>(null);
+  const [upcoming, setUpcoming] = useState<Assignment[]>([]);
+  const [seasonMatches, setSeasonMatches] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) { setLoading(false); return; }
     (async () => {
-      const { data } = await (supabase as any)
-        .from("nash_officials").select("*").eq("user_id", user.id).maybeSingle();
+      const sb = supabase as any;
+      const { data } = await sb.from("nash_officials").select("*").eq("user_id", user.id).maybeSingle();
       setProfile(data as OfficialProfile | null);
+
+      // Assignments still live on the legacy officials/official_assignments
+      // tables (matched by the same auth user_id) — nash_officials doesn't
+      // have its own assignment feed yet.
+      const { data: legacyOfficial } = await sb.from("officials").select("id").eq("user_id", user.id).maybeSingle();
+      if (legacyOfficial?.id) {
+        const { data: assignments } = await sb.from("official_assignments")
+          .select("id, role, status, fixture:fixture_id(scheduled_at, status, home_team:home_team_id(name), away_team:away_team_id(name)), competition:competition_id(name)")
+          .eq("official_id", legacyOfficial.id)
+          .order("created_at", { ascending: false })
+          .limit(50);
+        const rows = (assignments || []) as Assignment[];
+        setUpcoming(rows.filter((a) => a.fixture?.status !== "completed").slice(0, 8));
+        setSeasonMatches(rows.filter((a) => a.fixture?.status === "completed").length);
+      }
       setLoading(false);
     })();
   }, [user]);
@@ -63,8 +86,8 @@ export default function OfficialDashboard() {
         )}
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatCard label="Upcoming Assignments" value={0} icon={Calendar} tone="primary" />
-          <StatCard label="Matches This Season" value={0} icon={Award} tone="accent" />
+          <StatCard label="Upcoming Assignments" value={upcoming.length} icon={Calendar} tone="primary" loading={loading} />
+          <StatCard label="Matches This Season" value={seasonMatches} icon={Award} tone="accent" loading={loading} />
           <StatCard label="Total Career" value={profile?.total_matches ?? 0} icon={Award} tone="primary" />
           <StatCard
             label="Cert Expires"
@@ -78,9 +101,20 @@ export default function OfficialDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><Calendar className="h-4 w-4 text-accent" /> Upcoming Assignments</CardTitle></CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground py-6 text-center">No assignments yet. District coordinators will assign you to fixtures.</p>
-              <Button asChild variant="outline" className="w-full"><Link to="/official/assignments">View all assignments →</Link></Button>
+            <CardContent className="space-y-2">
+              {!loading && upcoming.length === 0 && (
+                <p className="text-sm text-muted-foreground py-6 text-center">No assignments yet. District coordinators will assign you to fixtures.</p>
+              )}
+              {upcoming.map((a) => (
+                <div key={a.id} className="flex items-center justify-between gap-2 py-2 border-b border-border/50 last:border-0">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{a.fixture?.home_team?.name ?? "TBD"} vs {a.fixture?.away_team?.name ?? "TBD"}</p>
+                    <p className="text-[10px] text-muted-foreground font-mono truncate">{a.competition?.name} · {a.role}</p>
+                  </div>
+                  <Badge variant="secondary" className="text-[10px] shrink-0">{a.status ?? "assigned"}</Badge>
+                </div>
+              ))}
+              <Button asChild variant="outline" className="w-full mt-2"><Link to="/official/assignments">View all assignments →</Link></Button>
             </CardContent>
           </Card>
           <Card>

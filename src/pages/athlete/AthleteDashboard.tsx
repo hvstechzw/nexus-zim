@@ -8,7 +8,7 @@ import { StatCard } from "@/components/nash/StatCard";
 import { EligibilityIndicator } from "@/components/nash/EligibilityIndicator";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { ShieldCheck, Trophy, Award, Calendar, IdCard } from "lucide-react";
+import { ShieldCheck, Trophy, Award, Calendar, IdCard, AlertTriangle } from "lucide-react";
 
 interface AthleteProfile {
   id: string; nash_id: string; first_name: string; last_name: string;
@@ -17,9 +17,12 @@ interface AthleteProfile {
   id_verified: boolean | null; ss_student_id: string | null; photo_url: string | null;
 }
 
+interface Stats { registrations: number; awards: number; flags: number; }
+
 export default function AthleteDashboard() {
   const { user } = useAuth();
   const [profile, setProfile] = useState<AthleteProfile | null>(null);
+  const [stats, setStats] = useState<Stats>({ registrations: 0, awards: 0, flags: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,8 +31,19 @@ export default function AthleteDashboard() {
       // Try resolve via legacy athletes table (which links user_id) → nash_athlete_id
       const { data: link } = await (supabase as any).from("athletes").select("nash_athlete_id").eq("user_id", user.id).maybeSingle();
       if (link?.nash_athlete_id) {
-        const { data } = await (supabase as any).from("nash_athlete_registry").select("*").eq("id", link.nash_athlete_id).maybeSingle();
-        setProfile(data as AthleteProfile | null);
+        const sb = supabase as any;
+        const [{ data: reg }, regCount, awardCount, flagCount] = await Promise.all([
+          sb.from("nash_athlete_registry").select("*").eq("id", link.nash_athlete_id).maybeSingle(),
+          sb.from("nash_athlete_registrations").select("id", { count: "exact", head: true }).eq("nash_athlete_id", link.nash_athlete_id),
+          sb.from("nash_awards").select("id", { count: "exact", head: true }).eq("nash_athlete_id", link.nash_athlete_id),
+          sb.from("nash_eligibility_flags").select("id", { count: "exact", head: true }).eq("nash_athlete_id", link.nash_athlete_id).eq("status", "open"),
+        ]);
+        setProfile(reg as AthleteProfile | null);
+        setStats({
+          registrations: regCount.count ?? 0,
+          awards: awardCount.count ?? 0,
+          flags: flagCount.count ?? 0,
+        });
       }
       setLoading(false);
     })();
@@ -67,9 +81,9 @@ export default function AthleteDashboard() {
         )}
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <StatCard label="Competitions This Season" value={0} icon={Trophy} tone="primary" />
-          <StatCard label="Career Matches" value={0} icon={Award} tone="accent" />
-          <StatCard label="Awards" value={0} icon={Award} tone="success" />
+          <StatCard label="Team Registrations" value={stats.registrations} icon={Trophy} tone="primary" loading={loading} />
+          <StatCard label="Eligibility Flags" value={stats.flags} icon={AlertTriangle} tone={stats.flags > 0 ? "error" : "success"} loading={loading} />
+          <StatCard label="Awards" value={stats.awards} icon={Award} tone="success" loading={loading} />
           <StatCard label="SS Link" value={profile?.ss_student_id ? "Linked" : "—"} icon={IdCard} tone={profile?.ss_student_id ? "accent" : "muted"} />
         </div>
 

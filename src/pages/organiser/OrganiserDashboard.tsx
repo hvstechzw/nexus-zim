@@ -9,18 +9,39 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Trophy, Plus, DollarSign, ShieldCheck, ListChecks } from "lucide-react";
 
+interface OrgStats { pending: number; officialsAssigned: number; feesCollected: number; }
+
 export default function OrganiserDashboard() {
   const { user } = useAuth();
   const [comps, setComps] = useState<Competition[]>([]);
+  const [stats, setStats] = useState<OrgStats>({ pending: 0, officialsAssigned: 0, feesCollected: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
       if (!user) { setLoading(false); return; }
-      const { data } = await (supabase as any).from("competitions")
+      const sb = supabase as any;
+      const { data } = await sb.from("competitions")
         .select("id,name,discipline,province,tier,age_group,gender,start_date,end_date,host_school_name,total_entries,status,is_nash_sanctioned")
         .eq("created_by", user.id).order("start_date", { ascending: false }).limit(50);
-      setComps((data || []) as Competition[]);
+      const rows = (data || []) as Competition[];
+      setComps(rows);
+
+      const compIds = rows.map((c) => c.id);
+      if (compIds.length > 0) {
+        const [pendingRes, assignedRes, feesRes] = await Promise.all([
+          sb.from("registrations").select("id", { count: "exact", head: true }).in("competition_id", compIds).eq("status", "pending"),
+          sb.from("official_assignments").select("id", { count: "exact", head: true }).in("competition_id", compIds),
+          sb.from("nash_entry_fee_payments").select("organiser_amount").in("competition_id", compIds),
+        ]);
+        const feesTotal = ((feesRes.data || []) as Array<{ organiser_amount: number | null }>)
+          .reduce((sum, r) => sum + (Number(r.organiser_amount) || 0), 0);
+        setStats({
+          pending: pendingRes.count ?? 0,
+          officialsAssigned: assignedRes.count ?? 0,
+          feesCollected: feesTotal,
+        });
+      }
       setLoading(false);
     })();
   }, [user]);
@@ -39,9 +60,9 @@ export default function OrganiserDashboard() {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <StatCard label="My Competitions" value={comps.length} icon={Trophy} tone="primary" loading={loading} />
-          <StatCard label="Pending Approvals" value={0} icon={ListChecks} tone="warning" loading={loading} />
-          <StatCard label="Officials Assigned" value={0} icon={ShieldCheck} tone="accent" loading={loading} />
-          <StatCard label="Fees Collected (USD)" value="$0" icon={DollarSign} tone="success" loading={loading} />
+          <StatCard label="Pending Approvals" value={stats.pending} icon={ListChecks} tone={stats.pending > 0 ? "warning" : "muted"} loading={loading} />
+          <StatCard label="Officials Assigned" value={stats.officialsAssigned} icon={ShieldCheck} tone="accent" loading={loading} />
+          <StatCard label="Fees Collected (USD)" value={`$${stats.feesCollected.toLocaleString()}`} icon={DollarSign} tone="success" loading={loading} />
         </div>
 
         <Card>

@@ -44,12 +44,22 @@ export function TierDashboard({ tier, tierLabel, description }: Props) {
         .eq("season_id", seasonId)
         .eq("tier", tier)
         .order("start_date", { ascending: false }).limit(50);
+      // District/zonal competitions don't carry a flat district/zone column
+      // (only organisation_id, which isn't resolvable from the URL scope
+      // param), so only provincial-tier scoping is precise here.
       if (scope && tier === "provincial") compQ = compQ.eq("province", scope);
+
+      let athleteQ = sb.from("nash_athlete_registry").select("id", { count: "exact", head: true });
+      let officialQ = sb.from("nash_officials").select("id", { count: "exact", head: true }).eq("is_active", true);
+      if (scope && tier === "provincial") {
+        athleteQ = athleteQ.eq("province", scope);
+        officialQ = officialQ.eq("province", scope);
+      }
 
       const [comps, athletes, officials, flags] = await Promise.all([
         compQ,
-        sb.from("nash_athlete_registry").select("id", { count: "exact", head: true }),
-        sb.from("nash_officials").select("id", { count: "exact", head: true }).eq("is_active", true),
+        athleteQ,
+        officialQ,
         sb.from("nash_eligibility_flags").select("id", { count: "exact", head: true }).eq("status", "open"),
       ]);
       if (cancelled) return;
