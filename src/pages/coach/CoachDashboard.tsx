@@ -170,7 +170,7 @@ export default function CoachDashboard() {
               <Button asChild variant="outline" className="w-full justify-start h-10"><Link to="/coach/registration"><Plus className="h-4 w-4 mr-2 text-accent" />Register / update team</Link></Button>
               <Button asChild variant="outline" className="w-full justify-start h-10"><Link to="/school/eligibility"><AlertTriangle className="h-4 w-4 mr-2 text-accent" />Check eligibility flags</Link></Button>
               <Button asChild variant="outline" className="w-full justify-start h-10"><Link to="/coach/team-sheet/new"><FileText className="h-4 w-4 mr-2 text-accent" />Generate team sheet</Link></Button>
-              <Button asChild variant="outline" className="w-full justify-start h-10"><Link to="/fixtures"><Calendar className="h-4 w-4 mr-2 text-accent" />My fixtures</Link></Button>
+              <Button asChild variant="outline" className="w-full justify-start h-10"><Link to="/calendar"><Calendar className="h-4 w-4 mr-2 text-accent" />My fixtures</Link></Button>
             </CardContent>
           </Card>
         </div>

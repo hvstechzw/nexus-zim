@@ -6,7 +6,6 @@ import { NexusFooter } from "@/components/NexusFooter";
 import { ScholasticIntegrationBanner } from "@/components/ScholasticBadge";
 import { SyncStatusWidget } from "@/components/SyncStatusWidget";
 import { InterSchoolFixturesBuilder } from "@/components/InterSchoolFixturesBuilder";
-import { HouseCompetitionsPanel } from "@/components/HouseCompetitionsPanel";
 import { SchoolsDirectory } from "@/components/SchoolsDirectory";
 import { SportingCalendar } from "@/components/admin/SportingCalendar";
 import { UsersRolesPanel } from "@/components/admin/UsersRolesPanel";
@@ -919,10 +918,9 @@ export default function AdminDashboard() {
                 <NashStatCard label="Sponsors" value={sponsorships.length} hint="active" icon={Handshake} tone="success" />
               </div>
 
-              {/* Schools tooling */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+              {/* Fixture generator */}
+              <div className="mb-6">
                 <InterSchoolFixturesBuilder />
-                <HouseCompetitionsPanel />
               </div>
 
               {/* Activity & Charts Section */}

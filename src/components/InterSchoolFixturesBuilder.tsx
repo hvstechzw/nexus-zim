@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
-import { useScholasticAutoSync } from "@/hooks/useScholasticAutoSync";
 import { useToast } from "@/hooks/use-toast";
 import { SCHOOL_TERMS, COMPETITION_STAGES, type CompetitionStage } from "@/lib/schools";
 import { AgeGroupFilter } from "@/components/AgeGroupFilter";
@@ -45,11 +44,15 @@ function knockout(ids: string[]): Array<[string, string]> {
   return pairs;
 }
 
+/**
+ * NASH/NAPH fixture wizard: set discipline + age group and the draw builds
+ * itself from every published school_teams row that matches — no manual
+ * school/team picking step.
+ */
 export function InterSchoolFixturesBuilder() {
   const { user } = useAuth();
   const { toast } = useToast();
   const qc = useQueryClient();
-  useScholasticAutoSync();
 
   const [discipline, setDiscipline] = useState<string>("Handball");
   const [ageGroup, setAgeGroup] = useState("U16");
@@ -58,14 +61,11 @@ export function InterSchoolFixturesBuilder() {
   const [format, setFormat] = useState<"round_robin" | "single_elimination" | "pooled">("round_robin");
   const [poolSize, setPoolSize] = useState<number>(4);
   const [name, setName] = useState("");
-  const [pickMode, setPickMode] = useState<"teams" | "schools">("teams");
-  const [selected, setSelected] = useState<string[]>([]);          // school_team ids
-  const [selectedSchools, setSelectedSchools] = useState<string[]>([]); // school (teams) ids
   const [busy, setBusy] = useState(false);
-  const [syncing, setSyncing] = useState(false);
 
-  // Published school teams (e.g. "Marist Handball U16") filtered to discipline + age group.
-  const { data: schoolTeams = [] } = useQuery({
+  // Every published school team matching discipline + age group — the draw
+  // auto-builds from this set, no manual selection.
+  const { data: schoolTeams = [], isLoading } = useQuery({
     queryKey: ["builder-school-teams", discipline, ageGroup],
     queryFn: async () => {
       const { data } = await supabase
@@ -79,80 +79,14 @@ export function InterSchoolFixturesBuilder() {
     },
   });
 
-  // Every school synced from Scholastic Services — always available as a
-  // fallback picker so admins aren't blocked when sports directors haven't
-  // published team sheets yet. We auto-create a school_team per selection.
-  const { data: schools = [] } = useQuery({
-    queryKey: ["builder-schools"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("teams")
-        .select("id, name, school_name, province, district, logo_url")
-        .eq("is_active", true)
-        .order("name")
-        .limit(1000);
-      return data || [];
-    },
-  });
-
-  const runSync = async () => {
-    setSyncing(true);
-    try {
-      const { error } = await supabase.functions.invoke("scholastic-sync", { body: { action: "full-sync" } });
-      if (error) throw error;
-      await qc.invalidateQueries();
-      toast({ title: "Sync complete", description: "Pulled latest schools from Scholastic Services." });
-    } catch (e: any) {
-      toast({ title: "Sync failed", description: e.message, variant: "destructive" });
-    } finally { setSyncing(false); }
-  };
-
-  const toggle = (id: string) => setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
-  const toggleSchool = (id: string) => setSelectedSchools((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
-
-
-  // Find-or-create a school_team (e.g. "Marist Handball U16") for a school.
-  // Lets admins build a draw straight from the schools list when sports
-  // directors haven't published team sheets yet.
-  async function ensureSchoolTeam(schoolId: string): Promise<{ id: string; school_id: string } | null> {
-    const school: any = schools.find((s: any) => s.id === schoolId);
-    if (!school) return null;
-    const existing = await supabase
-      .from("school_teams")
-      .select("id, school_id")
-      .eq("school_id", schoolId).eq("discipline", discipline).eq("age_group", ageGroup)
-      .maybeSingle();
-    if (existing.data) return existing.data as any;
-    const teamName = `${school.school_name || school.name} ${discipline} ${ageGroup}`;
-    const { data, error } = await supabase.from("school_teams").insert({
-      school_id: schoolId,
-      name: teamName,
-      discipline,
-      age_group: ageGroup,
-      gender: "Mixed",
-      is_published: true,
-      created_by: user?.id ?? null,
-    } as any).select("id, school_id").single();
-    if (error) throw error;
-    return data as any;
-  }
-
   const generate = async () => {
     if (!user) { toast({ title: "Sign in required", variant: "destructive" }); return; }
     if (!name.trim()) { toast({ title: "Name your competition", variant: "destructive" }); return; }
-    const usingSchools = pickMode === "schools";
-    if (usingSchools && selectedSchools.length < 2) { toast({ title: "Pick at least 2 schools", variant: "destructive" }); return; }
-    if (!usingSchools && selected.length < 2) { toast({ title: "Pick at least 2 teams", variant: "destructive" }); return; }
+    const teamIds = schoolTeams.map((t: any) => t.id);
+    if (teamIds.length < 2) { toast({ title: `Need at least 2 published ${discipline} ${ageGroup} teams`, variant: "destructive" }); return; }
     setBusy(true);
     try {
-      // Resolve to school_team ids — auto-create one per school when needed.
-      let teamIds: string[] = selected;
-      let schoolByTeam = new Map(schoolTeams.map((t: any) => [t.id, t.school_id]));
-      if (usingSchools) {
-        const created = await Promise.all(selectedSchools.map((sid) => ensureSchoolTeam(sid)));
-        teamIds = created.filter(Boolean).map((c: any) => c!.id);
-        created.forEach((c) => { if (c) schoolByTeam.set(c.id, c.school_id); });
-      }
+      const schoolByTeam = new Map(schoolTeams.map((t: any) => [t.id, t.school_id]));
 
       const { data: comp, error: cErr } = await supabase.from("competitions").insert({
         name: name.trim(),
@@ -180,10 +114,9 @@ export function InterSchoolFixturesBuilder() {
 
       let fixtures: any[] = [];
       if (format === "pooled") {
-        const shuffled = [...teamIds];
-        const numPools = Math.max(1, Math.ceil(shuffled.length / poolSize));
+        const numPools = Math.max(1, Math.ceil(teamIds.length / poolSize));
         const pools: string[][] = Array.from({ length: numPools }, () => []);
-        shuffled.forEach((id, i) => pools[i % numPools].push(id));
+        teamIds.forEach((id, i) => pools[i % numPools].push(id));
         pools.forEach((pool, pi) => {
           const poolPairs = roundRobin(pool);
           const half = Math.max(1, Math.floor(pool.length / 2));
@@ -208,7 +141,6 @@ export function InterSchoolFixturesBuilder() {
 
       toast({ title: "Bracket generated", description: `${comp.name} · ${fixtures.length} fixtures` });
       qc.invalidateQueries();
-      setSelected([]); setSelectedSchools([]);
       setName("");
     } catch (e: any) {
       toast({ title: "Failed", description: e.message, variant: "destructive" });
@@ -217,12 +149,11 @@ export function InterSchoolFixturesBuilder() {
     }
   };
 
-
   return (
-    <div className="hairline rounded-xl p-5 sm:p-6 bg-background card-shadow flex flex-col gap-5">
+    <div className="hairline rounded-xl p-5 sm:p-6 bg-card card-shadow flex flex-col gap-5">
       <div>
-        <p className="display-font text-base sm:text-lg font-bold text-foreground">Inter-School Fixtures Builder</p>
-        <p className="text-xs text-nexus-muted mt-0.5">Pick schools, set discipline + age group → auto-build the draw.</p>
+        <p className="display-font text-base sm:text-lg font-bold text-foreground">NASH / NAPH Fixture Wizard</p>
+        <p className="text-xs text-nexus-muted mt-0.5">Set discipline + age group — the draw auto-builds from every published team.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -281,71 +212,33 @@ export function InterSchoolFixturesBuilder() {
         </div>
       </div>
 
-      <div>
-        <div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
-          <div className="inline-flex rounded-lg border border-nexus-surface p-0.5 text-xs">
-            <button type="button" onClick={() => setPickMode("teams")}
-              className={`px-3 py-1.5 rounded-md ${pickMode === "teams" ? "bg-foreground text-primary-foreground" : "text-nexus-muted"}`}>
-              Published Teams ({schoolTeams.length})
-            </button>
-            <button type="button" onClick={() => setPickMode("schools")}
-              className={`px-3 py-1.5 rounded-md ${pickMode === "schools" ? "bg-foreground text-primary-foreground" : "text-nexus-muted"}`}>
-              All Schools ({schools.length})
-            </button>
+      <div className="hairline rounded-lg p-4 bg-nexus-surface/40">
+        {isLoading ? (
+          <p className="text-xs text-nexus-muted">Checking published teams…</p>
+        ) : schoolTeams.length === 0 ? (
+          <div className="text-center space-y-1">
+            <p className="text-xs text-nexus-muted">No published {discipline} teams for {ageGroup} yet.</p>
+            <p className="text-[11px] text-nexus-muted">Schools publish their team sheet from the Coach Dashboard — once at least 2 teams are published for this discipline/age group, the draw builds automatically.</p>
+            <Link to="/admin/teams" className="text-xs font-semibold underline underline-offset-2 hover:opacity-70">
+              Open team registry →
+            </Link>
           </div>
-          <button type="button" onClick={runSync} disabled={syncing}
-            className="text-[11px] mono uppercase px-3 py-1.5 rounded-md hairline hover:bg-nexus-surface disabled:opacity-50">
-            {syncing ? "Syncing…" : "↻ Sync from Scholastic"}
-          </button>
-        </div>
-        <p className={labelCls + " mb-2"}>
-          {pickMode === "teams"
-            ? `Published Teams (${discipline} · ${ageGroup}) — Selected: ${selected.length}`
-            : `Schools — Selected: ${selectedSchools.length} (auto-creates a ${discipline} ${ageGroup} team per school)`}
-        </p>
-        <div className="hairline rounded-lg max-h-72 overflow-y-auto">
-          {pickMode === "teams" ? (
-            schoolTeams.length === 0 ? (
-              <div className="p-5 flex flex-col items-center gap-2 text-center">
-                <p className="text-xs text-nexus-muted">No published {discipline} teams for {ageGroup}.</p>
-                <p className="text-[11px] text-nexus-muted">Switch to <b>All Schools</b> above to build a draw straight from schools — Nexus will auto-create the team sheet.</p>
-                <Link to="/admin/sync" className="text-xs font-semibold underline underline-offset-2 hover:opacity-70">
-                  Open full sync panel →
-                </Link>
-              </div>
-            ) : (
-              schoolTeams.map((t: any, i: number) => (
-                <label key={t.id} className={`flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-nexus-surface transition-colors ${i < schoolTeams.length - 1 ? "hairline-b" : ""}`}>
-                  <input type="checkbox" checked={selected.includes(t.id)} onChange={() => toggle(t.id)} className="w-3.5 h-3.5" />
-                  <span className="text-sm text-foreground flex-1">{t.name} <span className="text-nexus-muted text-xs">· {t.school?.school_name || t.school?.name}</span></span>
-                  <span className="text-[10px] mono uppercase text-nexus-muted">{t.school?.province}</span>
-                </label>
-              ))
-            )
-          ) : (
-            schools.length === 0 ? (
-              <div className="p-5 text-center text-xs text-nexus-muted">
-                No schools synced yet. Tap <b>↻ Sync from Scholastic</b> above.
-              </div>
-            ) : (
-              schools.map((s: any, i: number) => (
-                <label key={s.id} className={`flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-nexus-surface transition-colors ${i < schools.length - 1 ? "hairline-b" : ""}`}>
-                  <input type="checkbox" checked={selectedSchools.includes(s.id)} onChange={() => toggleSchool(s.id)} className="w-3.5 h-3.5" />
-                  {s.logo_url
-                    ? <img src={s.logo_url} alt="" className="w-6 h-6 rounded object-cover" onError={(e) => ((e.currentTarget.style.display = "none"))} />
-                    : <div className="w-6 h-6 rounded bg-nexus-surface" />}
-                  <span className="text-sm text-foreground flex-1">{s.school_name || s.name}</span>
-                  <span className="text-[10px] mono uppercase text-nexus-muted">{s.district || s.province}</span>
-                </label>
-              ))
-            )
-          )}
-        </div>
+        ) : (
+          <div className="flex items-center justify-between gap-2">
+            <p className={labelCls}>{schoolTeams.length} published {discipline} · {ageGroup} teams found</p>
+            <div className="flex -space-x-1">
+              {schoolTeams.slice(0, 6).map((t: any) => (
+                <span key={t.id} title={t.school?.school_name || t.school?.name} className="w-6 h-6 rounded-full bg-background hairline flex items-center justify-center text-[9px] font-semibold">
+                  {(t.school?.school_name || t.school?.name || "?").charAt(0)}
+                </span>
+              ))}
+              {schoolTeams.length > 6 && <span className="text-[10px] text-nexus-muted ml-2">+{schoolTeams.length - 6} more</span>}
+            </div>
+          </div>
+        )}
       </div>
 
-
-
-      <button onClick={generate} disabled={busy} className="h-11 px-6 text-sm font-semibold rounded-xl bg-foreground text-primary-foreground hover:opacity-85 disabled:opacity-50 btn-click">
+      <button onClick={generate} disabled={busy || schoolTeams.length < 2} className="h-11 px-6 text-sm font-semibold rounded-xl bg-foreground text-primary-foreground hover:opacity-85 disabled:opacity-50 btn-click">
         {busy ? "Generating…" : `Generate ${format === "round_robin" ? "Round Robin" : format === "pooled" ? "Pooled Draw" : "Knockout"} Draw`}
       </button>
     </div>

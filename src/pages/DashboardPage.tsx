@@ -74,7 +74,7 @@ export default function DashboardPage() {
             <Tile to="/coach" title="Coach console" desc="Manage your team sheets and submit line-ups." />
           )}
           {isUmpire && (
-            <Tile to="/fixtures" title="My fixtures" desc="Score live matches you're officiating." />
+            <Tile to="/official/assignments" title="My assignments" desc="Score live matches you're officiating." />
           )}
           {isHIC && (
             <>
@@ -83,7 +83,7 @@ export default function DashboardPage() {
             </>
           )}
           <Tile to="/live" title="Live scores" desc="Watch all fixtures live." />
-          <Tile to="/fixtures" title="Fixtures" desc="Browse schedule and results." />
+          <Tile to="/calendar" title="Calendar" desc="Browse schedule and results." />
           <Tile to="/schools" title="Schools" desc="Directory of registered schools." />
         </section>
       </main>

@@ -12,14 +12,10 @@ import Index from "./pages/Index.tsx";
 import AdminDashboard from "./pages/AdminDashboard.tsx";
 import CompetitionDetailPage from "./pages/CompetitionDetailPage.tsx";
 import ScoringPage from "./pages/ScoringPage.tsx";
-import FixturesPage from "./pages/FixturesPage.tsx";
 import AthleteIDPage from "./pages/AthleteIDPage.tsx";
 import BroadcastCGPage from "./pages/BroadcastCGPage.tsx";
 import SchoolsPage from "./pages/SchoolsPage.tsx";
 import SchoolProfilePage from "./pages/SchoolProfilePage.tsx";
-import InterSchoolPage from "./pages/InterSchoolPage.tsx";
-import SportsDayPage from "./pages/SportsDayPage.tsx";
-import PracticeScoringPage from "./pages/PracticeScoringPage.tsx";
 import LivePage from "./pages/LivePage.tsx";
 import FixtureScoringPage from "./pages/FixtureScoringPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
@@ -99,12 +95,15 @@ const App = () => (
               <Route path="/players/:nashId" element={<PlayerProfilePage />} />
               <Route path="/competition/:id" element={<CompetitionDetailPage />} />
 
-              {/* Legacy paths preserved for share-link continuity */}
+              {/* Legacy paths preserved for share-link continuity — Nexus is
+                  strictly NASH/NAPH now, so the old generic inter-school/
+                  sports-day/practice tools redirect to their NASH equivalents
+                  instead of 404ing. */}
               <Route path="/feed" element={<Navigate to="/" replace />} />
-              <Route path="/competitions" element={<Navigate to="/inter-school" replace />} />
-              <Route path="/inter-school" element={<InterSchoolPage />} />
-              <Route path="/sports-day" element={<SportsDayPage />} />
-              <Route path="/practice" element={<PracticeScoringPage />} />
+              <Route path="/competitions" element={<Navigate to="/admin/competitions" replace />} />
+              <Route path="/inter-school" element={<Navigate to="/admin/competitions" replace />} />
+              <Route path="/sports-day" element={<Navigate to="/admin/competitions/new" replace />} />
+              <Route path="/practice" element={<Navigate to="/live" replace />} />
               <Route path="/competition/:id/bracket" element={<BracketPage />} />
               <Route path="/competition/:id/standings" element={<StandingsPage />} />
 
@@ -184,7 +183,7 @@ const App = () => (
               <Route path="/admin/verify" element={<PlayerVerifyPage />} />
 
               {/* Legacy team/athlete tools (kept until rebuilt) */}
-              <Route path="/fixtures" element={<FixturesPage />} />
+              <Route path="/fixtures" element={<Navigate to="/calendar" replace />} />
               <Route path="/athletes/id-cards" element={<AthleteIDPage />} />
               <Route path="/schools/:id/teams/new" element={<TeamBuilderPage />} />
 
