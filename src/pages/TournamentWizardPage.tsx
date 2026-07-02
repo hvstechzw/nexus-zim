@@ -214,7 +214,7 @@ export default function TournamentWizardPage() {
         entry_fee_per_team: s.entryFeePerTeam || 0,
         is_nash_sanctioned: s.isNashSanctioned,
         nash_sanction_number: sanction,
-        status: "scheduled",
+        status: "draft",
       }).select("id").single();
       if (cerr || !comp) throw cerr || new Error("Failed to create competition");
 
