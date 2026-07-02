@@ -6,6 +6,8 @@ import { NexusHeader } from "@/components/NexusHeader";
 import { NexusFooter } from "@/components/NexusFooter";
 import { detectSport as detectSportKey, SPORT_LIST } from "@/lib/sports/registry";
 import type { SportKey } from "@/lib/sports/types";
+import { StatCard } from "@/components/nash/StatCard";
+import { Radio, CalendarClock, CheckCircle2, Trophy } from "lucide-react";
 
 type Sport = "all" | SportKey;
 
@@ -100,6 +102,13 @@ export default function LivePage() {
             ))}
           </div>
         </header>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+          <StatCard label="Live Now" value={liveOnes.length} icon={Radio} tone="error" />
+          <StatCard label="Upcoming" value={upcoming.length} icon={CalendarClock} tone="accent" />
+          <StatCard label="Completed" value={recent.length} icon={CheckCircle2} tone="success" />
+          <StatCard label="Sports Covered" value={SPORT_LIST.length} icon={Trophy} tone="primary" />
+        </div>
 
         <Section title="Live now" count={liveOnes.length} rows={liveOnes} empty="No matches are live right now." live />
         <Section title="Upcoming" count={upcoming.length} rows={upcoming} empty="No upcoming fixtures." />
