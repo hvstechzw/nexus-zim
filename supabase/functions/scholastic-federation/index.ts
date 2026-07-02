@@ -552,6 +552,7 @@ async function pullRankings(cors: Record<string, string>, supabase: any, body: a
   if (error) throw error;
   const rows = (data || [])
     .filter((r: any) => !discipline || r.competition?.discipline === discipline)
+    .filter((r: any) => !filterSchoolId || r.school_team?.school?.external_school_id === filterSchoolId)
     .map((r: any) => ({
       competition_id: r.competition_id,
       competition_name: r.competition?.name || null,
@@ -561,7 +562,7 @@ async function pullRankings(cors: Record<string, string>, supabase: any, body: a
       played: r.played, won: r.won, drawn: r.drawn, lost: r.lost,
       score_for: r.score_for, score_against: r.score_against,
       team_name: r.school_team?.name || null,
-      external_school_id: r.school_team?.team?.external_school_id || null,
+      external_school_id: r.school_team?.school?.external_school_id || null,
     }));
   return json(cors, { rankings: rows });
 }
