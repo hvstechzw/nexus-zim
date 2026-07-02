@@ -383,10 +383,27 @@ accounts seeded in Step 0.3. All test staff use password `Test1234!`.
    academic_eligible = true with today's date
 
 ### C-2 — Scholastic Card → Nexus login (the QR flow)
-**The card QR encodes credentials with the same byte-exact format used
-by both Nexus player verification and the student portal login.**
+**Verified against the actual code (2026-07-02): there is only ONE QR
+decode implementation, not two that could drift apart.** Nexus does not
+decode the card at all — it forwards the raw scanned QR string over an
+HMAC-signed federation call, and SS decodes it using the exact same
+function its own student portal login uses. Concretely, the call chain is:
 
-The format (from `_obfuscate_credentials` in `scholastic_cards.py`):
+- **SS student portal card-login**: `student-login` edge function decodes
+  the QR directly (`_obfuscate_credentials` format below).
+- **Nexus card verification**: `PlayerVerifyPage.tsx` scans the QR and
+  passes the raw string to the `verify-card` edge function
+  (`supabase/functions/verify-card/index.ts`), which does **not** decode
+  anything itself — it HMAC-signs the payload and POSTs it to SS's
+  `scholastic-bridge` function's `verify-student-card` action
+  (`supabase/functions/scholastic-bridge/index.ts`). That action, when
+  given raw `qrData`, itself calls `student-login` — the same function,
+  same deployment — to decode it.
+
+So both paths terminate in the same `student-login` code; there is no
+separate Nexus-side implementation to keep in sync. The obfuscation
+format (for reference, from `_obfuscate_credentials` in
+`scholastic_cards.py`):
 
 ```
 base64url( 0x01 + XOR(reverse(portalId), key)
@@ -397,6 +414,7 @@ key = SHA-256(schoolId + "_SCHOLASTIC_SECRET")
 checksum = XOR of all combined bytes
 ```
 
+Test:
 1. In SS Owner Admin → **Cards**, generate a card for `TSTD001` (the
    student created in Step 0.3) — the QR encodes the obfuscated
    credentials
@@ -406,14 +424,14 @@ checksum = XOR of all combined bytes
    TSTD001
 4. **Nexus side**: in Nexus, sign in as a scorer, navigate
    `/admin/verify` (PlayerVerifyPage). Scan the same QR. The page
-   should:
-   - Decode the QR using the same `decodeObfuscatedWithKey` algorithm
-   - Look up the student via portal_accounts
-   - Display: name, school, gate-eligibility status
-5. **Both sides** decode the same payload. If one works and the other
-   doesn't, the obfuscation key/algorithm has drifted and needs a
-   matching fix in either `student-login` (SS) or `verify-card`
-   (Nexus) edge function.
+   should call `verify-card`, which round-trips through SS as described
+   above, and display: name, school, gate-eligibility status.
+5. If SS-side login works but Nexus verification fails (or vice versa),
+   the bug is in the federation transport (HMAC signature, bridge URL,
+   `FEDERATION_HMAC_SECRET`/`FEDERATION_JWT_SECRET` env vars matching on
+   both sides) — **not** in a decode mismatch, since there's only one
+   decoder. Check `scholastic-bridge` logs for the inner `student-login`
+   call's response first.
 
 ### C-3 — Nexus writes back to SS (activity)
 1. Score a goal in Nexus for an SS-linked athlete (an athlete with
