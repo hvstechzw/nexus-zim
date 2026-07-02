@@ -205,7 +205,7 @@ export default function FixtureScoringPage() {
       <NexusHeader />
       <main className="flex-1 px-4 sm:px-8 py-6 max-w-7xl w-full mx-auto">
         <div className="flex items-center justify-between mb-4 text-xs mono text-nexus-muted">
-          <Link to="/fixtures" className="hover:text-foreground">← Fixtures</Link>
+          <Link to="/live" className="hover:text-foreground">← Live</Link>
           <span className="pill-sport" data-sport={sport}>{config.label}</span>
         </div>
 

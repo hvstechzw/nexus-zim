@@ -1,9 +1,10 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect } from "react";
 
-type Theme = "light" | "dark";
+type Theme = "light";
 
 interface ThemeContextType {
   theme: Theme;
+  /** No-op — Nexus is light-theme only. Kept so existing call sites don't need to change. */
   toggleTheme: () => void;
 }
 
@@ -12,29 +13,16 @@ const ThemeContext = createContext<ThemeContextType>({
   toggleTheme: () => {},
 });
 
+/** Nexus is light-theme only. This provider exists purely so components that
+ * read `useTheme()` keep working without every call site needing an update. */
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window !== "undefined") {
-      // NASH platform is dark-first; honour an explicit saved preference.
-      return (localStorage.getItem("nexus-theme") as Theme) || "dark";
-    }
-    return "dark";
-  });
-
   useEffect(() => {
-    const root = document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-    localStorage.setItem("nexus-theme", theme);
-  }, [theme]);
-
-  const toggleTheme = () => setTheme((t) => (t === "light" ? "dark" : "light"));
+    document.documentElement.classList.remove("dark");
+    localStorage.removeItem("nexus-theme");
+  }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme: "light", toggleTheme: () => {} }}>
       {children}
     </ThemeContext.Provider>
   );
