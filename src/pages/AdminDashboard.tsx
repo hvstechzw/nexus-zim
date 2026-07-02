@@ -1,7 +1,7 @@
 import { useState, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
-import { NexusHeader } from "@/components/NexusHeader";
+import { NashHeader } from "@/components/nash/NashHeader";
 import { NexusFooter } from "@/components/NexusFooter";
 import { ScholasticIntegrationBanner } from "@/components/ScholasticBadge";
 import { SyncStatusWidget } from "@/components/SyncStatusWidget";
@@ -12,6 +12,10 @@ import { SportingCalendar } from "@/components/admin/SportingCalendar";
 import { UsersRolesPanel } from "@/components/admin/UsersRolesPanel";
 import { RegionRequestsPanel } from "@/components/admin/RegionRequestsPanel";
 import { RoleRequestsPanel } from "@/components/admin/RoleRequestsPanel";
+import { StatCard as NashStatCard } from "@/components/nash/StatCard";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { School, Users, Trophy, CalendarDays, MapPin, ShieldCheck, ClipboardList, Handshake, ArrowRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
@@ -75,16 +79,6 @@ const FORMATS = ["round_robin","single_elimination","double_elimination","swiss"
 const STATUSES = ["draft","registration_open","registration_closed","ongoing","completed","cancelled"] as const;
 const DISCIPLINES = ["Handball","Netball","Football","Basketball","Volleyball","Cricket","Rugby","Hockey","Tennis","Table Tennis","Badminton","Athletics","Swimming","Cross Country","Chess"];
 
-
-function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <div className="hairline rounded-xl p-6 flex flex-col gap-2 card-shadow bg-background">
-      <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium">{label}</p>
-      <p className="score-display text-score-md text-foreground">{value}</p>
-      {sub && <p className="text-xs text-nexus-muted">{sub}</p>}
-    </div>
-  );
-}
 
 // ── File upload helper ────────────────────────────────────────────
 async function uploadFile(file: File, folder: string): Promise<string | null> {
@@ -419,10 +413,10 @@ function DetailPanel({ open, onClose, title, children }: { open: boolean; onClos
           <motion.div
             initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 300 }}
-            className="fixed right-0 top-0 h-full w-full max-w-lg bg-background z-50 shadow-2xl overflow-y-auto hairline-l"
+            className="fixed right-0 top-0 h-full w-full max-w-lg bg-card z-50 shadow-2xl overflow-y-auto hairline-l"
           >
-            <div className="p-6 hairline-b flex items-center justify-between sticky top-0 bg-background/95 backdrop-blur-sm z-10">
-              <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-semibold">{title}</p>
+            <div className="p-6 hairline-b flex items-center justify-between sticky top-0 bg-card/95 backdrop-blur-sm z-10">
+              <p className="text-xs mono tracking-[0.18em] uppercase text-accent font-semibold">{title}</p>
               <button onClick={onClose} className="w-8 h-8 rounded-lg bg-nexus-surface hover:bg-nexus-silver flex items-center justify-center transition-colors">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
@@ -564,7 +558,7 @@ function ScholasticPanel({ user, toast, refetchTeams, refetchAthletes, refetchVe
   return (
     <div className="p-4 sm:p-8">
       {/* Header */}
-      <div className="hairline rounded-xl p-6 sm:p-8 bg-background card-shadow mb-6">
+      <div className="hairline rounded-xl p-6 sm:p-8 bg-card card-shadow mb-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
@@ -620,7 +614,7 @@ function ScholasticPanel({ user, toast, refetchTeams, refetchAthletes, refetchVe
 
       {/* Discover Results */}
       {discoverResult && (
-        <div className="hairline rounded-xl p-6 bg-background card-shadow mb-6">
+        <div className="hairline rounded-xl p-6 bg-card card-shadow mb-6">
           <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Discovered Tables</p>
           {Object.keys(discoverResult.tables || {}).length === 0 ? (
             <div className="py-8 text-center">
@@ -650,7 +644,7 @@ function ScholasticPanel({ user, toast, refetchTeams, refetchAthletes, refetchVe
 
       {/* Sync Results */}
       {syncResult && (
-        <div className="hairline rounded-xl p-6 bg-background card-shadow mb-6">
+        <div className="hairline rounded-xl p-6 bg-card card-shadow mb-6">
           <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Sync Results</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {syncResult.schools && (
@@ -697,7 +691,7 @@ function ScholasticPanel({ user, toast, refetchTeams, refetchAthletes, refetchVe
       )}
 
       {/* Info Panel */}
-      <div className="hairline rounded-xl p-6 bg-background card-shadow">
+      <div className="hairline rounded-xl p-6 bg-card card-shadow">
         <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">How It Works</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="space-y-2">
@@ -761,7 +755,7 @@ export default function AdminDashboard() {
   if (!isAnyAdmin) {
     return (
       <div className="min-h-screen bg-background text-foreground">
-        <NexusHeader />
+        <NashHeader />
         <div className="max-w-[900px] mx-auto pt-32 px-8 text-center">
           <p className="text-[10px] mono tracking-[0.2em] uppercase text-nexus-muted mb-3">403 Forbidden</p>
           <h1 className="text-2xl font-semibold mb-3">Admin access required</h1>
@@ -863,21 +857,42 @@ export default function AdminDashboard() {
     refetchFixtures();
   };
 
+  const deleteBroadcast = async (id: string, title: string) => {
+    if (!window.confirm(`Delete broadcast "${title}"?`)) return;
+    const { error } = await supabase.from("broadcasts").delete().eq("id", id);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Broadcast deleted" });
+    setSelectedItem(null);
+    qc.invalidateQueries({ queryKey: ["admin-broadcasts"] });
+  };
+
+  const deleteSponsorship = async (id: string, name: string) => {
+    if (!window.confirm(`Remove sponsor "${name}"?`)) return;
+    const { error } = await supabase.from("sponsorships").delete().eq("id", id);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Sponsor removed" });
+    setSelectedItem(null);
+    refetchSponsors();
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <NexusHeader />
-      <div className="max-w-[1400px] mx-auto pt-20">
-        <div className="px-4 sm:px-8 py-8 hairline-b">
-          <p className="text-[10px] mono tracking-[0.25em] uppercase text-nexus-muted">Administration</p>
-          <h1 className="display-font text-display-lg font-bold text-foreground mt-1">Nexus Admin Dashboard</h1>
-          {!user && <p className="text-sm text-nexus-muted mt-3 bg-nexus-surface hairline rounded-lg px-4 py-2.5 inline-block">Sign in with an admin account to manage data</p>}
+      <NashHeader />
+      <div className="max-w-[1400px] mx-auto py-6">
+        <div className="px-4 md:px-6 flex flex-wrap items-end justify-between gap-3 mb-4">
+          <div>
+            <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">Platform · Administration</p>
+            <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight mt-1">Admin Dashboard</h1>
+            <p className="text-xs text-muted-foreground mt-0.5">Manage schools, competitions, fixtures, officials, users and the Scholastic Services bridge — all in one place.</p>
+          </div>
+          {!user && <Badge variant="secondary" className="text-xs">Sign in with an admin account to manage data</Badge>}
         </div>
 
-        <div className="flex overflow-x-auto hairline-b scrollbar-hide">
+        <div className="px-4 md:px-6 flex overflow-x-auto scrollbar-hide gap-1.5 mb-2">
           {visibleTabs.map((tab) => (
             <button key={tab.id} onClick={() => { setActiveTab(tab.id); setShowForm(false); }}
-              className={`px-4 sm:px-6 py-4 text-xs font-semibold tracking-wide whitespace-nowrap flex-shrink-0 border-b-2 transition-all duration-200 btn-click
-                ${activeTab === tab.id ? "border-foreground text-foreground" : "border-transparent text-nexus-muted hover:text-foreground"}`}>
+              className={`px-3.5 h-9 text-xs font-display font-semibold tracking-wide whitespace-nowrap flex-shrink-0 rounded-lg transition-all duration-200 btn-click
+                ${activeTab === tab.id ? "bg-primary text-primary-foreground" : "bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/40"}`}>
               {tab.label}
             </button>
           ))}
@@ -894,14 +909,14 @@ export default function AdminDashboard() {
                 <SyncStatusWidget autoSyncIfEmpty={true} />
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <StatCard label="Schools" value={String(teams.length)} sub="Scholastic verified" />
-                <StatCard label="Students" value={String(athletes.length)} sub="from Scholastic" />
-                <StatCard label="Competitions" value={String(competitions.length)} sub="total" />
-                <StatCard label="Inter-School Fixtures" value={String(fixtures.length)} sub="scheduled" />
-                <StatCard label="Venues" value={String(venues.length)} sub="in system" />
-                <StatCard label="Officials" value={String(officials.length)} sub="certified" />
-                <StatCard label="Registrations" value={String(registrations.length)} sub="submitted" />
-                <StatCard label="Sponsors" value={String(sponsorships.length)} sub="active" />
+                <NashStatCard label="Schools" value={teams.length} hint="Scholastic verified" icon={School} tone="primary" />
+                <NashStatCard label="Students" value={athletes.length} hint="from Scholastic" icon={Users} tone="accent" />
+                <NashStatCard label="Competitions" value={competitions.length} hint="total" icon={Trophy} tone="success" />
+                <NashStatCard label="Fixtures" value={fixtures.length} hint="scheduled" icon={CalendarDays} tone="primary" />
+                <NashStatCard label="Venues" value={venues.length} hint="in system" icon={MapPin} tone="muted" />
+                <NashStatCard label="Officials" value={officials.length} hint="certified" icon={ShieldCheck} tone="warning" />
+                <NashStatCard label="Registrations" value={registrations.length} hint="submitted" icon={ClipboardList} tone="accent" />
+                <NashStatCard label="Sponsors" value={sponsorships.length} hint="active" icon={Handshake} tone="success" />
               </div>
 
               {/* Schools tooling */}
@@ -913,7 +928,7 @@ export default function AdminDashboard() {
               {/* Activity & Charts Section */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Status Breakdown */}
-                <div className="hairline rounded-xl p-6 bg-background card-shadow">
+                <div className="hairline rounded-xl p-6 bg-card card-shadow">
                   <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Competition Status Breakdown</p>
                   <div className="space-y-3">
                     {["draft","registration_open","ongoing","completed","cancelled"].map(status => {
@@ -933,7 +948,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Fixture Status */}
-                <div className="hairline rounded-xl p-6 bg-background card-shadow">
+                <div className="hairline rounded-xl p-6 bg-card card-shadow">
                   <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Fixture Status</p>
                   <div className="grid grid-cols-3 gap-3">
                     {[
@@ -956,7 +971,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Discipline Distribution */}
-                <div className="hairline rounded-xl p-6 bg-background card-shadow">
+                <div className="hairline rounded-xl p-6 bg-card card-shadow">
                   <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Discipline Distribution</p>
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(
@@ -975,7 +990,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Recent Activity */}
-                <div className="hairline rounded-xl p-6 bg-background card-shadow">
+                <div className="hairline rounded-xl p-6 bg-card card-shadow">
                   <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Recent Activity</p>
                   <div className="space-y-3 max-h-48 overflow-y-auto">
                     {(fixtures as any[]).slice(0, 8).map((f) => (
@@ -999,7 +1014,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Provincial Coverage */}
-                <div className="hairline rounded-xl p-6 bg-background card-shadow lg:col-span-2">
+                <div className="hairline rounded-xl p-6 bg-card card-shadow lg:col-span-2">
                   <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Provincial Coverage</p>
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                     {PROVINCES.map(prov => {
@@ -1021,7 +1036,12 @@ export default function AdminDashboard() {
           {/* COMPETITIONS */}
           {activeTab === "competitions" && (
             <div>
-              {sectionHeader("Competitions", user && (
+              <div className="px-4 sm:px-8 pt-4">
+                <Link to="/admin/competitions" className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-accent hover:underline">
+                  Prefer the NASH-sanctioned competition builder? Open Competitions & Tournament Wizard <ArrowRight className="h-3 w-3" />
+                </Link>
+              </div>
+              {sectionHeader("Competitions (legacy list)", user && (
                 <button onClick={() => setShowForm(!showForm)} className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click">
                   {showForm ? "Cancel" : "+ New Competition"}
                 </button>
@@ -1115,13 +1135,18 @@ export default function AdminDashboard() {
           {activeTab === "schools" && (
             <div>
               {sectionHeader("Schools & Teams", (
-                <Link to="/schools" className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-nexus-surface hover:bg-nexus-silver flex items-center transition-colors">
-                  Open public directory →
-                </Link>
+                <div className="flex flex-wrap gap-2">
+                  <Link to="/admin/teams" className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-nexus-surface hover:bg-nexus-silver flex items-center transition-colors">
+                    Manage sport team rosters →
+                  </Link>
+                  <Link to="/schools" className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-nexus-surface hover:bg-nexus-silver flex items-center transition-colors">
+                    Open public directory →
+                  </Link>
+                </div>
               ))}
               <div className="p-4 sm:p-8 space-y-6">
                 <SchoolsDirectory />
-                <div className="hairline rounded-xl bg-background overflow-hidden">
+                <div className="hairline rounded-xl bg-card overflow-hidden">
                   <p className="px-6 py-4 hairline-b text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium">All synced schools</p>
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[720px]">
@@ -1205,10 +1230,14 @@ export default function AdminDashboard() {
           {/* BROADCASTS */}
           {activeTab === "broadcasts" && (
             <div>
-              {sectionHeader("Broadcasts & Media")}
+              {sectionHeader("Broadcasts & Media", (
+                <Link to="/broadcast" className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-nexus-surface hover:bg-nexus-silver flex items-center transition-colors">
+                  Open Broadcast Hub →
+                </Link>
+              ))}
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px]">
-                  {tableHead("Title","Competition","Platform","Status","Viewers","Quality")}
+                <table className="w-full min-w-[720px]">
+                  {tableHead("Title","Competition","Platform","Status","Viewers","Quality","Actions")}
                   <tbody>
                     {(broadcasts as any[]).map((b) => (
                       <tr key={b.id} className={clickableRow} onClick={() => openDetail(b, "broadcast")}>
@@ -1218,11 +1247,52 @@ export default function AdminDashboard() {
                         <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${b.is_live ? "bg-nexus-live text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{b.is_live ? "Live" : "Offline"}</span></td>
                         <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{b.viewer_count?.toLocaleString() || "—"}</td>
                         <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{b.quality || "HD"}</td>
+                        <td className="px-4 sm:px-6 py-4">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); deleteBroadcast(b.id, b.title); }}
+                            className="h-7 px-3 text-[10px] font-semibold tracking-wide rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </td>
                       </tr>
                     ))}
-                    {broadcasts.length === 0 && <tr><td colSpan={6}><EmptyState msg="No broadcasts yet." /></td></tr>}
+                    {broadcasts.length === 0 && <tr><td colSpan={7}><EmptyState msg="No broadcasts yet." /></td></tr>}
                   </tbody>
                 </table>
+              </div>
+
+              <div className="mt-8">
+                {sectionHeader("Sponsorships", user && (
+                  <button onClick={() => setShowForm(!showForm)} className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click">
+                    {showForm ? "Cancel" : "+ Add Sponsor"}
+                  </button>
+                ))}
+                {showForm && <div className="p-4 sm:p-8 hairline-b"><SponsorshipForm competitions={competitions as any[]} onSuccess={() => { setShowForm(false); refetchSponsors(); }} /></div>}
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[640px]">
+                    {tableHead("Sponsor","Tier","Amount","Competition","Actions")}
+                    <tbody>
+                      {(sponsorships as any[]).map((s) => (
+                        <tr key={s.id} className={clickableRow} onClick={() => openDetail(s, "sponsor")}>
+                          <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{s.sponsor_name}</td>
+                          <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted capitalize">{s.tier || "—"}</td>
+                          <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{s.amount ? `$${Number(s.amount).toLocaleString()}` : "—"}</td>
+                          <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{s.competition?.name || "General"}</td>
+                          <td className="px-4 sm:px-6 py-4">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); deleteSponsorship(s.id, s.sponsor_name); }}
+                              className="h-7 px-3 text-[10px] font-semibold tracking-wide rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+                            >
+                              Remove
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {sponsorships.length === 0 && <tr><td colSpan={5}><EmptyState msg="No sponsors yet." /></td></tr>}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
@@ -1372,6 +1442,33 @@ export default function AdminDashboard() {
             <DetailField label="Amount" value={selectedItem.amount ? `$${Number(selectedItem.amount).toLocaleString()}` : null} />
             <DetailField label="Contract Start" value={selectedItem.contract_start} />
             <DetailField label="Contract End" value={selectedItem.contract_end} />
+            <div className="mt-4">
+              <button onClick={() => deleteSponsorship(selectedItem.id, selectedItem.sponsor_name)} className="h-9 px-4 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
+                Remove sponsor
+              </button>
+            </div>
+          </div>
+        )}
+      </DetailPanel>
+
+      <DetailPanel open={!!selectedItem && detailType === "broadcast"} onClose={() => setSelectedItem(null)} title="Broadcast Details">
+        {selectedItem && detailType === "broadcast" && (
+          <div>
+            <DetailField label="Title" value={selectedItem.title} />
+            <DetailField label="Competition" value={selectedItem.competition?.name} />
+            <DetailField label="Platform" value={selectedItem.platform} />
+            <DetailField label="Status" value={selectedItem.is_live ? "Live" : "Offline"} />
+            <DetailField label="Viewers" value={selectedItem.viewer_count?.toLocaleString()} />
+            <DetailField label="Quality" value={selectedItem.quality || "HD"} />
+            <DetailField label="Stream URL" value={selectedItem.stream_url} />
+            <div className="mt-4 flex flex-wrap gap-2">
+              {selectedItem.stream_url && (
+                <a href={selectedItem.stream_url} target="_blank" rel="noreferrer" className="h-9 px-4 text-xs font-semibold rounded-lg bg-nexus-surface text-foreground flex items-center hover:bg-nexus-silver transition-colors">Open stream</a>
+              )}
+              <button onClick={() => deleteBroadcast(selectedItem.id, selectedItem.title)} className="h-9 px-4 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
+                Delete broadcast
+              </button>
+            </div>
           </div>
         )}
       </DetailPanel>
