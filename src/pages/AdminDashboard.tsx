@@ -817,6 +817,52 @@ export default function AdminDashboard() {
     refetchFixtures();
   };
 
+  // Deleting a school ("teams" row) cascades school_teams automatically
+  // (ON DELETE CASCADE), but fixtures.home/away_team_id have no cascade, so
+  // any fixtures involving this school as a team must be cleared first or
+  // the delete fails on an FK violation.
+  const deleteSchool = async (id: string, name: string) => {
+    if (!window.confirm(`Delete "${name}"? This removes the school, its teams and any fixtures it played in. This cannot be undone.`)) return;
+    const { data: linkedFixtures } = await supabase.from("fixtures").select("id").or(`home_team_id.eq.${id},away_team_id.eq.${id}`);
+    const fixtureIds = (linkedFixtures || []).map((f: any) => f.id);
+    if (fixtureIds.length > 0) {
+      await supabase.from("score_entries").delete().in("fixture_id", fixtureIds);
+      await supabase.from("fixtures").delete().in("id", fixtureIds);
+    }
+    const { error } = await supabase.from("teams").delete().eq("id", id);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: `"${name}" deleted` });
+    setSelectedItem(null);
+    refetchTeams();
+    refetchFixtures();
+  };
+
+  const deleteOfficial = async (id: string, name: string) => {
+    if (!window.confirm(`Remove ${name} from the officials registry?`)) return;
+    const { error } = await supabase.from("officials").delete().eq("id", id);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Official removed" });
+    setSelectedItem(null);
+    qc.invalidateQueries({ queryKey: ["admin-officials"] });
+  };
+
+  const deleteCompetition = async (id: string, name: string) => {
+    if (!window.confirm(`Delete "${name}"? All its fixtures and registrations are removed too. This cannot be undone.`)) return;
+    const { data: linkedFixtures } = await supabase.from("fixtures").select("id").eq("competition_id", id);
+    const fixtureIds = (linkedFixtures || []).map((f: any) => f.id);
+    if (fixtureIds.length > 0) {
+      await supabase.from("score_entries").delete().in("fixture_id", fixtureIds);
+      await supabase.from("fixtures").delete().in("id", fixtureIds);
+    }
+    await supabase.from("registrations").delete().eq("competition_id", id);
+    const { error } = await supabase.from("competitions").delete().eq("id", id);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: `"${name}" deleted` });
+    setSelectedItem(null);
+    refetchComp();
+    refetchFixtures();
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <NexusHeader />
@@ -982,8 +1028,8 @@ export default function AdminDashboard() {
               ))}
               {showForm && <div className="p-4 sm:p-8 hairline-b"><CompetitionForm competitions={competitions as any[]} onSuccess={() => { setShowForm(false); refetchComp(); }} /></div>}
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[800px]">
-                  {tableHead("","Name","Discipline","Level","Status","Province","Season")}
+                <table className="w-full min-w-[880px]">
+                  {tableHead("","Name","Discipline","Level","Status","Province","Season","Actions")}
                   <tbody>
                     {(competitions as any[]).map((comp) => (
                       <tr key={comp.id} className={clickableRow} onClick={() => openDetail(comp, "competition")}>
@@ -1004,9 +1050,17 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{comp.province || "National"}</td>
                         <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{comp.season || "—"}</td>
+                        <td className="px-4 sm:px-6 py-4">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); deleteCompetition(comp.id, comp.name); }}
+                            className="h-7 px-3 text-[10px] font-semibold tracking-wide rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </td>
                       </tr>
                     ))}
-                    {competitions.length === 0 && <tr><td colSpan={7}><EmptyState msg="No competitions yet. Create one above." /></td></tr>}
+                    {competitions.length === 0 && <tr><td colSpan={8}><EmptyState msg="No competitions yet. Create one above." /></td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -1070,8 +1124,8 @@ export default function AdminDashboard() {
                 <div className="hairline rounded-xl bg-background overflow-hidden">
                   <p className="px-6 py-4 hairline-b text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium">All synced schools</p>
                   <div className="overflow-x-auto">
-                    <table className="w-full min-w-[640px]">
-                      {tableHead("","Name","Discipline","Level","Province","Status")}
+                    <table className="w-full min-w-[720px]">
+                      {tableHead("","Name","Discipline","Level","Province","Status","Actions")}
                       <tbody>
                         {(teams as any[]).map((t) => (
                           <tr key={t.id} className={clickableRow} onClick={() => openDetail(t, "team")}>
@@ -1081,9 +1135,17 @@ export default function AdminDashboard() {
                             <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{t.level?.replace(/_/g," ") || "—"}</td>
                             <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{t.province || "—"}</td>
                             <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${t.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{t.is_active ? "Active" : "Inactive"}</span></td>
+                            <td className="px-4 sm:px-6 py-4">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); deleteSchool(t.id, t.name); }}
+                                className="h-7 px-3 text-[10px] font-semibold tracking-wide rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+                              >
+                                Delete
+                              </button>
+                            </td>
                           </tr>
                         ))}
-                        {teams.length === 0 && <tr><td colSpan={6}><EmptyState msg="No schools synced yet. Trigger a federation sync." /></td></tr>}
+                        {teams.length === 0 && <tr><td colSpan={7}><EmptyState msg="No schools synced yet. Trigger a federation sync." /></td></tr>}
                       </tbody>
                     </table>
                   </div>
@@ -1100,8 +1162,8 @@ export default function AdminDashboard() {
             <div>
               {sectionHeader("Officials")}
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[640px]">
-                  {tableHead("Name","Role","Disciplines","Province","Rating","Status")}
+                <table className="w-full min-w-[720px]">
+                  {tableHead("Name","Role","Disciplines","Province","Rating","Status","Actions")}
                   <tbody>
                     {(officials as any[]).map((o) => (
                       <tr key={o.id} className={clickableRow} onClick={() => openDetail(o, "official")}>
@@ -1111,9 +1173,17 @@ export default function AdminDashboard() {
                         <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{o.province || "—"}</td>
                         <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{o.performance_rating ? `${o.performance_rating}/5` : "—"}</td>
                         <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${o.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{o.is_active ? "Active" : "Inactive"}</span></td>
+                        <td className="px-4 sm:px-6 py-4">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); deleteOfficial(o.id, `${o.first_name} ${o.last_name}`); }}
+                            className="h-7 px-3 text-[10px] font-semibold tracking-wide rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+                          >
+                            Remove
+                          </button>
+                        </td>
                       </tr>
                     ))}
-                    {officials.length === 0 && <tr><td colSpan={6}><EmptyState msg="No officials registered yet." /></td></tr>}
+                    {officials.length === 0 && <tr><td colSpan={7}><EmptyState msg="No officials registered yet." /></td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -1195,6 +1265,11 @@ export default function AdminDashboard() {
             <DetailField label="Prize Pool" value={selectedItem.prize_pool ? `$${Number(selectedItem.prize_pool).toLocaleString()}` : null} />
             <DetailField label="Sponsor" value={selectedItem.sponsor} />
             <DetailField label="Description" value={selectedItem.description} />
+            <div className="mt-4">
+              <button onClick={() => deleteCompetition(selectedItem.id, selectedItem.name)} className="h-9 px-4 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
+                Delete competition
+              </button>
+            </div>
           </div>
         )}
       </DetailPanel>
@@ -1223,6 +1298,11 @@ export default function AdminDashboard() {
             <DetailField label="Founded" value={selectedItem.founded_year} />
             <DetailField label="Kit Colors" value={selectedItem.kit_colors?.join(", ")} />
             <DetailField label="Status" value={selectedItem.is_active ? "Active" : "Inactive"} />
+            <div className="mt-4">
+              <button onClick={() => deleteSchool(selectedItem.id, selectedItem.name)} className="h-9 px-4 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
+                Delete school
+              </button>
+            </div>
           </div>
         )}
       </DetailPanel>
@@ -1258,6 +1338,11 @@ export default function AdminDashboard() {
             <DetailField label="Rating" value={selectedItem.performance_rating ? `${selectedItem.performance_rating}/5` : null} />
             <DetailField label="Total Matches" value={selectedItem.total_matches} />
             <DetailField label="Status" value={selectedItem.is_active ? "Active" : "Inactive"} />
+            <div className="mt-4">
+              <button onClick={() => deleteOfficial(selectedItem.id, `${selectedItem.first_name} ${selectedItem.last_name}`)} className="h-9 px-4 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
+                Remove official
+              </button>
+            </div>
           </div>
         )}
       </DetailPanel>
