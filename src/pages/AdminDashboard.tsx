@@ -445,6 +445,79 @@ function DetailField({ label, value }: { label: string; value: React.ReactNode }
   );
 }
 
+// ── Fixture Edit Panel (fix score/status/schedule, or delete) ──────
+const FIXTURE_STATUSES = ["scheduled", "live", "completed", "postponed", "cancelled"] as const;
+
+function FixtureEditPanel({ fixture, onUpdate, onDelete }: {
+  fixture: any;
+  onUpdate: (id: string, patch: Record<string, unknown>) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
+}) {
+  const toLocalInput = (iso?: string | null) => {
+    if (!iso) return "";
+    const d = new Date(iso);
+    const pad = (n: number) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+
+  const [status, setStatus] = useState<string>(fixture.status || "scheduled");
+  const [scheduledAt, setScheduledAt] = useState(toLocalInput(fixture.scheduled_at));
+  const [homeScore, setHomeScore] = useState(String(fixture.home_score ?? 0));
+  const [awayScore, setAwayScore] = useState(String(fixture.away_score ?? 0));
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    setSaving(true);
+    await onUpdate(fixture.id, {
+      status,
+      scheduled_at: scheduledAt ? new Date(scheduledAt).toISOString() : null,
+      home_score: Number(homeScore) || 0,
+      away_score: Number(awayScore) || 0,
+    });
+    setSaving(false);
+  };
+
+  return (
+    <div>
+      <DetailField label="Match" value={`${fixture.home_team?.name || "TBD"} vs ${fixture.away_team?.name || "TBD"}`} />
+      <DetailField label="Competition" value={fixture.competition?.name} />
+      <DetailField label="Round" value={fixture.round_label} />
+
+      <div className="grid grid-cols-2 gap-4 py-3">
+        <div className="flex flex-col gap-1.5">
+          <label className={labelCls}>Status</label>
+          <select value={status} onChange={(e) => setStatus(e.target.value)} className={inputCls + " cursor-pointer"}>
+            {FIXTURE_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label className={labelCls}>Scheduled</label>
+          <input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} className={inputCls} />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label className={labelCls}>Home Score</label>
+          <input type="number" value={homeScore} onChange={(e) => setHomeScore(e.target.value)} className={inputCls} />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label className={labelCls}>Away Score</label>
+          <input type="number" value={awayScore} onChange={(e) => setAwayScore(e.target.value)} className={inputCls} />
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button onClick={save} disabled={saving} className="h-9 px-4 text-xs font-semibold rounded-lg bg-foreground text-primary-foreground hover:opacity-85 transition-opacity disabled:opacity-50">
+          {saving ? "Saving…" : "Save changes"}
+        </button>
+        <a href={`/scoring`} className="h-9 px-4 text-xs font-semibold rounded-lg bg-nexus-surface text-foreground flex items-center hover:bg-nexus-silver transition-colors">Open in Scoring</a>
+        <a href={`/broadcast/${fixture.id}`} className="h-9 px-4 text-xs font-semibold rounded-lg bg-nexus-surface text-foreground flex items-center hover:bg-nexus-silver transition-colors">Broadcast CG</a>
+        <button onClick={() => onDelete(fixture.id)} className="h-9 px-4 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors ml-auto">
+          Delete fixture
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── Scholastic Services Integration Panel ─────────────────────────
 function ScholasticPanel({ user, toast, refetchTeams, refetchAthletes, refetchVenues }: {
   user: any; toast: any; refetchTeams: () => void; refetchAthletes: () => void; refetchVenues: () => void;
@@ -649,6 +722,7 @@ function ScholasticPanel({ user, toast, refetchTeams, refetchAthletes, refetchVe
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<TabId>("overview");
   const [showForm, setShowForm] = useState(false);
+  const [showGenerator, setShowGenerator] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [detailType, setDetailType] = useState("");
   const { user, loading: authLoading } = useAuth();
@@ -724,6 +798,23 @@ export default function AdminDashboard() {
     const { error } = await supabase.from("competitions").update({ status: status as typeof STATUSES[number] }).eq("id", id);
     if (error) toast({ title: "Error", description: error.message, variant: "destructive" });
     else { toast({ title: "Status updated" }); refetchComp(); }
+  };
+
+  const deleteFixture = async (id: string) => {
+    if (!window.confirm("Delete this fixture? Its scores and events are removed too.")) return;
+    await supabase.from("score_entries").delete().eq("fixture_id", id);
+    const { error } = await supabase.from("fixtures").delete().eq("id", id);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Fixture deleted" });
+    setSelectedItem(null);
+    refetchFixtures();
+  };
+
+  const updateFixture = async (id: string, patch: Record<string, unknown>) => {
+    const { error } = await supabase.from("fixtures").update(patch).eq("id", id);
+    if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "Fixture updated" });
+    refetchFixtures();
   };
 
   return (
@@ -926,14 +1017,20 @@ export default function AdminDashboard() {
           {activeTab === "fixtures" && (
             <div>
               {sectionHeader("Fixtures", user && (
-                <button onClick={() => setShowForm(!showForm)} className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click">
-                  {showForm ? "Cancel" : "+ New Fixture"}
-                </button>
+                <div className="flex gap-2">
+                  <button onClick={() => { setShowGenerator(!showGenerator); setShowForm(false); }} className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-nexus-surface hover:bg-nexus-silver transition-colors btn-click">
+                    {showGenerator ? "Cancel" : "Generate Fixtures"}
+                  </button>
+                  <button onClick={() => { setShowForm(!showForm); setShowGenerator(false); }} className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click">
+                    {showForm ? "Cancel" : "+ New Fixture"}
+                  </button>
+                </div>
               ))}
+              {showGenerator && <div className="hairline-b"><InterSchoolFixturesBuilder /></div>}
               {showForm && <div className="p-4 sm:p-8 hairline-b"><FixtureForm competitions={competitions as any[]} onSuccess={() => { setShowForm(false); refetchFixtures(); }} /></div>}
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[800px]">
-                  {tableHead("Match","Competition","Round","Status","Score","Scheduled")}
+                <table className="w-full min-w-[880px]">
+                  {tableHead("Match","Competition","Round","Status","Score","Scheduled","Actions")}
                   <tbody>
                     {(fixtures as any[]).map((f) => (
                       <tr key={f.id} className={clickableRow} onClick={() => openDetail(f, "fixture")}>
@@ -943,9 +1040,17 @@ export default function AdminDashboard() {
                         <td className="px-4 sm:px-6 py-4"><span className="text-[10px] mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2.5 py-1 rounded-full">{f.status}</span></td>
                         <td className="px-4 sm:px-6 py-4 text-sm mono font-semibold text-foreground">{f.home_score ?? 0} — {f.away_score ?? 0}</td>
                         <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{f.scheduled_at ? new Date(f.scheduled_at).toLocaleString("en-ZW", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "TBD"}</td>
+                        <td className="px-4 sm:px-6 py-4">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); deleteFixture(f.id); }}
+                            className="h-7 px-3 text-[10px] font-semibold tracking-wide rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+                          >
+                            Delete
+                          </button>
+                        </td>
                       </tr>
                     ))}
-                    {fixtures.length === 0 && <tr><td colSpan={6}><EmptyState msg="No fixtures yet." /></td></tr>}
+                    {fixtures.length === 0 && <tr><td colSpan={7}><EmptyState msg="No fixtures yet." /></td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -1096,18 +1201,11 @@ export default function AdminDashboard() {
 
       <DetailPanel open={!!selectedItem && detailType === "fixture"} onClose={() => setSelectedItem(null)} title="Fixture Details">
         {selectedItem && detailType === "fixture" && (
-          <div>
-            <DetailField label="Match" value={`${selectedItem.home_team?.name || "TBD"} vs ${selectedItem.away_team?.name || "TBD"}`} />
-            <DetailField label="Competition" value={selectedItem.competition?.name} />
-            <DetailField label="Round" value={selectedItem.round_label} />
-            <DetailField label="Status" value={selectedItem.status} />
-            <DetailField label="Score" value={`${selectedItem.home_score ?? 0} — ${selectedItem.away_score ?? 0}`} />
-            <DetailField label="Scheduled" value={selectedItem.scheduled_at ? new Date(selectedItem.scheduled_at).toLocaleString() : "TBD"} />
-            <div className="mt-4 flex gap-2">
-              <a href={`/scoring`} className="h-9 px-4 text-xs font-semibold rounded-lg bg-foreground text-primary-foreground flex items-center hover:opacity-85 transition-opacity">Open in Scoring</a>
-              <a href={`/broadcast/${selectedItem.id}`} className="h-9 px-4 text-xs font-semibold rounded-lg bg-nexus-surface text-foreground flex items-center hover:bg-nexus-silver transition-colors">Broadcast CG</a>
-            </div>
-          </div>
+          <FixtureEditPanel
+            fixture={selectedItem}
+            onUpdate={updateFixture}
+            onDelete={deleteFixture}
+          />
         )}
       </DetailPanel>
 

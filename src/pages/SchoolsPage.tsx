@@ -7,6 +7,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { tierLabel, SCHOOL_TIERS } from "@/lib/schools";
 import { useScholasticAutoSync } from "@/hooks/useScholasticAutoSync";
+import { StatCard } from "@/components/nash/StatCard";
+import { School, MapPin, CheckCircle2 } from "lucide-react";
 
 const PROVINCES = ["All","Harare","Bulawayo","Manicaland","Mashonaland Central","Mashonaland East","Mashonaland West","Masvingo","Matabeleland North","Matabeleland South","Midlands"];
 
@@ -39,6 +41,13 @@ export default function SchoolsPage() {
       <main className="pt-16 sm:pt-20">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-8 py-6 sm:py-10 flex flex-col gap-6">
           <ScholasticIntegrationBanner />
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <StatCard label="Total Schools" value={schools.length} icon={School} tone="primary" />
+            <StatCard label="Provinces" value={new Set(schools.map((s: any) => s.province).filter(Boolean)).size} icon={MapPin} tone="accent" />
+            <StatCard label="NASH (Secondary)" value={schools.filter((s: any) => s.level !== "primary_school").length} icon={CheckCircle2} tone="success" />
+            <StatCard label="NAPH (Primary)" value={schools.filter((s: any) => s.level === "primary_school").length} icon={CheckCircle2} tone="muted" />
+          </div>
 
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
             <div>

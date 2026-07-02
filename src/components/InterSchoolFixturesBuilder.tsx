@@ -8,8 +8,13 @@ import { useToast } from "@/hooks/use-toast";
 import { SCHOOL_TERMS, COMPETITION_STAGES, type CompetitionStage } from "@/lib/schools";
 import { AgeGroupFilter } from "@/components/AgeGroupFilter";
 
-// Nexus is scoped to handball + netball only.
-const NEXUS_DISCIPLINES = ["Handball", "Netball"] as const;
+// All 15 sports NASH/NAPH sanctions — the generator is sport-agnostic, it
+// just needs a discipline string to filter school_teams by.
+const NEXUS_DISCIPLINES = [
+  "Handball", "Netball", "Football", "Basketball", "Volleyball", "Cricket",
+  "Rugby", "Hockey", "Tennis", "Table Tennis", "Badminton", "Athletics",
+  "Swimming", "Cross Country", "Chess",
+] as const;
 
 const inputCls = "bg-nexus-surface hairline rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-nexus-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground/20 transition-all w-full";
 const labelCls = "text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold";
