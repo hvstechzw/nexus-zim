@@ -381,17 +381,40 @@ async function pushAthlete(cors: Record<string, string>, supabase: any, body: an
 }
 
 async function linkAccount(cors: Record<string, string>, supabase: any, body: any) {
-  const { external_student_id, email, user_id } = body;
+  const { external_student_id, email, user_id, first_name, last_name, fullName } = body;
   if (!external_student_id) return json(cors, { error: "external_student_id required" }, 400);
 
-  const { data: athlete, error: aErr } = await supabase
+  let { data: athlete, error: aErr } = await supabase
     .from("athletes").select("id, user_id").eq("external_student_id", external_student_id).maybeSingle();
   if (aErr) throw aErr;
-  if (!athlete) return json(cors, { error: "athlete not found for this student id" }, 404);
+
+  // Auto-create a stub athlete so link can succeed before push-athlete
+  if (!athlete) {
+    let fn = first_name, ln = last_name;
+    if ((!fn || !ln) && fullName) {
+      const parts = String(fullName).trim().split(/\s+/);
+      fn = fn || parts[0] || "Pending";
+      ln = ln || parts.slice(1).join(" ") || "—";
+    }
+    const stub = {
+      external_student_id,
+      first_name: fn || "Pending",
+      last_name: ln || "—",
+      display_name: `${fn || "Pending"} ${(ln || "").charAt(0)}.`.trim(),
+      province: "Unknown",
+      disciplines: ["Handball"],
+      is_active: true,
+      is_ss_linked: true,
+    };
+    const { data: created, error: cErr } = await supabase
+      .from("athletes").upsert(stub, { onConflict: "external_student_id" })
+      .select("id, user_id").maybeSingle();
+    if (cErr) throw cErr;
+    athlete = created;
+  }
 
   let uid = user_id || null;
   if (!uid && email) {
-    // Look up an existing auth user with this email (admin API)
     const { data: list } = await supabase.auth.admin.listUsers({ page: 1, perPage: 200 });
     const match = list?.users?.find((u: any) => (u.email || "").toLowerCase() === String(email).toLowerCase());
     uid = match?.id || null;
@@ -400,7 +423,7 @@ async function linkAccount(cors: Record<string, string>, supabase: any, body: an
   if (uid) {
     await supabase.from("athletes").update({ user_id: uid, is_ss_linked: true }).eq("id", athlete.id);
   }
-  return json(cors, { ok: true, athleteId: athlete.id, linked_user_id: uid });
+  return json(cors, { ok: true, athleteId: athlete.id, linked_user_id: uid, auto_created: !user_id && !athlete.user_id });
 }
 
 async function registerEntry(cors: Record<string, string>, supabase: any, body: any) {
