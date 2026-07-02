@@ -17,6 +17,15 @@ const json = (cors: Record<string, string>, body: unknown, status = 200) =>
     headers: { ...cors, "Content-Type": "application/json" },
   });
 
+function normalizeNexusSport(v: any): "handball" | "netball" | "both" | null {
+  if (!v) return null;
+  const s = String(v).toLowerCase().trim();
+  if (s === "handball" || s === "netball" || s === "both") return s;
+  if (s.includes("hand")) return "handball";
+  if (s.includes("net")) return "netball";
+  return null;
+}
+
 Deno.serve(async (req) => {
   const cors = buildCorsHeaders(req);
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
