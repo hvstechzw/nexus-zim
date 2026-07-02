@@ -11,20 +11,37 @@ interface UserRow {
 }
 
 const GRANTABLE: AppRole[] = [
+  // Platform / federation
+  "platform_admin",
   "admin",
+  "nash_national",
+  "naph_national",
+  "national_technical_director",
   "national_admin",
-  "provincial_admin",
-  "district_admin",
-  "zonal_admin",
-  "coach",
-  "hic",
-  "umpire",
-  "referee",
-  "scorer",
-  "broadcaster",
   "federation_official",
+  // Provincial / district / zonal
+  "provincial_admin",
+  "provincial_technical_director",
+  "district_admin",
+  "district_technical_director",
+  "zonal_admin",
+  // School
+  "school_head",
+  "coach",
   "team_manager",
   "school_coordinator",
+  "hic",
+  // Officials
+  "referee",
+  "umpire",
+  "scorer",
+  "timekeeper",
+  "technical_delegate",
+  // Operations / athlete
+  "competition_organiser",
+  "broadcaster",
+  "athlete",
+  "parent",
   "viewer",
 ];
 
@@ -108,7 +125,7 @@ export function UsersRolesPanel() {
 
   return (
     <div className="p-4 sm:p-8 space-y-6">
-      <div className="hairline rounded-xl p-6 bg-background card-shadow">
+      <div className="hairline rounded-xl p-6 bg-card card-shadow">
         <h2 className="display-font text-xl font-bold text-foreground">Users &amp; Roles</h2>
         <p className="text-xs text-nexus-muted mt-1 mb-4">
           Grant or revoke any role except super admin. super_admin is bootstrapped directly in the database.
@@ -121,7 +138,7 @@ export function UsersRolesPanel() {
         />
       </div>
 
-      <div className="hairline rounded-xl bg-background overflow-hidden">
+      <div className="hairline rounded-xl bg-card overflow-hidden">
         {loading ? (
           <p className="p-12 text-center text-xs text-nexus-muted mono">Loading…</p>
         ) : filtered.length === 0 ? (
