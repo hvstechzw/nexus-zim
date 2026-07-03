@@ -804,7 +804,7 @@ export default function AdminDashboard() {
   };
 
   const updateFixture = async (id: string, patch: Record<string, unknown>) => {
-    const { error } = await supabase.from("fixtures").update(patch).eq("id", id);
+    const { error } = await (supabase.from("fixtures") as any).update(patch).eq("id", id);
     if (error) { toast({ title: "Error", description: error.message, variant: "destructive" }); return; }
     toast({ title: "Fixture updated" });
     refetchFixtures();
