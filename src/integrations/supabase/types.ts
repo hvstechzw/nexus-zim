@@ -80,6 +80,8 @@ export type Database = {
       }
       athletes: {
         Row: {
+          academic_year: string | null
+          age_group: string | null
           bio: string | null
           club_name: string | null
           created_at: string
@@ -87,8 +89,10 @@ export type Database = {
           disciplines: string[]
           display_name: string | null
           dominant_hand: string | null
+          dual_enrollment_flagged: boolean | null
           external_student_id: string | null
           first_name: string
+          form_level: string | null
           gender: string | null
           height_cm: number | null
           house: string | null
@@ -102,9 +106,12 @@ export type Database = {
           medical_cleared: boolean | null
           medical_waiver_date: string | null
           medical_waiver_signed: boolean | null
+          nash_athlete_id: string | null
+          nash_id: string | null
           nexus_sport: string | null
           nfc_tag: string | null
           parent_consent: boolean | null
+          parental_consent: boolean | null
           personal_bests: Json | null
           photo_url: string | null
           preferred_position: string | null
@@ -122,6 +129,8 @@ export type Database = {
           years_playing: number | null
         }
         Insert: {
+          academic_year?: string | null
+          age_group?: string | null
           bio?: string | null
           club_name?: string | null
           created_at?: string
@@ -129,8 +138,10 @@ export type Database = {
           disciplines: string[]
           display_name?: string | null
           dominant_hand?: string | null
+          dual_enrollment_flagged?: boolean | null
           external_student_id?: string | null
           first_name: string
+          form_level?: string | null
           gender?: string | null
           height_cm?: number | null
           house?: string | null
@@ -144,9 +155,12 @@ export type Database = {
           medical_cleared?: boolean | null
           medical_waiver_date?: string | null
           medical_waiver_signed?: boolean | null
+          nash_athlete_id?: string | null
+          nash_id?: string | null
           nexus_sport?: string | null
           nfc_tag?: string | null
           parent_consent?: boolean | null
+          parental_consent?: boolean | null
           personal_bests?: Json | null
           photo_url?: string | null
           preferred_position?: string | null
@@ -164,6 +178,8 @@ export type Database = {
           years_playing?: number | null
         }
         Update: {
+          academic_year?: string | null
+          age_group?: string | null
           bio?: string | null
           club_name?: string | null
           created_at?: string
@@ -171,8 +187,10 @@ export type Database = {
           disciplines?: string[]
           display_name?: string | null
           dominant_hand?: string | null
+          dual_enrollment_flagged?: boolean | null
           external_student_id?: string | null
           first_name?: string
+          form_level?: string | null
           gender?: string | null
           height_cm?: number | null
           house?: string | null
@@ -186,9 +204,12 @@ export type Database = {
           medical_cleared?: boolean | null
           medical_waiver_date?: string | null
           medical_waiver_signed?: boolean | null
+          nash_athlete_id?: string | null
+          nash_id?: string | null
           nexus_sport?: string | null
           nfc_tag?: string | null
           parent_consent?: boolean | null
+          parental_consent?: boolean | null
           personal_bests?: Json | null
           photo_url?: string | null
           preferred_position?: string | null
@@ -205,7 +226,141 @@ export type Database = {
           weight_kg?: number | null
           years_playing?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "athletes_nash_athlete_id_fkey"
+            columns: ["nash_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "nash_athlete_registry"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      athletics_events: {
+        Row: {
+          age_group: string | null
+          competition_id: string | null
+          created_at: string | null
+          event_name: string
+          event_type: string | null
+          final_places: number | null
+          gender: string | null
+          has_heats: boolean | null
+          has_semifinals: boolean | null
+          id: string
+          status: string | null
+          unit: string | null
+          wind_legal_limit: number | null
+        }
+        Insert: {
+          age_group?: string | null
+          competition_id?: string | null
+          created_at?: string | null
+          event_name: string
+          event_type?: string | null
+          final_places?: number | null
+          gender?: string | null
+          has_heats?: boolean | null
+          has_semifinals?: boolean | null
+          id?: string
+          status?: string | null
+          unit?: string | null
+          wind_legal_limit?: number | null
+        }
+        Update: {
+          age_group?: string | null
+          competition_id?: string | null
+          created_at?: string | null
+          event_name?: string
+          event_type?: string | null
+          final_places?: number | null
+          gender?: string | null
+          has_heats?: boolean | null
+          has_semifinals?: boolean | null
+          id?: string
+          status?: string | null
+          unit?: string | null
+          wind_legal_limit?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "athletics_events_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      athletics_results: {
+        Row: {
+          created_at: string | null
+          event_id: string | null
+          id: string
+          is_record: boolean | null
+          lane_or_bib: number | null
+          nash_athlete_id: string | null
+          performance: string
+          points_earned: number | null
+          position: number | null
+          record_type: string | null
+          round: string | null
+          school_team_id: string | null
+          wind_reading: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_id?: string | null
+          id?: string
+          is_record?: boolean | null
+          lane_or_bib?: number | null
+          nash_athlete_id?: string | null
+          performance: string
+          points_earned?: number | null
+          position?: number | null
+          record_type?: string | null
+          round?: string | null
+          school_team_id?: string | null
+          wind_reading?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          event_id?: string | null
+          id?: string
+          is_record?: boolean | null
+          lane_or_bib?: number | null
+          nash_athlete_id?: string | null
+          performance?: string
+          points_earned?: number | null
+          position?: number | null
+          record_type?: string | null
+          round?: string | null
+          school_team_id?: string | null
+          wind_reading?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "athletics_results_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "athletics_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "athletics_results_nash_athlete_id_fkey"
+            columns: ["nash_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "nash_athlete_registry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "athletics_results_school_team_id_fkey"
+            columns: ["school_team_id"]
+            isOneToOne: false
+            referencedRelation: "school_teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       broadcasts: {
         Row: {
@@ -350,32 +505,47 @@ export type Database = {
           discipline: string
           end_date: string | null
           entry_fee: number | null
+          entry_fee_per_team: number | null
           format: Database["public"]["Enums"]["bracket_format"]
+          gender: string | null
           group_count: number | null
           group_size: number | null
+          host_school_id: string | null
+          host_school_name: string | null
           id: string
           is_broadcast: boolean | null
           is_house_competition: boolean | null
+          is_nash_sanctioned: boolean | null
           is_sports_day: boolean | null
           level: Database["public"]["Enums"]["competition_level"]
           logo_url: string | null
+          match_report_url: string | null
           max_participants: number | null
           name: string
+          nash_sanction_number: string | null
+          nash_sport_id: string | null
+          organisation_id: string | null
           parent_id: string | null
           points_config: Json | null
           prize_pool: number | null
           province: string | null
           registration_deadline: string | null
+          requires_card_verification: boolean | null
           rules: Json | null
           season: string | null
+          season_id: string | null
           slug: string | null
           sponsor: string | null
           stage: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["competition_status"]
+          technical_delegate_id: string | null
           term: string | null
+          tier: string | null
+          total_entries: number | null
           updated_at: string
           venue_id: string | null
+          weather_conditions: string | null
         }
         Insert: {
           age_group?: string | null
@@ -385,32 +555,47 @@ export type Database = {
           discipline: string
           end_date?: string | null
           entry_fee?: number | null
+          entry_fee_per_team?: number | null
           format?: Database["public"]["Enums"]["bracket_format"]
+          gender?: string | null
           group_count?: number | null
           group_size?: number | null
+          host_school_id?: string | null
+          host_school_name?: string | null
           id?: string
           is_broadcast?: boolean | null
           is_house_competition?: boolean | null
+          is_nash_sanctioned?: boolean | null
           is_sports_day?: boolean | null
           level: Database["public"]["Enums"]["competition_level"]
           logo_url?: string | null
+          match_report_url?: string | null
           max_participants?: number | null
           name: string
+          nash_sanction_number?: string | null
+          nash_sport_id?: string | null
+          organisation_id?: string | null
           parent_id?: string | null
           points_config?: Json | null
           prize_pool?: number | null
           province?: string | null
           registration_deadline?: string | null
+          requires_card_verification?: boolean | null
           rules?: Json | null
           season?: string | null
+          season_id?: string | null
           slug?: string | null
           sponsor?: string | null
           stage?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["competition_status"]
+          technical_delegate_id?: string | null
           term?: string | null
+          tier?: string | null
+          total_entries?: number | null
           updated_at?: string
           venue_id?: string | null
+          weather_conditions?: string | null
         }
         Update: {
           age_group?: string | null
@@ -420,39 +605,82 @@ export type Database = {
           discipline?: string
           end_date?: string | null
           entry_fee?: number | null
+          entry_fee_per_team?: number | null
           format?: Database["public"]["Enums"]["bracket_format"]
+          gender?: string | null
           group_count?: number | null
           group_size?: number | null
+          host_school_id?: string | null
+          host_school_name?: string | null
           id?: string
           is_broadcast?: boolean | null
           is_house_competition?: boolean | null
+          is_nash_sanctioned?: boolean | null
           is_sports_day?: boolean | null
           level?: Database["public"]["Enums"]["competition_level"]
           logo_url?: string | null
+          match_report_url?: string | null
           max_participants?: number | null
           name?: string
+          nash_sanction_number?: string | null
+          nash_sport_id?: string | null
+          organisation_id?: string | null
           parent_id?: string | null
           points_config?: Json | null
           prize_pool?: number | null
           province?: string | null
           registration_deadline?: string | null
+          requires_card_verification?: boolean | null
           rules?: Json | null
           season?: string | null
+          season_id?: string | null
           slug?: string | null
           sponsor?: string | null
           stage?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["competition_status"]
+          technical_delegate_id?: string | null
           term?: string | null
+          tier?: string | null
+          total_entries?: number | null
           updated_at?: string
           venue_id?: string | null
+          weather_conditions?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "competitions_nash_sport_id_fkey"
+            columns: ["nash_sport_id"]
+            isOneToOne: false
+            referencedRelation: "nash_sports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competitions_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "nash_organisations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "competitions_parent_id_fkey"
             columns: ["parent_id"]
             isOneToOne: false
             referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competitions_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "nash_seasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competitions_technical_delegate_id_fkey"
+            columns: ["technical_delegate_id"]
+            isOneToOne: false
+            referencedRelation: "nash_officials"
             referencedColumns: ["id"]
           },
           {
@@ -989,6 +1217,7 @@ export type Database = {
           period: string
           player_id: string | null
           sequence: number
+          sport_code: string | null
           sub_type: string | null
           team_side: string
           value: number
@@ -1008,6 +1237,7 @@ export type Database = {
           period?: string
           player_id?: string | null
           sequence: number
+          sport_code?: string | null
           sub_type?: string | null
           team_side: string
           value?: number
@@ -1027,6 +1257,7 @@ export type Database = {
           period?: string
           player_id?: string | null
           sequence?: number
+          sport_code?: string | null
           sub_type?: string | null
           team_side?: string
           value?: number
@@ -1168,6 +1399,905 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      nash_athlete_registrations: {
+        Row: {
+          academic_check_date: string | null
+          academic_checked_by: string | null
+          academic_eligible: boolean | null
+          age_group: string | null
+          approved_at: string | null
+          approved_by: string | null
+          consent_document_url: string | null
+          created_at: string | null
+          id: string
+          is_captain: boolean | null
+          jersey_number: number | null
+          medical_clearance_date: string | null
+          medical_cleared: boolean | null
+          medical_cleared_by: string | null
+          medical_notes: string | null
+          nash_athlete_id: string | null
+          parental_consent: boolean | null
+          position: string | null
+          registration_status: string | null
+          rejection_reason: string | null
+          school_team_id: string | null
+          season_id: string | null
+          sport_id: string | null
+        }
+        Insert: {
+          academic_check_date?: string | null
+          academic_checked_by?: string | null
+          academic_eligible?: boolean | null
+          age_group?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          consent_document_url?: string | null
+          created_at?: string | null
+          id?: string
+          is_captain?: boolean | null
+          jersey_number?: number | null
+          medical_clearance_date?: string | null
+          medical_cleared?: boolean | null
+          medical_cleared_by?: string | null
+          medical_notes?: string | null
+          nash_athlete_id?: string | null
+          parental_consent?: boolean | null
+          position?: string | null
+          registration_status?: string | null
+          rejection_reason?: string | null
+          school_team_id?: string | null
+          season_id?: string | null
+          sport_id?: string | null
+        }
+        Update: {
+          academic_check_date?: string | null
+          academic_checked_by?: string | null
+          academic_eligible?: boolean | null
+          age_group?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          consent_document_url?: string | null
+          created_at?: string | null
+          id?: string
+          is_captain?: boolean | null
+          jersey_number?: number | null
+          medical_clearance_date?: string | null
+          medical_cleared?: boolean | null
+          medical_cleared_by?: string | null
+          medical_notes?: string | null
+          nash_athlete_id?: string | null
+          parental_consent?: boolean | null
+          position?: string | null
+          registration_status?: string | null
+          rejection_reason?: string | null
+          school_team_id?: string | null
+          season_id?: string | null
+          sport_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nash_athlete_registrations_nash_athlete_id_fkey"
+            columns: ["nash_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "nash_athlete_registry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nash_athlete_registrations_school_team_id_fkey"
+            columns: ["school_team_id"]
+            isOneToOne: false
+            referencedRelation: "school_teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nash_athlete_registrations_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "nash_seasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nash_athlete_registrations_sport_id_fkey"
+            columns: ["sport_id"]
+            isOneToOne: false
+            referencedRelation: "nash_sports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nash_athlete_registry: {
+        Row: {
+          created_at: string | null
+          current_school_id: string | null
+          current_school_name: string | null
+          date_of_birth: string
+          first_name: string
+          gender: string | null
+          id: string
+          id_document_url: string | null
+          id_number: string | null
+          id_verified: boolean | null
+          is_active: boolean | null
+          is_suspended: boolean | null
+          last_name: string
+          lifetime_ban: boolean | null
+          nash_id: string
+          photo_url: string | null
+          province: string | null
+          scholastic_card_number: string | null
+          ss_student_id: string | null
+          suspension_reason: string | null
+          suspension_until: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          current_school_id?: string | null
+          current_school_name?: string | null
+          date_of_birth: string
+          first_name: string
+          gender?: string | null
+          id?: string
+          id_document_url?: string | null
+          id_number?: string | null
+          id_verified?: boolean | null
+          is_active?: boolean | null
+          is_suspended?: boolean | null
+          last_name: string
+          lifetime_ban?: boolean | null
+          nash_id: string
+          photo_url?: string | null
+          province?: string | null
+          scholastic_card_number?: string | null
+          ss_student_id?: string | null
+          suspension_reason?: string | null
+          suspension_until?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          current_school_id?: string | null
+          current_school_name?: string | null
+          date_of_birth?: string
+          first_name?: string
+          gender?: string | null
+          id?: string
+          id_document_url?: string | null
+          id_number?: string | null
+          id_verified?: boolean | null
+          is_active?: boolean | null
+          is_suspended?: boolean | null
+          last_name?: string
+          lifetime_ban?: boolean | null
+          nash_id?: string
+          photo_url?: string | null
+          province?: string | null
+          scholastic_card_number?: string | null
+          ss_student_id?: string | null
+          suspension_reason?: string | null
+          suspension_until?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      nash_awards: {
+        Row: {
+          award_name: string | null
+          award_type: string | null
+          awarded_at: string | null
+          certificate_url: string | null
+          coach_id: string | null
+          competition_id: string | null
+          description: string | null
+          id: string
+          nash_athlete_id: string | null
+          official_id: string | null
+          school_team_id: string | null
+          season_id: string | null
+          sport_id: string | null
+          team_id: string | null
+          trophy_due_date: string | null
+          trophy_returned: boolean | null
+        }
+        Insert: {
+          award_name?: string | null
+          award_type?: string | null
+          awarded_at?: string | null
+          certificate_url?: string | null
+          coach_id?: string | null
+          competition_id?: string | null
+          description?: string | null
+          id?: string
+          nash_athlete_id?: string | null
+          official_id?: string | null
+          school_team_id?: string | null
+          season_id?: string | null
+          sport_id?: string | null
+          team_id?: string | null
+          trophy_due_date?: string | null
+          trophy_returned?: boolean | null
+        }
+        Update: {
+          award_name?: string | null
+          award_type?: string | null
+          awarded_at?: string | null
+          certificate_url?: string | null
+          coach_id?: string | null
+          competition_id?: string | null
+          description?: string | null
+          id?: string
+          nash_athlete_id?: string | null
+          official_id?: string | null
+          school_team_id?: string | null
+          season_id?: string | null
+          sport_id?: string | null
+          team_id?: string | null
+          trophy_due_date?: string | null
+          trophy_returned?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nash_awards_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nash_awards_nash_athlete_id_fkey"
+            columns: ["nash_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "nash_athlete_registry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nash_awards_official_id_fkey"
+            columns: ["official_id"]
+            isOneToOne: false
+            referencedRelation: "nash_officials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nash_awards_school_team_id_fkey"
+            columns: ["school_team_id"]
+            isOneToOne: false
+            referencedRelation: "school_teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nash_awards_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "nash_seasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nash_awards_sport_id_fkey"
+            columns: ["sport_id"]
+            isOneToOne: false
+            referencedRelation: "nash_sports"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nash_competition_budgets: {
+        Row: {
+          catering_costs: number | null
+          competition_id: string | null
+          created_at: string | null
+          entry_fees_collected: number | null
+          equipment_costs: number | null
+          id: string
+          notes: string | null
+          official_stipends: number | null
+          other_costs: number | null
+          printing_costs: number | null
+          sponsorship_received: number | null
+          surplus_deficit: number | null
+          total_budget: number | null
+          transport_costs: number | null
+          updated_at: string | null
+          venue_costs: number | null
+        }
+        Insert: {
+          catering_costs?: number | null
+          competition_id?: string | null
+          created_at?: string | null
+          entry_fees_collected?: number | null
+          equipment_costs?: number | null
+          id?: string
+          notes?: string | null
+          official_stipends?: number | null
+          other_costs?: number | null
+          printing_costs?: number | null
+          sponsorship_received?: number | null
+          surplus_deficit?: number | null
+          total_budget?: number | null
+          transport_costs?: number | null
+          updated_at?: string | null
+          venue_costs?: number | null
+        }
+        Update: {
+          catering_costs?: number | null
+          competition_id?: string | null
+          created_at?: string | null
+          entry_fees_collected?: number | null
+          equipment_costs?: number | null
+          id?: string
+          notes?: string | null
+          official_stipends?: number | null
+          other_costs?: number | null
+          printing_costs?: number | null
+          sponsorship_received?: number | null
+          surplus_deficit?: number | null
+          total_budget?: number | null
+          transport_costs?: number | null
+          updated_at?: string | null
+          venue_costs?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nash_competition_budgets_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nash_competition_tiers: {
+        Row: {
+          advances_count: number | null
+          code: string | null
+          id: string
+          level_order: number | null
+          min_ss_package: string | null
+          name: string | null
+          requires_card_verification: boolean | null
+          requires_ss_integration: boolean | null
+        }
+        Insert: {
+          advances_count?: number | null
+          code?: string | null
+          id?: string
+          level_order?: number | null
+          min_ss_package?: string | null
+          name?: string | null
+          requires_card_verification?: boolean | null
+          requires_ss_integration?: boolean | null
+        }
+        Update: {
+          advances_count?: number | null
+          code?: string | null
+          id?: string
+          level_order?: number | null
+          min_ss_package?: string | null
+          name?: string | null
+          requires_card_verification?: boolean | null
+          requires_ss_integration?: boolean | null
+        }
+        Relationships: []
+      }
+      nash_eligibility_flags: {
+        Row: {
+          description: string | null
+          flag_type: string | null
+          id: string
+          nash_athlete_id: string | null
+          raised_at: string | null
+          raised_by: string | null
+          registration_id: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string | null
+        }
+        Insert: {
+          description?: string | null
+          flag_type?: string | null
+          id?: string
+          nash_athlete_id?: string | null
+          raised_at?: string | null
+          raised_by?: string | null
+          registration_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string | null
+        }
+        Update: {
+          description?: string | null
+          flag_type?: string | null
+          id?: string
+          nash_athlete_id?: string | null
+          raised_at?: string | null
+          raised_by?: string | null
+          registration_id?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nash_eligibility_flags_nash_athlete_id_fkey"
+            columns: ["nash_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "nash_athlete_registry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nash_eligibility_flags_registration_id_fkey"
+            columns: ["registration_id"]
+            isOneToOne: false
+            referencedRelation: "nash_athlete_registrations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nash_entry_fee_payments: {
+        Row: {
+          amount: number | null
+          competition_id: string | null
+          created_at: string | null
+          id: string
+          nexus_fee_15pct: number | null
+          nexus_fee_paid: boolean | null
+          notes: string | null
+          organiser_amount: number | null
+          payment_date: string | null
+          payment_method: string | null
+          payment_reference: string | null
+          receipt_number: string | null
+          received_by: string | null
+          school_team_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          competition_id?: string | null
+          created_at?: string | null
+          id?: string
+          nexus_fee_15pct?: number | null
+          nexus_fee_paid?: boolean | null
+          notes?: string | null
+          organiser_amount?: number | null
+          payment_date?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          receipt_number?: string | null
+          received_by?: string | null
+          school_team_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          competition_id?: string | null
+          created_at?: string | null
+          id?: string
+          nexus_fee_15pct?: number | null
+          nexus_fee_paid?: boolean | null
+          notes?: string | null
+          organiser_amount?: number | null
+          payment_date?: string | null
+          payment_method?: string | null
+          payment_reference?: string | null
+          receipt_number?: string | null
+          received_by?: string | null
+          school_team_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nash_entry_fee_payments_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nash_entry_fee_payments_school_team_id_fkey"
+            columns: ["school_team_id"]
+            isOneToOne: false
+            referencedRelation: "school_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nash_members: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          first_name: string
+          id: string
+          id_number: string | null
+          is_active: boolean | null
+          last_name: string
+          organisation_id: string | null
+          phone: string | null
+          photo_url: string | null
+          role_title: string
+          sports: string[] | null
+          term_end: string | null
+          term_start: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          first_name: string
+          id?: string
+          id_number?: string | null
+          is_active?: boolean | null
+          last_name: string
+          organisation_id?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          role_title: string
+          sports?: string[] | null
+          term_end?: string | null
+          term_start?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          id_number?: string | null
+          is_active?: boolean | null
+          last_name?: string
+          organisation_id?: string | null
+          phone?: string | null
+          photo_url?: string | null
+          role_title?: string
+          sports?: string[] | null
+          term_end?: string | null
+          term_start?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nash_members_organisation_id_fkey"
+            columns: ["organisation_id"]
+            isOneToOne: false
+            referencedRelation: "nash_organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nash_mopse_reports: {
+        Row: {
+          created_at: string | null
+          id: string
+          pdf_url: string | null
+          report_data: Json | null
+          report_type: string | null
+          season_id: string | null
+          status: string | null
+          submitted_at: string | null
+          submitted_by: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          pdf_url?: string | null
+          report_data?: Json | null
+          report_type?: string | null
+          season_id?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          pdf_url?: string | null
+          report_data?: Json | null
+          report_type?: string | null
+          season_id?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nash_mopse_reports_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "nash_seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nash_officials: {
+        Row: {
+          account_name: string | null
+          account_number: string | null
+          bank_name: string | null
+          certification_body: string | null
+          certification_date: string | null
+          certification_expiry: string | null
+          created_at: string | null
+          date_of_birth: string | null
+          district: string | null
+          email: string | null
+          first_name: string
+          gender: string | null
+          grade: string | null
+          id: string
+          id_number: string | null
+          is_active: boolean | null
+          is_verified: boolean | null
+          last_name: string
+          nash_official_id: string | null
+          notes: string | null
+          other_roles: string[] | null
+          performance_rating: number | null
+          phone: string | null
+          photo_url: string | null
+          primary_role: string | null
+          province: string | null
+          sports: string[]
+          total_matches: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          account_name?: string | null
+          account_number?: string | null
+          bank_name?: string | null
+          certification_body?: string | null
+          certification_date?: string | null
+          certification_expiry?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          district?: string | null
+          email?: string | null
+          first_name: string
+          gender?: string | null
+          grade?: string | null
+          id?: string
+          id_number?: string | null
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          last_name: string
+          nash_official_id?: string | null
+          notes?: string | null
+          other_roles?: string[] | null
+          performance_rating?: number | null
+          phone?: string | null
+          photo_url?: string | null
+          primary_role?: string | null
+          province?: string | null
+          sports?: string[]
+          total_matches?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          account_name?: string | null
+          account_number?: string | null
+          bank_name?: string | null
+          certification_body?: string | null
+          certification_date?: string | null
+          certification_expiry?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          district?: string | null
+          email?: string | null
+          first_name?: string
+          gender?: string | null
+          grade?: string | null
+          id?: string
+          id_number?: string | null
+          is_active?: boolean | null
+          is_verified?: boolean | null
+          last_name?: string
+          nash_official_id?: string | null
+          notes?: string | null
+          other_roles?: string[] | null
+          performance_rating?: number | null
+          phone?: string | null
+          photo_url?: string | null
+          primary_role?: string | null
+          province?: string | null
+          sports?: string[]
+          total_matches?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      nash_organisations: {
+        Row: {
+          chair_name: string | null
+          created_at: string | null
+          district: string | null
+          email: string | null
+          established_year: number | null
+          id: string
+          is_active: boolean | null
+          level: string | null
+          logo_url: string | null
+          name: string
+          parent_id: string | null
+          phone: string | null
+          physical_address: string | null
+          province: string | null
+          secretary_name: string | null
+          treasurer_name: string | null
+          type: string | null
+          updated_at: string | null
+          zone: string | null
+        }
+        Insert: {
+          chair_name?: string | null
+          created_at?: string | null
+          district?: string | null
+          email?: string | null
+          established_year?: number | null
+          id?: string
+          is_active?: boolean | null
+          level?: string | null
+          logo_url?: string | null
+          name: string
+          parent_id?: string | null
+          phone?: string | null
+          physical_address?: string | null
+          province?: string | null
+          secretary_name?: string | null
+          treasurer_name?: string | null
+          type?: string | null
+          updated_at?: string | null
+          zone?: string | null
+        }
+        Update: {
+          chair_name?: string | null
+          created_at?: string | null
+          district?: string | null
+          email?: string | null
+          established_year?: number | null
+          id?: string
+          is_active?: boolean | null
+          level?: string | null
+          logo_url?: string | null
+          name?: string
+          parent_id?: string | null
+          phone?: string | null
+          physical_address?: string | null
+          province?: string | null
+          secretary_name?: string | null
+          treasurer_name?: string | null
+          type?: string | null
+          updated_at?: string | null
+          zone?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nash_organisations_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "nash_organisations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      nash_seasons: {
+        Row: {
+          academic_year: string
+          created_at: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean | null
+          is_current: boolean | null
+          name: string | null
+          registration_deadline: string | null
+          start_date: string | null
+          term: number | null
+        }
+        Insert: {
+          academic_year: string
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_current?: boolean | null
+          name?: string | null
+          registration_deadline?: string | null
+          start_date?: string | null
+          term?: number | null
+        }
+        Update: {
+          academic_year?: string
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_current?: boolean | null
+          name?: string | null
+          registration_deadline?: string | null
+          start_date?: string | null
+          term?: number | null
+        }
+        Relationships: []
+      }
+      nash_sports: {
+        Row: {
+          age_groups: string[] | null
+          applicable_to: string[] | null
+          code: string
+          created_at: string | null
+          full_name: string | null
+          gender: string | null
+          has_extra_time: boolean | null
+          has_penalties: boolean | null
+          has_suspension: boolean | null
+          icon_name: string | null
+          id: string
+          is_active: boolean | null
+          max_squad_size: number | null
+          min_squad_size: number | null
+          name: string
+          period_duration_minutes: number | null
+          periods: number | null
+          players_on_field: number | null
+          primary_term: number | null
+          rules_document_url: string | null
+          scoring_config: Json | null
+          scoring_type: string | null
+          secondary_term: number | null
+        }
+        Insert: {
+          age_groups?: string[] | null
+          applicable_to?: string[] | null
+          code: string
+          created_at?: string | null
+          full_name?: string | null
+          gender?: string | null
+          has_extra_time?: boolean | null
+          has_penalties?: boolean | null
+          has_suspension?: boolean | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_squad_size?: number | null
+          min_squad_size?: number | null
+          name: string
+          period_duration_minutes?: number | null
+          periods?: number | null
+          players_on_field?: number | null
+          primary_term?: number | null
+          rules_document_url?: string | null
+          scoring_config?: Json | null
+          scoring_type?: string | null
+          secondary_term?: number | null
+        }
+        Update: {
+          age_groups?: string[] | null
+          applicable_to?: string[] | null
+          code?: string
+          created_at?: string | null
+          full_name?: string | null
+          gender?: string | null
+          has_extra_time?: boolean | null
+          has_penalties?: boolean | null
+          has_suspension?: boolean | null
+          icon_name?: string | null
+          id?: string
+          is_active?: boolean | null
+          max_squad_size?: number | null
+          min_squad_size?: number | null
+          name?: string
+          period_duration_minutes?: number | null
+          periods?: number | null
+          players_on_field?: number | null
+          primary_term?: number | null
+          rules_document_url?: string | null
+          scoring_config?: Json | null
+          scoring_type?: string | null
+          secondary_term?: number | null
+        }
+        Relationships: []
       }
       nexus_coaches: {
         Row: {
@@ -2285,30 +3415,42 @@ export type Database = {
       ss_sync_log: {
         Row: {
           created_at: string
+          eligibility_checks_run: number | null
           error_message: string | null
+          flags_raised: number | null
           id: string
           performed_by: string | null
           schools_synced: number
+          season_id: string | null
+          sport: string | null
           status: string
           students_synced: number
           sync_type: string
         }
         Insert: {
           created_at?: string
+          eligibility_checks_run?: number | null
           error_message?: string | null
+          flags_raised?: number | null
           id?: string
           performed_by?: string | null
           schools_synced?: number
+          season_id?: string | null
+          sport?: string | null
           status: string
           students_synced?: number
           sync_type: string
         }
         Update: {
           created_at?: string
+          eligibility_checks_run?: number | null
           error_message?: string | null
+          flags_raised?: number | null
           id?: string
           performed_by?: string | null
           schools_synced?: number
+          season_id?: string | null
+          sport?: string | null
           status?: string
           students_synced?: number
           sync_type?: string
@@ -2627,49 +3769,85 @@ export type Database = {
       venues: {
         Row: {
           address: string | null
+          booking_notes: string | null
           capacity: number | null
           city: string
+          contact_person: string | null
+          contact_phone: string | null
           created_at: string
           equipment_inventory: Json | null
           facilities: string[] | null
+          has_changing_rooms: boolean | null
+          has_floodlights: boolean | null
+          has_medical_room: boolean | null
+          has_spectator_seating: boolean | null
           id: string
           is_active: boolean | null
           lat: number | null
           lng: number | null
           name: string
+          nash_approved: boolean | null
           province: string
+          school_id: string | null
+          spectator_capacity: number | null
+          sports_supported: string[] | null
+          surface_type: string | null
           type: string
           updated_at: string
         }
         Insert: {
           address?: string | null
+          booking_notes?: string | null
           capacity?: number | null
           city: string
+          contact_person?: string | null
+          contact_phone?: string | null
           created_at?: string
           equipment_inventory?: Json | null
           facilities?: string[] | null
+          has_changing_rooms?: boolean | null
+          has_floodlights?: boolean | null
+          has_medical_room?: boolean | null
+          has_spectator_seating?: boolean | null
           id?: string
           is_active?: boolean | null
           lat?: number | null
           lng?: number | null
           name: string
+          nash_approved?: boolean | null
           province: string
+          school_id?: string | null
+          spectator_capacity?: number | null
+          sports_supported?: string[] | null
+          surface_type?: string | null
           type: string
           updated_at?: string
         }
         Update: {
           address?: string | null
+          booking_notes?: string | null
           capacity?: number | null
           city?: string
+          contact_person?: string | null
+          contact_phone?: string | null
           created_at?: string
           equipment_inventory?: Json | null
           facilities?: string[] | null
+          has_changing_rooms?: boolean | null
+          has_floodlights?: boolean | null
+          has_medical_room?: boolean | null
+          has_spectator_seating?: boolean | null
           id?: string
           is_active?: boolean | null
           lat?: number | null
           lng?: number | null
           name?: string
+          nash_approved?: boolean | null
           province?: string
+          school_id?: string | null
+          spectator_capacity?: number | null
+          sports_supported?: string[] | null
+          surface_type?: string | null
           type?: string
           updated_at?: string
         }
@@ -2827,6 +4005,7 @@ export type Database = {
         Returns: boolean
       }
       is_competition_organizer: { Args: { _uid: string }; Returns: boolean }
+      nash_is_admin: { Args: { _user: string }; Returns: boolean }
       notify_users: {
         Args: {
           _body: string
@@ -2865,6 +4044,18 @@ export type Database = {
         | "district_admin"
         | "provincial_admin"
         | "national_admin"
+        | "platform_admin"
+        | "nash_national"
+        | "naph_national"
+        | "national_technical_director"
+        | "provincial_technical_director"
+        | "district_technical_director"
+        | "school_head"
+        | "timekeeper"
+        | "technical_delegate"
+        | "parent"
+        | "public"
+        | "competition_organiser"
       bracket_format:
         | "round_robin"
         | "single_elimination"
@@ -3054,6 +4245,18 @@ export const Constants = {
         "district_admin",
         "provincial_admin",
         "national_admin",
+        "platform_admin",
+        "nash_national",
+        "naph_national",
+        "national_technical_director",
+        "provincial_technical_director",
+        "district_technical_director",
+        "school_head",
+        "timekeeper",
+        "technical_delegate",
+        "parent",
+        "public",
+        "competition_organiser",
       ],
       bracket_format: [
         "round_robin",
