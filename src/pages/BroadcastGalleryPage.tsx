@@ -31,15 +31,13 @@ interface FixtureRow {
 
 function periodFor(f: FixtureRow) {
   if (f.status === "completed") return "FT";
-  if (f.status === "halftime") return "HT";
   return f.round_label || "LIVE";
 }
 
-function statusFor(f: FixtureRow): "live" | "ht" | "ft" | "upcoming" {
+function statusFor(f: FixtureRow): "live" | "ht" | "ft" | "scheduled" {
   if (f.status === "completed") return "ft";
-  if (f.status === "halftime") return "ht";
-  if (f.status === "live" || f.status === "in_progress") return "live";
-  return "upcoming";
+  if (f.status === "live") return "live";
+  return "scheduled";
 }
 
 export default function BroadcastGalleryPage() {
@@ -67,7 +65,7 @@ export default function BroadcastGalleryPage() {
                  competition:competition_id(name,discipline,level),
                  home_team:home_team_id(name),
                  away_team:away_team_id(name)`)
-        .in("status", ["live", "in_progress", "halftime", "completed", "scheduled"])
+        .in("status", ["live", "completed", "scheduled"])
         .order("scheduled_at", { ascending: false })
         .limit(8);
       return (data || []) as unknown as FixtureRow[];
@@ -92,15 +90,15 @@ export default function BroadcastGalleryPage() {
   const { data: sponsors = [] } = useQuery({
     queryKey: ["bcast-sponsors"],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from("sponsorships")
-        .select("sponsor_name, sponsor_logo, notes")
+        .select("sponsor_name, sponsor_logo")
         .limit(4);
-      return (data || []) as { sponsor_name: string; sponsor_logo: string | null; notes: string | null }[];
+      return (data || []) as { sponsor_name: string; sponsor_logo: string | null }[];
     },
   });
 
-  const live = fixtures.filter(f => ["live","in_progress","halftime"].includes(f.status)).slice(0, 4);
+  const live = fixtures.filter(f => f.status === "live").slice(0, 4);
   const recent = fixtures.filter(f => f.status === "completed").slice(0, 4);
   const upcoming = fixtures.filter(f => f.status === "scheduled").slice(0, 2);
 
