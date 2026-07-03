@@ -196,7 +196,7 @@ export default function BroadcastGalleryPage() {
             {sponsors.length === 0 ? (
               <p className="text-xs text-muted-foreground">No sponsors configured yet. Add them under Admin → Sponsorships.</p>
             ) : sponsors.map((s, i) => (
-              <SponsorBillboard key={i} name={s.sponsor_name} tagline={s.notes || "Official partner"} logo={s.sponsor_logo} />
+              <SponsorBillboard key={i} name={s.sponsor_name} tagline="Official partner" logo={s.sponsor_logo} />
             ))}
           </CardContent>
         </Card>
