@@ -149,6 +149,8 @@ const App = () => (
               <Route path="/official/profile" element={<OfficialDashboard />} />
 
               <Route path="/athlete/profile" element={<AthleteDashboard />} />
+              <Route path="/athlete/register-nexus" element={<AthleteRegisterNexusPage />} />
+              <Route path="/athlete/register" element={<AthleteRegisterNexusPage />} />
               <Route path="/athlete/stats" element={<AthleteDashboard />} />
               <Route path="/athlete/competitions" element={<AthleteDashboard />} />
 
