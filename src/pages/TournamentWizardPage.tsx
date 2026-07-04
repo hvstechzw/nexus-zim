@@ -33,7 +33,7 @@ interface State {
   organisationName: string;
   province: string;           // resolved from organisation
   gender: "boys" | "girls" | "mixed";
-  ageGroup: "U14" | "U16" | "U18" | "Open";
+  ageGroup: string;
   name: string;
   description: string;
   startDate: string;
@@ -381,16 +381,16 @@ export default function TournamentWizardPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-xs">Age Group</Label>
-                <Select value={s.ageGroup} onValueChange={(v) => set("ageGroup", v as State["ageGroup"])}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="U14">U14</SelectItem>
-                    <SelectItem value="U16">U16</SelectItem>
-                    <SelectItem value="U18">U18</SelectItem>
-                    <SelectItem value="Open">Open / Senior</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label className="text-xs">Age Group <span className="text-muted-foreground">(pick a preset or type custom)</span></Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {["U12", "U13", "U14", "U15", "U16", "U18", "U19", "U21", "Open"].map((g) => (
+                    <button key={g} type="button" onClick={() => set("ageGroup", g)}
+                      className={`px-3 py-1.5 text-xs rounded-full border transition ${s.ageGroup === g ? "border-accent bg-accent/10 text-accent" : "border-border text-muted-foreground hover:border-primary/40"}`}>
+                      {g}
+                    </button>
+                  ))}
+                </div>
+                <Input value={s.ageGroup} onChange={(e) => set("ageGroup", e.target.value)} placeholder="Custom (e.g. Form 3 & 4)" className="mt-1" />
               </div>
             </div>
           )}

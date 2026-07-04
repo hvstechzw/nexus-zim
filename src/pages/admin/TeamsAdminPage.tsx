@@ -13,7 +13,7 @@ import { SportBadge } from "@/components/nash/SportBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useHasRole, ORGANIZER_ROLES } from "@/hooks/useHasRole";
-import { Users, Plus, Trash2, Loader2, Search, Trophy } from "lucide-react";
+import { Users, Plus, Trash2, Loader2, Search, Trophy, Check } from "lucide-react";
 
 interface SchoolTeam {
   id: string;
@@ -146,7 +146,18 @@ export default function TeamsAdminPage() {
                             : <Badge variant="secondary" className="text-[10px]">Draft</Badge>}
                         </TableCell>
                         <TableCell className="text-right whitespace-nowrap">
-                          {canDelete && (
+                          {canManage && !r.is_published && (
+                            <Button variant="ghost" size="sm" className="h-8 text-[hsl(var(--nash-success))]"
+                              onClick={async () => {
+                                const { error } = await (supabase as any).from("school_teams").update({ is_published: true, published_at: new Date().toISOString() }).eq("id", r.id);
+                                if (error) return toast.error(error.message);
+                                toast.success(`Approved "${r.name}"`);
+                                setRows((prev) => prev.map((x) => x.id === r.id ? { ...x, is_published: true } : x));
+                              }}>
+                              <Check className="h-3.5 w-3.5 mr-1" /> Approve
+                            </Button>
+                          )}
+                          {(canDelete || canManage) && (
                             <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setTarget(r)} title="Delete team">
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>

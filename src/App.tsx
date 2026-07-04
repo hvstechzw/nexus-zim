@@ -46,6 +46,7 @@ import TeamSheetPage from "./pages/coach/TeamSheetPage.tsx";
 import OfficialDashboard from "./pages/official/OfficialDashboard.tsx";
 import OfficialAssignmentsPage from "./pages/official/OfficialAssignmentsPage.tsx";
 import AthleteDashboard from "./pages/athlete/AthleteDashboard.tsx";
+import AthleteRegisterNexusPage from "./pages/athlete/AthleteRegisterNexusPage.tsx";
 import OrganiserDashboard from "./pages/organiser/OrganiserDashboard.tsx";
 import AthletesRegistryPage from "./pages/admin/AthletesRegistryPage.tsx";
 import AthleteRegisterPage from "./pages/admin/AthleteRegisterPage.tsx";
@@ -148,6 +149,8 @@ const App = () => (
               <Route path="/official/profile" element={<OfficialDashboard />} />
 
               <Route path="/athlete/profile" element={<AthleteDashboard />} />
+              <Route path="/athlete/register-nexus" element={<AthleteRegisterNexusPage />} />
+              <Route path="/athlete/register" element={<AthleteRegisterNexusPage />} />
               <Route path="/athlete/stats" element={<AthleteDashboard />} />
               <Route path="/athlete/competitions" element={<AthleteDashboard />} />
 
