@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { InstallPrompt } from "@/components/InstallPrompt";
+import { AppShell } from "@/components/shell/AppShell";
 
 // ── Existing pages (preserved; will be repurposed in subsequent sessions) ──
 import Index from "./pages/Index.tsx";
@@ -80,6 +81,8 @@ const App = () => (
           <InstallPrompt />
           <BrowserRouter>
             <Routes>
+              {/* One shell owner for every route: header, rail, bottom navigation and Sly */}
+              <Route element={<AppShell />}>
               {/* ───────────────────── PUBLIC ───────────────────── */}
               <Route path="/" element={<FeedPage />} />
               <Route path="/home" element={<Index />} />
@@ -192,6 +195,7 @@ const App = () => (
 
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
+              </Route>
             </Routes>
           </BrowserRouter>
         </TooltipProvider>

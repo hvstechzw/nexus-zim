@@ -124,7 +124,7 @@ export default function TeamRegistrationPage() {
   return (
     <Shell>
       <div>
-        <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">Team Registration</p>
+        <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">Team Registration</p>
         <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">Register a Team</h1>
         <p className="text-xs text-muted-foreground mt-0.5">Any school (SS-linked or independent) can submit a team. A NASH admin approves it before it appears in fixture generators.</p>
       </div>
@@ -132,8 +132,8 @@ export default function TeamRegistrationPage() {
       <div className="flex items-center gap-1 overflow-x-auto pb-1">
         {STEPS.map((label, i) => (
           <button key={label} disabled={i > step} onClick={() => i <= step && setStep(i)}
-            className={`flex-1 min-w-fit px-3 py-1.5 rounded text-[10px] font-display tracking-wider uppercase transition-colors ${i === step ? "bg-primary text-primary-foreground" : i < step ? "text-accent hover:bg-accent/10" : "text-muted-foreground"}`}>
-            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold mr-1.5">
+            className={`flex-1 min-w-fit px-3 py-1.5 rounded text-xs font-display tracking-wider uppercase transition-colors ${i === step ? "bg-primary text-primary-foreground" : i < step ? "text-foreground hover:bg-accent/10" : "text-muted-foreground"}`}>
+            <span className="inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold mr-1.5">
               {i < step ? <Check className="h-3 w-3" /> : i + 1}
             </span>{label}
           </button>
@@ -143,7 +143,7 @@ export default function TeamRegistrationPage() {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-display tracking-wide flex items-center gap-2">
-            <Users className="h-4 w-4 text-accent" /> Step {step + 1} · {STEPS[step]}
+            <Users className="h-4 w-4 text-foreground" /> Step {step + 1} · {STEPS[step]}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 min-h-[280px]">
@@ -151,14 +151,14 @@ export default function TeamRegistrationPage() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-2">
                 <button onClick={() => setSchoolMode("existing")}
-                  className={`p-3 rounded border-2 text-left transition ${schoolMode === "existing" ? "border-accent bg-accent/10" : "border-border"}`}>
+                  className={`p-3 rounded border-2 text-left transition ${schoolMode === "existing" ? "border-border bg-accent/10" : "border-border"}`}>
                   <div className="text-sm font-medium">Existing school</div>
-                  <div className="text-[11px] text-muted-foreground">Pick from the registry</div>
+                  <div className="text-xs text-muted-foreground">Pick from the registry</div>
                 </button>
                 <button onClick={() => setSchoolMode("new")}
-                  className={`p-3 rounded border-2 text-left transition ${schoolMode === "new" ? "border-accent bg-accent/10" : "border-border"}`}>
+                  className={`p-3 rounded border-2 text-left transition ${schoolMode === "new" ? "border-border bg-accent/10" : "border-border"}`}>
                   <div className="text-sm font-medium">New / non-SS school</div>
-                  <div className="text-[11px] text-muted-foreground">Register a school not yet in Nexus</div>
+                  <div className="text-xs text-muted-foreground">Register a school not yet in Nexus</div>
                 </button>
               </div>
               {schoolMode === "existing" ? (
@@ -218,7 +218,7 @@ export default function TeamRegistrationPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FileField label="Team crest / logo" file={logoFile} onFile={setLogoFile} accept="image/*" hint="PNG or SVG, ideally square." />
               <FileField label="Team photo" file={photoFile} onFile={setPhotoFile} accept="image/*" hint="Full squad group photo." />
-              <p className="md:col-span-2 text-[11px] text-muted-foreground">Media is optional; you can upload later from the coach dashboard.</p>
+              <p className="md:col-span-2 text-xs text-muted-foreground">Media is optional; you can upload later from the coach dashboard.</p>
             </div>
           )}
 
@@ -231,7 +231,7 @@ export default function TeamRegistrationPage() {
               <Row label="Season" value={team.season} />
               <Row label="Coach" value={team.coach_name || "—"} />
               <Row label="Media" value={`${logoFile ? "Logo ✓" : "—"} · ${photoFile ? "Photo ✓" : "—"}`} />
-              <p className="text-[11px] text-muted-foreground pt-2">Submitting sends this to the NASH admin queue. Athletes can be added to the roster once approved.</p>
+              <p className="text-xs text-muted-foreground pt-2">Submitting sends this to the NASH admin queue. Athletes can be added to the roster once approved.</p>
             </div>
           )}
         </CardContent>
@@ -259,15 +259,15 @@ export default function TeamRegistrationPage() {
                 <div key={t.id} className="flex items-center justify-between gap-2 py-2 border-b border-border/40 last:border-0">
                   <div>
                     <div className="text-sm font-medium">{t.name}</div>
-                    <div className="text-[11px] text-muted-foreground">{t.school?.school_name || t.school?.name} · {t.discipline} · {t.age_group} {t.gender}</div>
+                    <div className="text-xs text-muted-foreground">{t.school?.school_name || t.school?.name} · {t.discipline} · {t.age_group} {t.gender}</div>
                   </div>
                   {t.is_published
-                    ? <Badge variant="outline" className="text-[10px] border-[hsl(var(--nash-success))]/50 text-[hsl(var(--nash-success))]">Approved</Badge>
-                    : <Badge variant="secondary" className="text-[10px]">Pending review</Badge>}
+                    ? <Badge variant="outline" className="text-xs border-[hsl(var(--nash-success))]/50 text-[hsl(var(--nash-success))]">Approved</Badge>
+                    : <Badge variant="secondary" className="text-xs">Pending review</Badge>}
                 </div>
               ))}
             </div>
-            <p className="text-[11px] text-muted-foreground mt-3">Once approved, add players via <Link to="/athlete/register-nexus" className="underline">athlete registration</Link>, then attach them from the coach dashboard.</p>
+            <p className="text-xs text-muted-foreground mt-3">Once approved, add players via <Link to="/athlete/register-nexus" className="underline">athlete registration</Link>, then attach them from the coach dashboard.</p>
           </CardContent>
         </Card>
       )}
@@ -288,12 +288,12 @@ function FileField({ label, file, onFile, accept, hint }: { label: string; file:
   return (
     <div className="space-y-1">
       <Label className="text-xs">{label}</Label>
-      <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-border rounded cursor-pointer hover:border-accent transition">
+      <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-border rounded cursor-pointer hover:border-border transition">
         {file ? (
           <>
-            <Check className="h-5 w-5 text-accent mb-1" />
+            <Check className="h-5 w-5 text-foreground mb-1" />
             <span className="text-xs">{file.name}</span>
-            <button type="button" onClick={(e) => { e.preventDefault(); onFile(null); }} className="text-[10px] text-destructive mt-1">Remove</button>
+            <button type="button" onClick={(e) => { e.preventDefault(); onFile(null); }} className="text-xs text-destructive mt-1">Remove</button>
           </>
         ) : (
           <>
@@ -303,7 +303,7 @@ function FileField({ label, file, onFile, accept, hint }: { label: string; file:
         )}
         <input type="file" accept={accept} className="hidden" onChange={(e) => onFile(e.target.files?.[0] || null)} />
       </label>
-      <p className="text-[10px] text-muted-foreground">{hint}</p>
+      <p className="text-xs text-muted-foreground">{hint}</p>
     </div>
   );
 }
@@ -314,7 +314,7 @@ function Shell({ children }: { children: React.ReactNode }) {
       <NashHeader />
       <div className="max-w-3xl mx-auto px-4 md:px-6 py-6 space-y-4">
         {children}
-        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
+        <p className="text-xs text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
       </div>
     </div>
   );

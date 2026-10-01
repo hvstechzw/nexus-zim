@@ -79,15 +79,15 @@ function AthleteIDCard({ athlete }: { athlete: Athlete }) {
           {/* Top: organization + card type */}
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[8px] tracking-[0.3em] uppercase opacity-60 font-semibold">NEXUS · Zimbabwe Sports Grid</p>
-              <p className="text-[11px] tracking-[0.12em] uppercase font-bold mt-0.5">Official Athlete ID</p>
+              <p className="text-xs tracking-[0.3em] uppercase opacity-60 font-semibold">NEXUS · Zimbabwe Sports Grid</p>
+              <p className="text-xs tracking-[0.12em] uppercase font-bold mt-0.5">Official Athlete ID</p>
             </div>
             <div className="text-right">
-              <p className="text-[8px] tracking-widest uppercase opacity-50">Season 2026</p>
+              <p className="text-xs tracking-widest uppercase opacity-50">Season 2026</p>
               {athlete.is_suspended ? (
-                <span className="text-[9px] tracking-widest font-bold text-red-300">SUSPENDED</span>
+                <span className="text-xs tracking-widest font-bold text-red-300">SUSPENDED</span>
               ) : (
-                <span className="text-[9px] tracking-widest font-bold opacity-70">{athlete.is_active !== false ? "ACTIVE" : "INACTIVE"}</span>
+                <span className="text-xs tracking-widest font-bold opacity-70">{athlete.is_active !== false ? "ACTIVE" : "INACTIVE"}</span>
               )}
             </div>
           </div>
@@ -109,10 +109,10 @@ function AthleteIDCard({ athlete }: { athlete: Athlete }) {
               <h2 className="text-xl font-black leading-tight tracking-tight truncate">
                 {athlete.display_name || `${athlete.first_name} ${athlete.last_name}`}
               </h2>
-              <p className="text-[11px] opacity-60 mt-0.5">{athlete.first_name} {athlete.last_name}</p>
+              <p className="text-xs opacity-60 mt-0.5">{athlete.first_name} {athlete.last_name}</p>
               <div className="flex flex-wrap gap-1 mt-1.5">
                 {athlete.disciplines.slice(0, 3).map(d => (
-                  <span key={d} className="text-[8px] tracking-[0.12em] uppercase font-bold px-2 py-0.5 rounded bg-primary-foreground/20">{d}</span>
+                  <span key={d} className="text-xs tracking-[0.12em] uppercase font-bold px-2 py-0.5 rounded bg-primary-foreground/20">{d}</span>
                 ))}
               </div>
             </div>
@@ -131,30 +131,30 @@ function AthleteIDCard({ athlete }: { athlete: Athlete }) {
             <div className="flex gap-4">
               <div>
                 <p className="text-[7px] tracking-[0.2em] uppercase opacity-40 font-semibold">Province</p>
-                <p className="text-[10px] font-bold">{athlete.province}</p>
+                <p className="text-xs font-bold">{athlete.province}</p>
               </div>
               {age && (
                 <div>
                   <p className="text-[7px] tracking-[0.2em] uppercase opacity-40 font-semibold">Age</p>
-                  <p className="text-[10px] font-bold">{age}</p>
+                  <p className="text-xs font-bold">{age}</p>
                 </div>
               )}
               {(athlete.school_name || athlete.club_name) && (
                 <div>
                   <p className="text-[7px] tracking-[0.2em] uppercase opacity-40 font-semibold">Affiliation</p>
-                  <p className="text-[10px] font-bold truncate max-w-[80px]">{athlete.school_name || athlete.club_name}</p>
+                  <p className="text-xs font-bold truncate max-w-[80px]">{athlete.school_name || athlete.club_name}</p>
                 </div>
               )}
               {athlete.medical_waiver_signed && (
                 <div>
                   <p className="text-[7px] tracking-[0.2em] uppercase opacity-40 font-semibold">Medical</p>
-                  <p className="text-[10px] font-bold">✓ Cleared</p>
+                  <p className="text-xs font-bold">✓ Cleared</p>
                 </div>
               )}
             </div>
             <div className="text-right">
               <p className="text-[7px] tracking-[0.2em] uppercase opacity-40 font-semibold">Card No.</p>
-              <p className="text-[9px] font-black tracking-widest opacity-70">{cardNum}</p>
+              <p className="text-xs font-black tracking-widest opacity-70">{cardNum}</p>
             </div>
           </div>
         </div>
@@ -162,7 +162,7 @@ function AthleteIDCard({ athlete }: { athlete: Athlete }) {
 
       {/* Actions */}
       <div className="flex gap-2 mt-3">
-        <button onClick={handlePrint} className="flex-1 h-9 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 transition-opacity flex items-center justify-center gap-2">
+        <button onClick={handlePrint} className="flex-1 min-h-11 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 transition-opacity flex items-center justify-center gap-2">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
           Print / Save PDF
         </button>
@@ -198,10 +198,10 @@ export default function AthleteIDPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <NexusHeader />
-      <div className="max-w-[1400px] mx-auto pt-20">
+      <div className="max-w-workspace mx-auto pt-20">
         {/* Header */}
         <div className="px-4 sm:px-8 py-10 hairline-b">
-          <p className="text-[10px] mono tracking-[0.25em] uppercase text-nexus-muted">Identity Management</p>
+          <p className="text-xs mono tracking-[0.25em] uppercase text-nexus-muted">Identity Management</p>
           <h1 className="display-font text-display-lg font-bold text-foreground mt-1">Athlete ID Cards</h1>
           <p className="text-sm text-nexus-muted mt-2">Digital identity cards with QR codes for all registered athletes. Print-ready PDF generation.</p>
         </div>
@@ -231,7 +231,7 @@ export default function AthleteIDPage() {
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="w-full aspect-[1.586/1] rounded-2xl bg-nexus-surface animate-pulse" />
+                <div key={i} className="w-full aspect-[1.586/1] rounded-2xl bg-nexus-surface " />
               ))}
             </div>
           ) : filtered.length === 0 ? (

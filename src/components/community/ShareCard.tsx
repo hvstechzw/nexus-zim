@@ -58,7 +58,7 @@ export function ShareCard({
             <div className="text-5xl font-bold tabular-nums">{awayScore}</div>
           </div>
         </div>
-        {footer && <div className="mt-5 text-[10px] opacity-60 text-center">{footer}</div>}
+        {footer && <div className="mt-5 text-xs opacity-60 text-center">{footer}</div>}
       </div>
       <div className="flex gap-2">
         <Button size="sm" onClick={share}>Share</Button>

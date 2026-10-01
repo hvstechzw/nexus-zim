@@ -64,10 +64,10 @@ export default function OfficialRegistryPage() {
   return (
     <div className="min-h-screen bg-background">
       <NashHeader />
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="max-w-workspace mx-auto px-4 md:px-6 py-6 space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">Federation · Officials</p>
+            <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">Federation · Officials</p>
             <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">Officials Registry</h1>
             <p className="text-xs text-muted-foreground mt-0.5">Referees, umpires, scorers, timekeepers and technical delegates across all sports.</p>
           </div>
@@ -89,9 +89,9 @@ export default function OfficialRegistryPage() {
               <div className="flex-1" />
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input className="h-9 pl-8 w-64" placeholder="Search name, ID, role" value={search} onChange={(e) => setSearch(e.target.value)} />
+                <Input className="min-h-11 pl-8 w-64" placeholder="Search name, ID, role" value={search} onChange={(e) => setSearch(e.target.value)} />
               </div>
-              <ProvinceSelector value={province} onChange={setProvince} allOption className="h-9 w-48" />
+              <ProvinceSelector value={province} onChange={setProvince} allOption className="min-h-11 w-48" />
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -111,18 +111,18 @@ export default function OfficialRegistryPage() {
                     const d = daysUntil(o.certification_expiry);
                     return (
                       <TableRow key={o.id}>
-                        <TableCell className="font-mono text-[11px] text-accent">{o.nash_official_id}</TableCell>
+                        <TableCell className="font-mono text-xs text-foreground">{o.nash_official_id}</TableCell>
                         <TableCell className="text-sm font-medium">{o.last_name}, {o.first_name}</TableCell>
                         <TableCell className="text-xs capitalize">{o.primary_role?.replace(/_/g, " ")}</TableCell>
-                        <TableCell><Badge variant="outline" className="text-[10px] font-display">{o.grade ?? "—"}</Badge></TableCell>
+                        <TableCell><Badge variant="outline" className="text-xs font-display">{o.grade ?? "—"}</Badge></TableCell>
                         <TableCell><div className="flex flex-wrap gap-1">{(o.sports || []).slice(0, 3).map((c) => <SportBadge key={c} code={c} />)}</div></TableCell>
                         <TableCell className="text-xs">{o.province ?? "—"}</TableCell>
                         <TableCell className="tabular-nums text-xs">{o.total_matches ?? 0}</TableCell>
                         <TableCell className="tabular-nums text-xs">{o.performance_rating ?? "—"}</TableCell>
                         <TableCell>
-                          {o.is_active ? <Badge variant="outline" className="text-[10px] border-[hsl(var(--nash-success))]/50 text-[hsl(var(--nash-success))]">Active</Badge> : <Badge variant="secondary" className="text-[10px]">Inactive</Badge>}
-                          {d !== null && d < 60 && d >= 0 && <Badge variant="outline" className="ml-1 text-[9px] border-[hsl(var(--nash-warning))]/60 text-[hsl(var(--nash-warning))]">Cert {d}d</Badge>}
-                          {d !== null && d < 0 && <Badge variant="destructive" className="ml-1 text-[9px]">Expired</Badge>}
+                          {o.is_active ? <Badge variant="outline" className="text-xs border-[hsl(var(--nash-success))]/50 text-[hsl(var(--nash-success))]">Active</Badge> : <Badge variant="secondary" className="text-xs">Inactive</Badge>}
+                          {d !== null && d < 60 && d >= 0 && <Badge variant="outline" className="ml-1 text-xs border-[hsl(var(--nash-warning))]/60 text-[hsl(var(--nash-warning))]">Cert {d}d</Badge>}
+                          {d !== null && d < 0 && <Badge variant="destructive" className="ml-1 text-xs">Expired</Badge>}
                         </TableCell>
                       </TableRow>
                     );
@@ -133,7 +133,7 @@ export default function OfficialRegistryPage() {
           </CardContent>
         </Card>
 
-        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
+        <p className="text-xs text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
       </div>
     </div>
   );

@@ -133,9 +133,9 @@ export default function EligibilityFlagsPage() {
   return (
     <div className="min-h-screen bg-background">
       <NashHeader />
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="max-w-workspace mx-auto px-4 md:px-6 py-6 space-y-6">
         <div>
-          <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">Federation · Eligibility</p>
+          <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">Federation · Eligibility</p>
           <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">Eligibility Engine</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Age fraud, dual enrollment, academic, medical and suspension flags across all competitions.</p>
         </div>
@@ -150,15 +150,15 @@ export default function EligibilityFlagsPage() {
           <CardHeader className="pb-3">
             <div className="flex flex-wrap items-center gap-2">
               <CardTitle className="text-base flex items-center gap-2 font-display tracking-wide">
-                <ShieldAlert className="h-4 w-4 text-accent" /> Flag Queue
+                <ShieldAlert className="h-4 w-4 text-foreground" /> Flag Queue
               </CardTitle>
               <div className="flex-1" />
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input className="h-9 pl-8 w-56" placeholder="Search athlete, NASH ID, description" value={search} onChange={(e) => setSearch(e.target.value)} />
+                <Input className="min-h-11 pl-8 w-56" placeholder="Search athlete, NASH ID, description" value={search} onChange={(e) => setSearch(e.target.value)} />
               </div>
               <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
-                <SelectTrigger className="h-9 w-32"><SelectValue /></SelectTrigger>
+                <SelectTrigger className="min-h-11 w-32"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="open">Open</SelectItem>
                   <SelectItem value="resolved">Resolved</SelectItem>
@@ -167,13 +167,13 @@ export default function EligibilityFlagsPage() {
                 </SelectContent>
               </Select>
               <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger className="h-9 w-44"><SelectValue placeholder="All flag types" /></SelectTrigger>
+                <SelectTrigger className="min-h-11 w-44"><SelectValue placeholder="All flag types" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
                   {Object.entries(FLAG_LABEL).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="sm" className="h-9" onClick={load}>
+              <Button variant="outline" size="sm" className="min-h-11" onClick={load}>
                 <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
               </Button>
             </div>
@@ -205,18 +205,18 @@ export default function EligibilityFlagsPage() {
                       <TableCell className="font-medium text-sm">
                         {f.athlete ? `${f.athlete.first_name} ${f.athlete.last_name}` : "—"}
                       </TableCell>
-                      <TableCell className="font-mono text-[11px] text-muted-foreground">{f.athlete?.nash_id ?? "—"}</TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground">{f.athlete?.nash_id ?? "—"}</TableCell>
                       <TableCell className="text-xs">
                         <div>{f.athlete?.current_school_name ?? "—"}</div>
                         <div className="text-muted-foreground">{f.athlete?.province ?? ""}</div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="text-[10px] font-display tracking-wider">
+                        <Badge variant="outline" className="text-xs font-display tracking-wider">
                           {FLAG_LABEL[f.flag_type || "other"] ?? f.flag_type}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-xs max-w-sm truncate" title={f.description ?? undefined}>{f.description}</TableCell>
-                      <TableCell className="text-[11px] text-muted-foreground">
+                      <TableCell className="text-xs text-muted-foreground">
                         {f.raised_at ? new Date(f.raised_at).toLocaleDateString() : "—"}
                       </TableCell>
                       <TableCell>
@@ -227,11 +227,11 @@ export default function EligibilityFlagsPage() {
                       </TableCell>
                       <TableCell className="text-right">
                         {f.status === "open" && canManage ? (
-                          <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => setActive(f)}>
+                          <Button size="sm" variant="outline" className="min-h-11 text-xs" onClick={() => setActive(f)}>
                             Review
                           </Button>
                         ) : (
-                          <span className="text-[11px] text-muted-foreground">{f.status === "open" ? "—" : "closed"}</span>
+                          <span className="text-xs text-muted-foreground">{f.status === "open" ? "—" : "closed"}</span>
                         )}
                       </TableCell>
                     </TableRow>
@@ -242,7 +242,7 @@ export default function EligibilityFlagsPage() {
           </CardContent>
         </Card>
 
-        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
+        <p className="text-xs text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
       </div>
 
       <Dialog open={!!active} onOpenChange={(o) => { if (!o) { setActive(null); setResolution(""); } }}>
@@ -259,7 +259,7 @@ export default function EligibilityFlagsPage() {
               </div>
               <div>
                 <span className="text-muted-foreground">Flag: </span>
-                <Badge variant="outline" className="text-[10px]">{FLAG_LABEL[active.flag_type || "other"] ?? active.flag_type}</Badge>
+                <Badge variant="outline" className="text-xs">{FLAG_LABEL[active.flag_type || "other"] ?? active.flag_type}</Badge>
               </div>
               <div>
                 <span className="text-muted-foreground">Description: </span>

@@ -155,9 +155,9 @@ export default function PlayerProfilePage() {
           )}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <span className="text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted bg-nexus-surface px-2.5 py-1 rounded-full">{sport}</span>
-              {athlete.jersey_number != null && <span className="text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted bg-nexus-surface px-2.5 py-1 rounded-full">#{athlete.jersey_number}</span>}
-              <span className={`text-[10px] mono tracking-[0.15em] uppercase px-2.5 py-1 rounded-full ${
+              <span className="text-xs mono tracking-[0.15em] uppercase text-nexus-muted bg-nexus-surface px-2.5 py-1 rounded-full">{sport}</span>
+              {athlete.jersey_number != null && <span className="text-xs mono tracking-[0.15em] uppercase text-nexus-muted bg-nexus-surface px-2.5 py-1 rounded-full">#{athlete.jersey_number}</span>}
+              <span className={`text-xs mono tracking-[0.15em] uppercase px-2.5 py-1 rounded-full ${
                 elig.status === "suspended" ? "bg-foreground text-primary-foreground" : elig.status === "unverified" ? "bg-nexus-surface text-nexus-muted" : "bg-nexus-surface text-nexus-muted"}`}>{elig.label}</span>
             </div>
             <h1 className="display-font text-display-md font-bold">{name}</h1>
@@ -174,14 +174,14 @@ export default function PlayerProfilePage() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {stats.map((s) => (
             <div key={s.label} className="hairline rounded-xl p-4">
-              <p className="text-[9px] mono tracking-[0.15em] uppercase text-nexus-muted">{s.label}</p>
+              <p className="text-xs mono tracking-[0.15em] uppercase text-nexus-muted">{s.label}</p>
               <p className="text-xl font-bold text-foreground mt-1">{s.value}</p>
             </div>
           ))}
         </div>
 
         <div className="py-8">
-          <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted mb-3">Recent activity</p>
+          <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted mb-3">Recent activity</p>
           {entries.length === 0 ? (
             <p className="text-nexus-muted mono text-sm text-center py-12">No recorded events yet.</p>
           ) : (
@@ -189,8 +189,8 @@ export default function PlayerProfilePage() {
               {entries.slice(0, 40).map((e, i) => (
                 <div key={i} className="flex items-center gap-3 px-4 py-3 hairline-b last:border-b-0">
                   <span className="text-sm font-semibold text-foreground flex-1 truncate">{labels[e.event_type] || e.event_type}</span>
-                  {Number(e.value ?? 0) > 0 && <span className="text-[10px] mono text-nexus-live">+{e.value}</span>}
-                  <span className="text-[10px] mono text-nexus-muted">{new Date(e.created_at).toLocaleDateString("en-ZW", { month: "short", day: "numeric" })}</span>
+                  {Number(e.value ?? 0) > 0 && <span className="text-xs mono text-nexus-live">+{e.value}</span>}
+                  <span className="text-xs mono text-nexus-muted">{new Date(e.created_at).toLocaleDateString("en-ZW", { month: "short", day: "numeric" })}</span>
                 </div>
               ))}
             </div>
@@ -200,7 +200,7 @@ export default function PlayerProfilePage() {
         {(career || form.length > 0 || badges.length > 0) && (
           <div className="py-8 space-y-6">
             <div>
-              <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted mb-3">Career — Match Engine</p>
+              <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted mb-3">Career — Match Engine</p>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                 {[
                   { l: "Matches", v: career?.matches ?? 0 },
@@ -210,7 +210,7 @@ export default function PlayerProfilePage() {
                   { l: "Intercepts", v: career?.intercepts ?? 0 },
                 ].map((s) => (
                   <div key={s.l} className="hairline rounded-xl p-4">
-                    <p className="text-[9px] mono tracking-[0.15em] uppercase text-nexus-muted">{s.l}</p>
+                    <p className="text-xs mono tracking-[0.15em] uppercase text-nexus-muted">{s.l}</p>
                     <p className="text-xl font-bold mt-1">{s.v}</p>
                   </div>
                 ))}
@@ -218,13 +218,13 @@ export default function PlayerProfilePage() {
             </div>
             {form.length > 0 && (
               <div>
-                <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted mb-3">Last {form.length} matches</p>
+                <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted mb-3">Last {form.length} matches</p>
                 <div className="hairline rounded-xl overflow-hidden">
                   {form.map((m: any) => (
                     <Link to={`/live/${m.fixture_id}`} key={m.fixture_id} className="flex items-center gap-3 px-4 py-3 hairline-b last:border-b-0 hover:bg-nexus-surface/40">
-                      <span className="text-[10px] mono text-nexus-muted w-20">{m.scheduled_at ? new Date(m.scheduled_at).toLocaleDateString("en-ZW", { month: "short", day: "numeric" }) : "—"}</span>
+                      <span className="text-xs mono text-nexus-muted w-20">{m.scheduled_at ? new Date(m.scheduled_at).toLocaleDateString("en-ZW", { month: "short", day: "numeric" }) : "—"}</span>
                       <span className="text-sm flex-1 tabular-nums">{m.goals}G · {m.assists}A · {m.intercepts}I{m.cards ? ` · ${m.cards}C` : ""}</span>
-                      <span className="text-[10px] mono text-nexus-muted">view →</span>
+                      <span className="text-xs mono text-nexus-muted">view →</span>
                     </Link>
                   ))}
                 </div>
@@ -232,7 +232,7 @@ export default function PlayerProfilePage() {
             )}
             {badges.length > 0 && (
               <div>
-                <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted mb-3">Achievements</p>
+                <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted mb-3">Achievements</p>
                 <div className="flex flex-wrap gap-2">
                   {badges.map((b: any) => (
                     <span key={b.id} className="hairline rounded-full px-3 py-1 text-xs">{b.label}</span>

@@ -52,7 +52,7 @@ const STATUS_TONE: Record<string, string> = {
   active: "border-[hsl(var(--nash-error))]/60 text-[hsl(var(--nash-error))]",
   completed: "border-[hsl(var(--nash-success))]/50 text-[hsl(var(--nash-success))]",
   final: "border-[hsl(var(--nash-success))]/50 text-[hsl(var(--nash-success))]",
-  draft: "border-accent/50 text-accent",
+  draft: "border-border text-foreground",
   cancelled: "border-destructive/60 text-destructive",
 };
 
@@ -166,10 +166,10 @@ export default function CompetitionsAdminPage() {
   return (
     <div className="min-h-screen bg-background">
       <NashHeader />
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="max-w-workspace mx-auto px-4 md:px-6 py-6 space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">Federation · Competitions</p>
+            <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">Federation · Competitions</p>
             <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">Competitions</h1>
             <p className="text-xs text-muted-foreground mt-0.5">Create, manage, and delete sanctioned competitions across every NASH sport and tier.</p>
           </div>
@@ -192,10 +192,10 @@ export default function CompetitionsAdminPage() {
               <div className="flex-1" />
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input className="h-9 pl-8 w-56" placeholder="Search by name" value={search} onChange={(e) => setSearch(e.target.value)} />
+                <Input className="min-h-11 pl-8 w-56" placeholder="Search by name" value={search} onChange={(e) => setSearch(e.target.value)} />
               </div>
-              <SportSelector value={sport} onChange={setSport} allOption className="h-9 w-44" />
-              <ProvinceSelector value={province} onChange={setProvince} allOption className="h-9 w-44" />
+              <SportSelector value={sport} onChange={setSport} allOption className="min-h-11 w-44" />
+              <ProvinceSelector value={province} onChange={setProvince} allOption className="min-h-11 w-44" />
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -218,7 +218,7 @@ export default function CompetitionsAdminPage() {
                   {loading && <TableRow><TableCell colSpan={9} className="text-center py-8 text-sm text-muted-foreground">Loading…</TableCell></TableRow>}
                   {!loading && filtered.length === 0 && (
                     <TableRow><TableCell colSpan={9} className="text-center py-8 text-sm text-muted-foreground">
-                      No competitions match. {canManage && <Link to="/admin/competitions/new" className="text-accent hover:underline">Create one →</Link>}
+                      No competitions match. {canManage && <Link to="/admin/competitions/new" className="text-foreground underline underline-offset-4">Create one →</Link>}
                     </TableCell></TableRow>
                   )}
                   {filtered.map((c) => {
@@ -233,18 +233,18 @@ export default function CompetitionsAdminPage() {
                           </TableCell>
                           <TableCell className="font-medium" onClick={() => toggleExpand(c)}>
                             <div>{c.name}</div>
-                            {c.nash_sanction_number && <div className="text-[10px] font-mono text-accent">{c.nash_sanction_number}</div>}
+                            {c.nash_sanction_number && <div className="text-xs font-mono text-foreground">{c.nash_sanction_number}</div>}
                           </TableCell>
                           <TableCell>{c.discipline && <SportBadge code={c.discipline.toUpperCase().slice(0, 2)} />}</TableCell>
                           <TableCell>{c.tier && <TierBadge tier={c.tier as CompetitionTier} />}</TableCell>
                           <TableCell className="text-xs">{c.age_group} {c.gender}</TableCell>
                           <TableCell className="text-xs">{c.province ?? "—"}</TableCell>
                           <TableCell className="text-xs">{c.start_date ?? "—"}{c.end_date ? ` → ${c.end_date}` : ""}</TableCell>
-                          <TableCell><Badge variant="outline" className={`${STATUS_TONE[c.status] || ""} text-[10px] font-display uppercase`}>{c.status}</Badge></TableCell>
+                          <TableCell><Badge variant="outline" className={`${STATUS_TONE[c.status] || ""} text-xs font-display uppercase`}>{c.status}</Badge></TableCell>
                           <TableCell className="text-right whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                            <Button asChild variant="ghost" size="icon" className="h-8 w-8"><Link to={`/competition/${c.id}`} title="View"><Edit3 className="h-3.5 w-3.5" /></Link></Button>
+                            <Button asChild variant="ghost" size="icon" className="min-h-11 w-11"><Link to={`/competition/${c.id}`} title="View"><Edit3 className="h-3.5 w-3.5" /></Link></Button>
                             {canDelete && (
-                              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" title="Delete" onClick={() => setDeleteCompTarget(c)}>
+                              <Button variant="ghost" size="icon" className="min-h-11 w-11 text-destructive hover:text-destructive" title="Delete" onClick={() => setDeleteCompTarget(c)}>
                                 <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             )}
@@ -266,7 +266,7 @@ export default function CompetitionsAdminPage() {
           </CardContent>
         </Card>
 
-        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
+        <p className="text-xs text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
       </div>
 
       {/* Competition delete confirm */}
@@ -313,12 +313,12 @@ function FixtureList({ list, canManage, onDelete }: { list?: Fixture[]; canManag
   if (list.length === 0) return <div className="text-xs text-muted-foreground py-2 text-center">No fixtures yet for this competition.</div>;
   return (
     <div className="space-y-1">
-      <div className="text-[10px] font-display tracking-wider uppercase text-muted-foreground mb-1">Fixtures ({list.length})</div>
+      <div className="text-xs font-display tracking-wider uppercase text-muted-foreground mb-1">Fixtures ({list.length})</div>
       {list.map((f) => (
         <div key={f.id} className="flex items-center gap-2 px-2 py-1.5 rounded border border-border/40 bg-background text-sm">
-          <span className="text-[10px] font-mono text-muted-foreground w-12 shrink-0">{f.round_label ?? "—"}</span>
-          <span className="flex-1 min-w-0 truncate">{f.home_team?.name ?? "TBD"} <span className="text-accent font-mono mx-1">{f.home_score ?? 0} – {f.away_score ?? 0}</span> {f.away_team?.name ?? "TBD"}</span>
-          <Badge variant="outline" className="text-[9px]">{f.status}</Badge>
+          <span className="text-xs font-mono text-muted-foreground w-12 shrink-0">{f.round_label ?? "—"}</span>
+          <span className="flex-1 min-w-0 truncate">{f.home_team?.name ?? "TBD"} <span className="text-foreground font-mono mx-1">{f.home_score ?? 0} – {f.away_score ?? 0}</span> {f.away_team?.name ?? "TBD"}</span>
+          <Badge variant="outline" className="text-xs">{f.status}</Badge>
           {canManage && (
             <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => onDelete(f)} title="Delete fixture">
               <Trash2 className="h-3 w-3" />

@@ -90,7 +90,7 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {mode === "signup" && (
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold">Full Name</label>
+                <label className="text-xs mono tracking-[0.15em] uppercase text-nexus-muted font-semibold">Full Name</label>
                 <input
                   type="text"
                   required
@@ -103,7 +103,7 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
             )}
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold">Email</label>
+              <label className="text-xs mono tracking-[0.15em] uppercase text-nexus-muted font-semibold">Email</label>
               <input
                 type="email"
                 required
@@ -115,7 +115,7 @@ export function AuthModal({ open, onClose }: AuthModalProps) {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold">Password</label>
+              <label className="text-xs mono tracking-[0.15em] uppercase text-nexus-muted font-semibold">Password</label>
               <input
                 type="password"
                 required

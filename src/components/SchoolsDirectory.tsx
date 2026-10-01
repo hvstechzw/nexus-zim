@@ -28,12 +28,12 @@ export function SchoolsDirectory() {
     <section id="schools" className="hairline-b bg-background">
       <div className="px-4 sm:px-8 py-6 sm:py-8 hairline-b flex items-center justify-between gap-3">
         <div>
-          <p className="text-[10px] sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">Schools Directory</p>
+          <p className="text-xs sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">Schools Directory</p>
           <h2 className="display-font text-xl sm:text-2xl font-bold text-foreground mt-1">Verified Schools on Nexus</h2>
         </div>
         <div className="flex items-center gap-3">
           <ScholasticBadge size="sm" />
-          <Link to="/schools" className="hidden sm:flex items-center h-8 px-3 text-[11px] font-semibold tracking-wide bg-foreground text-primary-foreground rounded-lg hover:opacity-85 transition-opacity">
+          <Link to="/schools" className="hidden sm:flex items-center h-8 px-3 text-xs font-semibold tracking-wide bg-foreground text-primary-foreground rounded-lg hover:opacity-85 transition-opacity">
             View All
           </Link>
         </div>
@@ -62,8 +62,8 @@ export function SchoolsDirectory() {
                 )}
               </div>
               <p className="text-xs sm:text-sm font-semibold text-foreground line-clamp-2 leading-tight">{s.school_name || s.name}</p>
-              <p className="text-[10px] mono uppercase tracking-wider text-nexus-muted">{tierLabel(s.level)}</p>
-              <p className="text-[10px] text-nexus-muted">{s.province}</p>
+              <p className="text-xs mono uppercase tracking-wider text-nexus-muted">{tierLabel(s.level)}</p>
+              <p className="text-xs text-nexus-muted">{s.province}</p>
             </Link>
           ))}
         </div>

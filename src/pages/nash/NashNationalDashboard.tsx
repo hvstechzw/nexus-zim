@@ -114,11 +114,11 @@ export default function NashNationalDashboard({ federation = "NASH" }: { federat
     <div className="min-h-screen bg-background">
       <NashHeader />
 
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="max-w-workspace mx-auto px-4 md:px-6 py-6 space-y-6">
         {/* Header band */}
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">{federation}</p>
+            <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">{federation}</p>
             <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">
               National Command Centre
             </h1>
@@ -126,8 +126,8 @@ export default function NashNationalDashboard({ federation = "NASH" }: { federat
           </div>
           <div className="flex items-end gap-2">
             <div className="space-y-1">
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Season</p>
-              <SeasonSelector value={seasonId} onChange={(id, s) => { setSeasonId(id); setSeason(s); }} className="h-9 w-56" />
+              <p className="text-xs uppercase tracking-wider text-muted-foreground">Season</p>
+              <SeasonSelector value={seasonId} onChange={(id, s) => { setSeasonId(id); setSeason(s); }} className="min-h-11 w-56" />
             </div>
           </div>
         </div>
@@ -155,7 +155,7 @@ export default function NashNationalDashboard({ federation = "NASH" }: { federat
           <Card className="lg:col-span-2">
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2 font-display tracking-wide">
-                <Globe2 className="h-4 w-4 text-accent" /> Province Participation
+                <Globe2 className="h-4 w-4 text-foreground" /> Province Participation
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-1.5">
@@ -170,7 +170,7 @@ export default function NashNationalDashboard({ federation = "NASH" }: { federat
                     <div className="space-y-1">
                       <div className="flex items-center justify-between gap-2 text-xs">
                         <span className="font-medium">{row.province}</span>
-                        <Badge variant="outline" className="font-mono text-[9px] text-accent">{provinceCode(row.province)}</Badge>
+                        <Badge variant="outline" className="font-mono text-xs text-foreground">{provinceCode(row.province)}</Badge>
                       </div>
                       <div className="h-1.5 rounded bg-muted overflow-hidden">
                         <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
@@ -178,7 +178,7 @@ export default function NashNationalDashboard({ federation = "NASH" }: { federat
                     </div>
                     <div className="text-right text-xs tabular-nums">
                       <div className="font-bold">{row.athletes}</div>
-                      <div className="text-[10px] text-muted-foreground">{row.competitions} comp{row.competitions === 1 ? "" : "s"}</div>
+                      <div className="text-xs text-muted-foreground">{row.competitions} comp{row.competitions === 1 ? "" : "s"}</div>
                     </div>
                   </div>
                 );
@@ -190,7 +190,7 @@ export default function NashNationalDashboard({ federation = "NASH" }: { federat
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base flex items-center gap-2 font-display tracking-wide">
-                <ListChecks className="h-4 w-4 text-accent" /> Quick Actions
+                <ListChecks className="h-4 w-4 text-foreground" /> Quick Actions
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
@@ -210,16 +210,16 @@ export default function NashNationalDashboard({ federation = "NASH" }: { federat
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between gap-2">
               <CardTitle className="text-base flex items-center gap-2 font-display tracking-wide">
-                <MapPin className="h-4 w-4 text-accent" /> Recent &amp; Upcoming Competitions
+                <MapPin className="h-4 w-4 text-foreground" /> Recent &amp; Upcoming Competitions
               </CardTitle>
-              <Link to="/admin/competitions" className="text-xs text-accent hover:underline">View all →</Link>
+              <Link to="/admin/competitions" className="text-xs text-foreground underline underline-offset-4">View all →</Link>
             </div>
           </CardHeader>
           <CardContent>
             {loading && <p className="text-xs text-muted-foreground">Loading competitions…</p>}
             {!loading && recentComps.length === 0 && (
               <p className="text-sm text-muted-foreground py-6 text-center">
-                No competitions for this season yet. <Link to="/admin/competitions/new" className="text-accent hover:underline">Create one →</Link>
+                No competitions for this season yet. <Link to="/admin/competitions/new" className="text-foreground underline underline-offset-4">Create one →</Link>
               </p>
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -228,7 +228,7 @@ export default function NashNationalDashboard({ federation = "NASH" }: { federat
           </CardContent>
         </Card>
 
-        <p className="text-[10px] text-muted-foreground text-center pt-2">
+        <p className="text-xs text-muted-foreground text-center pt-2">
           Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises
         </p>
       </div>
@@ -239,10 +239,10 @@ export default function NashNationalDashboard({ federation = "NASH" }: { federat
 function QuickAction({ to, label, icon: Icon, badge }: { to: string; label: string; icon: any; badge?: string }) {
   return (
     <Link to={to}>
-      <Button variant="outline" className="w-full justify-start h-10 font-normal">
-        <Icon className="h-4 w-4 mr-2 text-accent" />
+      <Button variant="outline" className="w-full justify-start min-h-11 font-normal">
+        <Icon className="h-4 w-4 mr-2 text-foreground" />
         <span className="flex-1 text-left text-sm">{label}</span>
-        {badge && <Badge variant="destructive" className="ml-auto h-5 text-[10px]">{badge}</Badge>}
+        {badge && <Badge variant="destructive" className="ml-auto h-5 text-xs">{badge}</Badge>}
         <ArrowRight className="h-3.5 w-3.5 ml-1 opacity-50" />
       </Button>
     </Link>

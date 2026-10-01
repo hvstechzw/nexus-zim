@@ -187,7 +187,7 @@ export default function TeamBuilderPage() {
         <div className="hairline rounded-xl p-5 mb-6">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-semibold">Roster</p>
-            <span className="text-[10px] mono text-nexus-muted">{selected.size} selected · {eligible.length} eligible from SS</span>
+            <span className="text-xs mono text-nexus-muted">{selected.size} selected · {eligible.length} eligible from SS</span>
           </div>
           {eligible.length === 0 ? (
             <p className="text-xs text-nexus-muted">No Scholastic Services students mirrored for this school yet. Run a sync from Admin first.</p>
@@ -201,7 +201,7 @@ export default function TeamBuilderPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-medium truncate">{a.first_name} {a.last_name}</p>
-                    <p className="text-[10px] text-nexus-muted">{a.gender || "—"}{a.scholastic_card_verified ? " · verified" : ""}</p>
+                    <p className="text-xs text-nexus-muted">{a.gender || "—"}{a.scholastic_card_verified ? " · verified" : ""}</p>
                   </div>
                 </label>
               ))}

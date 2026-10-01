@@ -36,7 +36,7 @@ export function CompetitionCard({ comp }: { comp: Competition }) {
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0 flex-1">
               <p className="font-display font-semibold text-sm truncate">{comp.name}</p>
-              <p className="text-[11px] text-muted-foreground truncate">
+              <p className="text-xs text-muted-foreground truncate">
                 {code ? sportName(code) : comp.discipline}
                 {comp.age_group ? ` · ${comp.age_group}` : ""}
                 {comp.gender ? ` · ${comp.gender}` : ""}
@@ -44,7 +44,7 @@ export function CompetitionCard({ comp }: { comp: Competition }) {
             </div>
             {comp.tier && <TierBadge tier={comp.tier as CompetitionTier} />}
           </div>
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
             {code && <SportBadge code={code} />}
             {dateRange && <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />{dateRange}</span>}
             {comp.province && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{comp.province}</span>}

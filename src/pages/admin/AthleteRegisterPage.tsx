@@ -172,7 +172,7 @@ export default function AthleteRegisterPage() {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-display tracking-wide flex items-center gap-2">
-            <UserPlus className="h-5 w-5 text-accent" /> Athlete Details
+            <UserPlus className="h-5 w-5 text-foreground" /> Athlete Details
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -192,7 +192,7 @@ export default function AthleteRegisterPage() {
           </div>
 
           <div className="border-t pt-3 space-y-2">
-            <p className="text-[10px] font-display tracking-wider uppercase text-accent flex items-center gap-1.5"><LinkIcon className="h-3 w-3" /> Scholastic Services link (optional)</p>
+            <p className="text-xs font-display tracking-wider uppercase text-foreground flex items-center gap-1.5"><LinkIcon className="h-3 w-3" /> Scholastic Services link (optional)</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <Field label="SS Student ID"><Input value={form.ss_student_id} onChange={(e) => set("ss_student_id", e.target.value)} placeholder="ss-student-uuid" /></Field>
               <Field label="Scholastic Card Number"><Input value={form.scholastic_card_number} onChange={(e) => set("scholastic_card_number", e.target.value)} placeholder="Card serial" /></Field>
@@ -203,7 +203,7 @@ export default function AthleteRegisterPage() {
           <div className="flex items-center justify-between gap-3 border-t pt-3">
             <div>
               <div className="text-sm font-medium">ID Verified</div>
-              <div className="text-[11px] text-muted-foreground">Only enable if you've inspected the national ID or birth certificate.</div>
+              <div className="text-xs text-muted-foreground">Only enable if you've inspected the national ID or birth certificate.</div>
             </div>
             <Switch checked={form.id_verified} onCheckedChange={(v) => set("id_verified", v)} />
           </div>
@@ -222,14 +222,14 @@ export default function AthleteRegisterPage() {
                       <div className="font-medium">{d.first_name} {d.last_name}</div>
                       <div className="text-muted-foreground">{d.current_school_name ?? "—"} · {d.province ?? ""}</div>
                     </div>
-                    <Badge variant="outline" className="font-mono text-[10px] text-accent">{d.nash_id}</Badge>
+                    <Badge variant="outline" className="font-mono text-xs text-foreground">{d.nash_id}</Badge>
                   </div>
                 ))}
-                <p className="text-[10px] text-muted-foreground">If you proceed and a school name differs, a <code>dual_enrollment</code> flag will be raised automatically for review in the Eligibility Engine.</p>
+                <p className="text-xs text-muted-foreground">If you proceed and a school name differs, a <code>dual_enrollment</code> flag will be raised automatically for review in the Eligibility Engine.</p>
               </CardContent>
             </Card>
           )}
-          {checkingDup && <p className="text-[11px] text-muted-foreground">Checking registry for duplicates…</p>}
+          {checkingDup && <p className="text-xs text-muted-foreground">Checking registry for duplicates…</p>}
         </CardContent>
       </Card>
 
@@ -249,14 +249,14 @@ function Shell({ children }: { children: React.ReactNode }) {
       <NashHeader />
       <div className="max-w-3xl mx-auto px-4 md:px-6 py-6 space-y-4">
         <div>
-          <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">Federation · Registry</p>
+          <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">Federation · Registry</p>
           <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">Register Athlete</h1>
           <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
-            <ShieldCheck className="h-3.5 w-3.5 text-accent" /> Issues a permanent NASH ID and auto-detects potential dual enrollment.
+            <ShieldCheck className="h-3.5 w-3.5 text-foreground" /> Issues a permanent NASH ID and auto-detects potential dual enrollment.
           </p>
         </div>
         {children}
-        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
+        <p className="text-xs text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
       </div>
     </div>
   );

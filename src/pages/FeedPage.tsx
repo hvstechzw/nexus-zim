@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
-import { NashHeader } from "@/components/nash/NashHeader";
 import { StatCard } from "@/components/nash/StatCard";
 import { CompetitionCard, type Competition } from "@/components/nash/CompetitionCard";
 import { SportSelector } from "@/components/nash/SportSelector";
@@ -17,6 +16,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/context/AuthContext";
 import { useScholasticAutoSync } from "@/hooks/useScholasticAutoSync";
 import {
   Trophy, Users, Activity, Calendar, MapPin, ShieldCheck,
@@ -49,6 +49,7 @@ interface LiveFixture {
 
 export default function FeedPage() {
   useScholasticAutoSync();
+  const { user } = useAuth();
 
   const [feed, setFeed] = useState<FeedItem[]>([]);
   const [live, setLive] = useState<LiveFixture[]>([]);
@@ -142,42 +143,37 @@ export default function FeedPage() {
         <meta name="description" content="Live results, competitions, and rankings across all 15 sports under NASH and NAPH. Zimbabwe's official school sport network — powered by Scholastic Services, built by Aetheris." />
         <link rel="canonical" href="https://nexuszw.online/" />
       </Helmet>
-      <NashHeader />
-
       <main className="flex-1">
-        {/* Hero band */}
-        <section className="bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground border-b-4 border-accent">
-          <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-10 md:py-14">
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-              <div className="space-y-2 max-w-2xl">
-                <p className="text-[10px] font-display tracking-[0.3em] uppercase text-accent flex items-center gap-2">
-                  <ShieldCheck className="h-3.5 w-3.5" /> NASH · NAPH · Zimbabwe
+        {/* Lead with the literal product (§11.5): what Nexus is, what it covers, where to go next */}
+        <section data-sly="hero" className="border-b border-border">
+          <div className="rail py-10 md:py-14">
+            <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+              <div className="max-w-2xl space-y-3">
+                <p className="flex items-center gap-2 text-sm font-medium text-supporting">
+                  <ShieldCheck className="h-4 w-4" aria-hidden="true" /> NASH and NAPH · Zimbabwe
                 </p>
-                <h1 className="text-3xl md:text-5xl font-display font-bold tracking-tight">
-                  Every sport. Every school.<br /><span className="text-accent">One national network.</span>
+                <h1 className="font-display text-3xl font-bold md:text-4xl">
+                  Fixtures, live scores and results for Zimbabwean school sport
                 </h1>
-                <p className="text-sm md:text-base opacity-90 max-w-xl">
-                  The official competition platform for Zimbabwean inter-school sport — handball, netball, football, athletics, cricket, rugby, and every other sport under NASH & NAPH jurisdiction.
+                <p className="max-w-xl text-base text-supporting">
+                  The official competition platform for inter-school sport under NASH and NAPH, covering handball, netball, football, athletics, cricket, rugby and every other sanctioned sport.
                 </p>
-                <div className="flex flex-wrap items-center gap-2 pt-2">
-                  <Badge variant="outline" className="border-accent text-accent bg-transparent text-[10px] font-mono">
-                    <span className="w-1.5 h-1.5 rounded-full bg-accent mr-1 animate-pulse" /> LIVE NETWORK
-                  </Badge>
-                  <Badge variant="outline" className="border-accent/40 text-primary-foreground bg-transparent text-[10px] font-mono">15 SPORTS</Badge>
-                  <Badge variant="outline" className="border-accent/40 text-primary-foreground bg-transparent text-[10px] font-mono">10 PROVINCES</Badge>
-                  <Badge variant="outline" className="border-accent/40 text-primary-foreground bg-transparent text-[10px] font-mono">SS-LINKED</Badge>
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <Badge variant="outline">15 sports</Badge>
+                  <Badge variant="outline">10 provinces</Badge>
+                  <Badge variant="outline">Linked to Scholastic Services</Badge>
                 </div>
               </div>
               <div className="flex gap-2">
-                <Button asChild className="bg-accent text-accent-foreground hover:bg-accent/90"><Link to="/live"><Radio className="h-4 w-4 mr-1" /> Live now</Link></Button>
-                <Button asChild variant="outline" className="border-accent/40 text-primary-foreground hover:bg-primary-foreground/10"><Link to="/dashboard">Sign in</Link></Button>
+                <Button asChild><Link to="/live"><Radio className="mr-1 h-4 w-4" aria-hidden="true" /> See live matches</Link></Button>
+                {!user && <Button asChild variant="outline"><Link to="/login">Sign in</Link></Button>}
               </div>
             </div>
           </div>
         </section>
 
         {/* Live stats strip */}
-        <section className="max-w-[1400px] mx-auto px-4 md:px-6 -mt-6 md:-mt-8 relative z-10">
+        <section data-sly="stats" className="rail pt-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <StatCard label="Registered Athletes" value={stats.athletes} icon={Users} tone="primary" loading={loading} />
             <StatCard label="Schools" value={stats.schools} icon={GraduationCap} tone="accent" loading={loading} />
@@ -187,14 +183,14 @@ export default function FeedPage() {
         </section>
 
         {/* Filters */}
-        <section className="max-w-[1400px] mx-auto px-4 md:px-6 pt-8">
+        <section data-sly="filters" className="rail pt-8">
           <Card>
             <CardContent className="p-3 flex flex-wrap items-center gap-2">
-              <span className="text-[10px] font-display tracking-widest uppercase text-muted-foreground mr-2">Filter</span>
-              <SportSelector value={sport} onChange={setSport} allOption className="h-9 w-44" />
-              <ProvinceSelector value={province} onChange={setProvince} allOption className="h-9 w-48" />
+              <span className="text-xs font-display tracking-widest uppercase text-muted-foreground mr-2">Filter</span>
+              <SportSelector value={sport} onChange={setSport} allOption className="min-h-11 w-44" />
+              <ProvinceSelector value={province} onChange={setProvince} allOption className="min-h-11 w-48" />
               <Select value={tier || "__all__"} onValueChange={(v) => setTier(v === "__all__" ? "" : v)}>
-                <SelectTrigger className="h-9 w-36"><SelectValue placeholder="All Tiers" /></SelectTrigger>
+                <SelectTrigger className="min-h-11 w-36"><SelectValue placeholder="All Tiers" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__all__">All Tiers</SelectItem>
                   <SelectItem value="zonal">Zonal</SelectItem>
@@ -207,35 +203,35 @@ export default function FeedPage() {
                 <Button variant="ghost" size="sm" onClick={() => { setSport(""); setProvince(""); setTier(""); }}>Clear</Button>
               )}
               <div className="flex-1" />
-              <Link to="/calendar" className="text-xs text-accent hover:underline">Full calendar →</Link>
+              <Link to="/calendar" className="text-xs text-foreground underline underline-offset-4">Full calendar →</Link>
             </CardContent>
           </Card>
         </section>
 
         {/* Live now */}
         {liveFiltered.length > 0 && (
-          <section className="max-w-[1400px] mx-auto px-4 md:px-6 pt-6">
+          <section data-sly="live" className="rail pt-6">
             <h2 className="text-base font-display tracking-wide flex items-center gap-2 mb-3">
-              <Activity className="h-4 w-4 text-[hsl(var(--nash-error))]" />
+              <Activity className="h-4 w-4 text-info" aria-hidden="true" />
               <span className="inline-flex items-center gap-1.5 text-[hsl(var(--nash-error))]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--nash-error))] animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[hsl(var(--nash-error))] " />
                 LIVE NOW
               </span>
-              <Badge variant="secondary" className="ml-1 font-mono text-[10px]">{liveFiltered.length}</Badge>
+              <Badge variant="secondary" className="ml-1 font-mono text-xs">{liveFiltered.length}</Badge>
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {liveFiltered.map((f) => (
                 <Link key={f.id} to={`/live/${f.id}`}>
                   <Card className="border-[hsl(var(--nash-error))]/30 hover:border-[hsl(var(--nash-error))] transition-colors">
                     <CardContent className="p-3 space-y-2">
-                      <div className="flex items-center justify-between text-[10px]">
+                      <div className="flex items-center justify-between text-xs">
                         {f.competition_tier && <TierBadge tier={f.competition_tier as CompetitionTier} />}
                         {f.discipline && <SportBadge code={f.discipline.toUpperCase().slice(0, 2)} />}
                       </div>
-                      <p className="text-[11px] text-muted-foreground truncate">{f.competition_name ?? "Live fixture"}</p>
+                      <p className="text-xs text-muted-foreground truncate">{f.competition_name ?? "Live fixture"}</p>
                       <div className="flex items-center justify-between gap-3 py-1">
                         <span className="text-sm font-medium truncate">{f.home_name ?? "Home"}</span>
-                        <span className="font-display font-bold text-2xl tabular-nums text-accent">{f.home_score ?? 0} – {f.away_score ?? 0}</span>
+                        <span className="font-display font-bold text-2xl tabular-nums text-foreground">{f.home_score ?? 0} – {f.away_score ?? 0}</span>
                         <span className="text-sm font-medium truncate">{f.away_name ?? "Away"}</span>
                       </div>
                     </CardContent>
@@ -247,10 +243,10 @@ export default function FeedPage() {
         )}
 
         {/* Upcoming */}
-        <section className="max-w-[1400px] mx-auto px-4 md:px-6 pt-8">
+        <section data-sly="upcoming" className="rail pt-8">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-display tracking-wide flex items-center gap-2"><Calendar className="h-4 w-4 text-accent" /> Upcoming Competitions</h2>
-            <Link to="/calendar" className="text-xs text-accent hover:underline">All →</Link>
+            <h2 className="text-base font-display tracking-wide flex items-center gap-2"><Calendar className="h-4 w-4 text-foreground" /> Upcoming Competitions</h2>
+            <Link to="/calendar" className="text-xs text-foreground underline underline-offset-4">All →</Link>
           </div>
           {loading && <p className="text-xs text-muted-foreground">Loading…</p>}
           {!loading && upcomingFiltered.length === 0 && (
@@ -265,10 +261,10 @@ export default function FeedPage() {
 
         {/* Recent results */}
         {recentFiltered.length > 0 && (
-          <section className="max-w-[1400px] mx-auto px-4 md:px-6 pt-8">
+          <section data-sly="results" className="rail pt-8">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-base font-display tracking-wide flex items-center gap-2"><Trophy className="h-4 w-4 text-accent" /> Latest Results</h2>
-              <Link to="/results" className="text-xs text-accent hover:underline">All →</Link>
+              <h2 className="text-base font-display tracking-wide flex items-center gap-2"><Trophy className="h-4 w-4 text-foreground" /> Latest Results</h2>
+              <Link to="/results" className="text-xs text-foreground underline underline-offset-4">All →</Link>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {recentFiltered.slice(0, 6).map((c) => <CompetitionCard key={c.id} comp={c} />)}
@@ -277,10 +273,10 @@ export default function FeedPage() {
         )}
 
         {/* Activity feed + feature tiles */}
-        <section className="max-w-[1400px] mx-auto px-4 md:px-6 py-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <section className="rail py-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><Sparkles className="h-4 w-4 text-accent" /> Latest Activity</CardTitle>
+              <CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><Sparkles className="h-4 w-4 text-foreground" /> Latest Activity</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               {feed.length === 0 && <p className="text-sm text-muted-foreground py-4 text-center">Results, milestones and highlights will appear here as they happen.</p>}
@@ -292,12 +288,12 @@ export default function FeedPage() {
                   return (
                     <li key={it.id} className="py-2 first:pt-0 last:pb-0">
                       <Link to={href} className="flex items-start gap-3 hover:bg-accent/5 rounded p-1.5 transition-colors">
-                        <Badge variant={KIND_TONE[it.kind] ?? "outline"} className="text-[9px] font-display tracking-wider uppercase shrink-0">{it.kind.replace("_", " ")}</Badge>
+                        <Badge variant={KIND_TONE[it.kind] ?? "outline"} className="text-xs font-display tracking-wider uppercase shrink-0">{it.kind.replace("_", " ")}</Badge>
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-medium truncate">{it.title}</p>
                           {it.body && <p className="text-xs text-muted-foreground truncate">{it.body}</p>}
                         </div>
-                        <time className="text-[10px] text-muted-foreground font-mono shrink-0 mt-0.5">{new Date(it.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}</time>
+                        <time className="text-xs text-muted-foreground font-mono shrink-0 mt-0.5">{new Date(it.created_at).toLocaleDateString(undefined, { day: "numeric", month: "short" })}</time>
                       </Link>
                     </li>
                   );
@@ -309,7 +305,7 @@ export default function FeedPage() {
           {/* Quick access */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><MapPin className="h-4 w-4 text-accent" /> Explore</CardTitle>
+              <CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><MapPin className="h-4 w-4 text-foreground" /> Explore</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2">
               <Tile to="/federation/nash" title="NASH National" body="Federation command centre" icon={ShieldCheck} />
@@ -322,13 +318,6 @@ export default function FeedPage() {
           </Card>
         </section>
 
-        {/* Footer band */}
-        <footer className="border-t border-border bg-primary/5 mt-auto">
-          <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 text-center space-y-1">
-            <p className="text-xs font-display tracking-wider uppercase">Nexus Zimbabwe</p>
-            <p className="text-[10px] text-muted-foreground">Powered by NASH & NAPH · Integrated with Scholastic Services · Built by Aetheris Innovative Enterprises</p>
-          </div>
-        </footer>
       </main>
     </div>
   );
@@ -337,10 +326,10 @@ export default function FeedPage() {
 function Tile({ to, title, body, icon: Icon }: { to: string; title: string; body: string; icon: any }) {
   return (
     <Link to={to} className="flex items-center gap-3 p-2 rounded border border-border hover:border-primary/50 transition-colors group">
-      <Icon className="h-4 w-4 text-accent shrink-0" />
+      <Icon className="h-4 w-4 text-foreground shrink-0" />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium truncate">{title}</p>
-        <p className="text-[10px] text-muted-foreground truncate">{body}</p>
+        <p className="text-xs text-muted-foreground truncate">{body}</p>
       </div>
       <ArrowRight className="h-3.5 w-3.5 opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
     </Link>

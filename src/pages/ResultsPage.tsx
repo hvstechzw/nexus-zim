@@ -32,19 +32,19 @@ export default function ResultsPage() {
   return (
     <div className="min-h-screen bg-background">
       <NashHeader />
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="max-w-workspace mx-auto px-4 md:px-6 py-6 space-y-6">
         <div>
-          <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">Public · Results</p>
+          <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">Public · Results</p>
           <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">Latest Results</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Completed competitions across every sport and every level.</p>
         </div>
         <Card>
           <CardHeader className="pb-3">
             <div className="flex flex-wrap items-center gap-2">
-              <CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><Trophy className="h-4 w-4 text-accent" /> Filters</CardTitle>
+              <CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><Trophy className="h-4 w-4 text-foreground" /> Filters</CardTitle>
               <div className="flex-1" />
-              <SportSelector value={sport} onChange={setSport} allOption className="h-9 w-48" />
-              <ProvinceSelector value={province} onChange={setProvince} allOption className="h-9 w-48" />
+              <SportSelector value={sport} onChange={setSport} allOption className="min-h-11 w-48" />
+              <ProvinceSelector value={province} onChange={setProvince} allOption className="min-h-11 w-48" />
             </div>
           </CardHeader>
         </Card>
@@ -55,7 +55,7 @@ export default function ResultsPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {comps.map((c) => <CompetitionCard key={c.id} comp={c} />)}
         </div>
-        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
+        <p className="text-xs text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
       </div>
     </div>
   );

@@ -18,7 +18,7 @@ export function ScholasticPartnerSection() {
     <section id="register" className="hairline-b bg-nexus-surface/30">
       <div className="max-w-[1100px] mx-auto px-4 sm:px-8 py-12 sm:py-20">
         <motion.div initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5 }}>
-          <p className="text-[10px] sm:text-xs mono tracking-[0.25em] uppercase text-nexus-muted font-medium">Exclusive Data Partner</p>
+          <p className="text-xs sm:text-xs mono tracking-[0.25em] uppercase text-nexus-muted font-medium">Exclusive Data Partner</p>
           <h2 className="display-font text-2xl sm:text-display-md font-bold text-foreground mt-2 tracking-tight">
             Schools join Nexus through Scholastic Services
           </h2>
@@ -36,7 +36,7 @@ export function ScholasticPartnerSection() {
             { n: "03", t: "Compete & broadcast", d: "Run inter-school fixtures, sports days and house competitions on day one." },
           ].map((step) => (
             <div key={step.n} className="hairline rounded-xl p-5 sm:p-6 bg-background card-shadow flex flex-col gap-2">
-              <p className="mono text-[10px] tracking-[0.25em] uppercase text-nexus-muted">{step.n}</p>
+              <p className="mono text-xs tracking-[0.25em] uppercase text-nexus-muted">{step.n}</p>
               <p className="display-font text-base sm:text-lg font-bold text-foreground">{step.t}</p>
               <p className="text-xs sm:text-sm text-nexus-muted leading-relaxed">{step.d}</p>
             </div>
@@ -51,11 +51,11 @@ export function ScholasticPartnerSection() {
           <div className="flex flex-wrap items-center gap-3">
             <div className="text-right">
               <p className="score-display text-xl sm:text-2xl text-foreground">{stats?.schools ?? "—"}</p>
-              <p className="text-[10px] mono uppercase tracking-wider text-nexus-muted">Schools</p>
+              <p className="text-xs mono uppercase tracking-wider text-nexus-muted">Schools</p>
             </div>
             <div className="text-right">
               <p className="score-display text-xl sm:text-2xl text-foreground">{stats?.students ?? "—"}</p>
-              <p className="text-[10px] mono uppercase tracking-wider text-nexus-muted">Students</p>
+              <p className="text-xs mono uppercase tracking-wider text-nexus-muted">Students</p>
             </div>
             <a
               href="https://scholasticservices.online"

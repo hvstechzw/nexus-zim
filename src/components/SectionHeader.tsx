@@ -20,8 +20,8 @@ export function SectionHeader({
   return (
     <div className={`flex items-end justify-between gap-4 ${className}`}>
       <div className="min-w-0">
-        <p className="flex items-center gap-2 text-[10px] sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">
-          {live && <span className="w-1.5 h-1.5 rounded-full bg-nexus-live animate-pulse" />}
+        <p className="flex items-center gap-2 text-xs sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">
+          {live && <span className="w-1.5 h-1.5 rounded-full bg-nexus-live " />}
           {eyebrow}
         </p>
         {title && (

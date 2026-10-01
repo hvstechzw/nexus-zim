@@ -117,10 +117,10 @@ export function LiveScoreboard() {
       <div className="px-4 sm:px-8 py-3 sm:py-5 hairline-b flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
         <div>
           <div className="flex items-center gap-2 sm:gap-3">
-            {liveCount > 0 && <span className="w-2 h-2 rounded-full bg-nexus-live animate-pulse" />}
-            <span className="text-[10px] sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">Live</span>
-            {liveCount > 0 && <span className="text-[10px] mono text-nexus-live">{liveCount} live</span>}
-            {totalScheduled > 0 && <span className="text-[10px] mono text-nexus-muted">{totalScheduled} upcoming</span>}
+            {liveCount > 0 && <span className="w-2 h-2 rounded-full bg-nexus-live " />}
+            <span className="text-xs sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">Live</span>
+            {liveCount > 0 && <span className="text-xs mono text-nexus-live">{liveCount} live</span>}
+            {totalScheduled > 0 && <span className="text-xs mono text-nexus-muted">{totalScheduled} upcoming</span>}
           </div>
           <h2 className="display-font text-xl sm:text-2xl font-bold text-foreground mt-1 tracking-tight">Scores &amp; schedule</h2>
         </div>
@@ -128,7 +128,7 @@ export function LiveScoreboard() {
           <div className="flex hairline rounded-lg overflow-hidden">
             {(["live", "recent", "upcoming"] as const).map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
-                className={`px-2.5 sm:px-3 py-1.5 text-[9px] sm:text-[10px] mono font-semibold tracking-wide transition-colors ${activeTab === tab ? "bg-foreground text-primary-foreground" : "bg-background text-nexus-muted hover:text-foreground"}`}>
+                className={`px-2.5 sm:px-3 py-1.5 text-xs sm:text-xs mono font-semibold tracking-wide transition-colors ${activeTab === tab ? "bg-foreground text-primary-foreground" : "bg-background text-nexus-muted hover:text-foreground"}`}>
                 {tab === "live" ? (liveCount > 0 ? `${liveCount} LIVE` : "LIVE") : tab.toUpperCase()}
               </button>
             ))}
@@ -160,28 +160,28 @@ export function LiveScoreboard() {
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                       {featured.status === "live" && (
-                        <span className="flex items-center gap-1.5 text-[9px] sm:text-xs mono tracking-widest uppercase text-nexus-live bg-nexus-surface px-2 sm:px-3 py-1 sm:py-1.5 rounded-full">
-                          <span className="w-1.5 h-1.5 rounded-full bg-nexus-live animate-pulse" />Live
+                        <span className="flex items-center gap-1.5 text-xs sm:text-xs mono tracking-widest uppercase text-nexus-live bg-nexus-surface px-2 sm:px-3 py-1 sm:py-1.5 rounded-full">
+                          <span className="w-1.5 h-1.5 rounded-full bg-nexus-live " />Live
                         </span>
                       )}
                       {featured.status === "completed" && (
-                        <span className="text-[9px] sm:text-xs mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2 sm:px-3 py-1 sm:py-1.5 rounded-full">FT</span>
+                        <span className="text-xs sm:text-xs mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2 sm:px-3 py-1 sm:py-1.5 rounded-full">FT</span>
                       )}
                       {featured.status === "scheduled" && (
-                        <span className="text-[9px] sm:text-xs mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2 sm:px-3 py-1 sm:py-1.5 rounded-full">Scheduled</span>
+                        <span className="text-xs sm:text-xs mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2 sm:px-3 py-1 sm:py-1.5 rounded-full">Scheduled</span>
                       )}
-                      <span className="text-[9px] sm:text-xs mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2 sm:px-3 py-1 sm:py-1.5 rounded-full">
+                      <span className="text-xs sm:text-xs mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2 sm:px-3 py-1 sm:py-1.5 rounded-full">
                         {featured.competition?.discipline}
                       </span>
                     </div>
-                    <span className="text-[9px] sm:text-xs mono text-nexus-muted hidden sm:block">
+                    <span className="text-xs sm:text-xs mono text-nexus-muted hidden sm:block">
                       {featured.venue ? `${featured.venue.name}, ${featured.venue.city}` : "TBD"}
                     </span>
                   </div>
 
                   <div className="hairline rounded-xl overflow-hidden flex items-stretch">
                     <div className="flex-1 p-4 sm:p-8 text-center hairline-r bg-background">
-                      <p className="text-[9px] sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted mb-2 sm:mb-4 truncate">
+                      <p className="text-xs sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted mb-2 sm:mb-4 truncate">
                         {featured.home_team?.name || "Home"}
                       </p>
                       <motion.p key={featured.home_score} className="score-display text-3xl sm:text-score-lg text-foreground" animate={{ opacity: [0.3, 1] }} transition={{ duration: 0.3 }}>
@@ -190,15 +190,15 @@ export function LiveScoreboard() {
                     </div>
                     <div className="px-3 sm:px-6 flex flex-col items-center justify-center gap-1 sm:gap-2 bg-nexus-surface/50">
                       <span className="score-display text-xl sm:text-2xl text-nexus-muted">:</span>
-                      <span className="text-[8px] sm:text-xs mono text-nexus-muted text-center">{featured.round_label || featured.status}</span>
+                      <span className="text-xs sm:text-xs mono text-nexus-muted text-center">{featured.round_label || featured.status}</span>
                       {featured.scheduled_at && featured.status === "scheduled" && (
-                        <span className="text-[8px] sm:text-[10px] mono text-nexus-muted text-center">
+                        <span className="text-xs sm:text-xs mono text-nexus-muted text-center">
                           {new Date(featured.scheduled_at).toLocaleDateString("en-ZW", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                         </span>
                       )}
                     </div>
                     <div className="flex-1 p-4 sm:p-8 text-center hairline-l bg-background">
-                      <p className="text-[9px] sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted mb-2 sm:mb-4 truncate">
+                      <p className="text-xs sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted mb-2 sm:mb-4 truncate">
                         {featured.away_team?.name || "Away"}
                       </p>
                       <motion.p key={featured.away_score} className="score-display text-3xl sm:text-score-lg text-foreground" animate={{ opacity: [0.3, 1] }} transition={{ duration: 0.3 }}>
@@ -208,8 +208,8 @@ export function LiveScoreboard() {
                   </div>
 
                   <div className="text-center">
-                    <p className="text-[10px] sm:text-xs mono text-nexus-muted">{featured.competition?.name}</p>
-                    <p className="text-[9px] mono text-nexus-muted/60 mt-0.5">{featured.competition?.level?.replace(/_/g, " ")}</p>
+                    <p className="text-xs sm:text-xs mono text-nexus-muted">{featured.competition?.name}</p>
+                    <p className="text-xs mono text-nexus-muted/60 mt-0.5">{featured.competition?.level?.replace(/_/g, " ")}</p>
                   </div>
                 </motion.div>
               )}
@@ -228,19 +228,19 @@ export function LiveScoreboard() {
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5">
-                    {match.status === "live" && <span className="w-1.5 h-1.5 rounded-full bg-nexus-live flex-shrink-0 animate-pulse" />}
-                    {match.status === "completed" && <span className="text-[8px] mono text-nexus-muted/60 tracking-widest">FT</span>}
-                    <span className="text-[8px] sm:text-[10px] mono tracking-widest uppercase text-nexus-muted truncate">
+                    {match.status === "live" && <span className="w-1.5 h-1.5 rounded-full bg-nexus-live flex-shrink-0 " />}
+                    {match.status === "completed" && <span className="text-xs mono text-nexus-muted/60 tracking-widest">FT</span>}
+                    <span className="text-xs sm:text-xs mono tracking-widest uppercase text-nexus-muted truncate">
                       {match.competition?.discipline}
                     </span>
                   </div>
-                  <p className="text-[11px] sm:text-sm display-font font-semibold text-foreground truncate">
+                  <p className="text-xs sm:text-sm display-font font-semibold text-foreground truncate">
                     {match.home_team?.name || "TBD"}
-                    <span className="mx-1 text-nexus-muted font-normal text-[10px] sm:text-xs">vs</span>
+                    <span className="mx-1 text-nexus-muted font-normal text-xs sm:text-xs">vs</span>
                     {match.away_team?.name || "TBD"}
                   </p>
                   {match.scheduled_at && match.status === "scheduled" && (
-                    <p className="text-[8px] sm:text-[10px] mono text-nexus-muted/60 mt-0.5">
+                    <p className="text-xs sm:text-xs mono text-nexus-muted/60 mt-0.5">
                       {new Date(match.scheduled_at).toLocaleDateString("en-ZW", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" })}
                     </p>
                   )}

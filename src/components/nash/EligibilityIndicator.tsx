@@ -27,7 +27,7 @@ export function EligibilityIndicator({ status, reason, className }: Props) {
   return (
     <Badge
       variant="outline"
-      className={cn("gap-1 text-[10px] font-display tracking-wider", s.cls, className)}
+      className={cn("gap-1 text-xs font-display tracking-wider", s.cls, className)}
       title={reason || s.label}
     >
       <I className="h-3 w-3" />

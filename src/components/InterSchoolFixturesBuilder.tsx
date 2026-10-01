@@ -14,7 +14,7 @@ const NEXUS_DISCIPLINES = [
 ] as const;
 
 const inputCls = "bg-nexus-surface hairline rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-nexus-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground/20 transition-all w-full";
-const labelCls = "text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold";
+const labelCls = "text-xs mono tracking-[0.15em] uppercase text-nexus-muted font-semibold";
 
 function roundRobin(ids: string[]): Array<[string, string]> {
   const list = [...ids];
@@ -231,7 +231,7 @@ export function InterSchoolFixturesBuilder() {
                 </option>
               ))}
             </select>
-            {selectedComp && <p className="text-[11px] text-nexus-muted">Loading registered teams for <strong>{selectedComp.name}</strong>. Draw settings inherit from the competition.</p>}
+            {selectedComp && <p className="text-xs text-nexus-muted">Loading registered teams for <strong>{selectedComp.name}</strong>. Draw settings inherit from the competition.</p>}
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
@@ -325,7 +325,7 @@ export function InterSchoolFixturesBuilder() {
           <>
             <div className="flex items-center justify-between gap-2 mb-3">
               <p className={labelCls}>{teams.length} of {sourceTeams.length} teams selected</p>
-              <button onClick={() => setExcluded(new Set())} className="text-[10px] text-nexus-muted underline underline-offset-2 hover:text-foreground">Reset</button>
+              <button onClick={() => setExcluded(new Set())} className="text-xs text-nexus-muted underline underline-offset-2 hover:text-foreground">Reset</button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-64 overflow-y-auto">
               {sourceTeams.map((t: any) => {
@@ -333,7 +333,7 @@ export function InterSchoolFixturesBuilder() {
                 return (
                   <button key={t.id} onClick={() => toggleExclude(t.id)}
                     className={`flex items-center gap-2 px-2 py-1.5 rounded text-left text-xs transition ${off ? "opacity-40 line-through" : "bg-background hairline"}`}>
-                    <span className="w-5 h-5 rounded-full bg-nexus-surface flex items-center justify-center text-[9px] font-semibold shrink-0">
+                    <span className="w-5 h-5 rounded-full bg-nexus-surface flex items-center justify-center text-xs font-semibold shrink-0">
                       {(t.school?.school_name || t.school?.name || "?").charAt(0)}
                     </span>
                     <span className="truncate">{t.name}</span>

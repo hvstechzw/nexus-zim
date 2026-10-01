@@ -84,10 +84,10 @@ export default function TeamsAdminPage() {
   return (
     <div className="min-h-screen bg-background">
       <NashHeader />
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="max-w-workspace mx-auto px-4 md:px-6 py-6 space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">Federation · Teams</p>
+            <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">Federation · Teams</p>
             <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">School Teams</h1>
             <p className="text-xs text-muted-foreground mt-0.5">All school team rosters across every sport. Create via the team builder, delete here.</p>
           </div>
@@ -110,7 +110,7 @@ export default function TeamsAdminPage() {
               <div className="flex-1" />
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input className="h-9 pl-8 w-64" placeholder="Search by team or school" value={search} onChange={(e) => setSearch(e.target.value)} />
+                <Input className="min-h-11 pl-8 w-64" placeholder="Search by team or school" value={search} onChange={(e) => setSearch(e.target.value)} />
               </div>
             </div>
           </CardHeader>
@@ -136,18 +136,18 @@ export default function TeamsAdminPage() {
                     return (
                       <TableRow key={r.id}>
                         <TableCell className="font-medium text-sm">{r.name}</TableCell>
-                        <TableCell className="text-xs">{r.school?.name ?? "—"}<div className="text-[10px] text-muted-foreground">{r.school?.province ?? ""}</div></TableCell>
+                        <TableCell className="text-xs">{r.school?.name ?? "—"}<div className="text-xs text-muted-foreground">{r.school?.province ?? ""}</div></TableCell>
                         <TableCell><SportBadge code={r.discipline.toUpperCase().slice(0, 2)} /></TableCell>
                         <TableCell className="text-xs">{r.age_group} {r.gender}</TableCell>
                         <TableCell className="text-xs">{r.season ?? "—"}</TableCell>
                         <TableCell>
                           {r.is_published
-                            ? <Badge variant="outline" className="text-[10px] border-[hsl(var(--nash-success))]/50 text-[hsl(var(--nash-success))]">Published</Badge>
-                            : <Badge variant="secondary" className="text-[10px]">Draft</Badge>}
+                            ? <Badge variant="outline" className="text-xs border-[hsl(var(--nash-success))]/50 text-[hsl(var(--nash-success))]">Published</Badge>
+                            : <Badge variant="secondary" className="text-xs">Draft</Badge>}
                         </TableCell>
                         <TableCell className="text-right whitespace-nowrap">
                           {canManage && !r.is_published && (
-                            <Button variant="ghost" size="sm" className="h-8 text-[hsl(var(--nash-success))]"
+                            <Button variant="ghost" size="sm" className="min-h-11 text-[hsl(var(--nash-success))]"
                               onClick={async () => {
                                 const { error } = await (supabase as any).from("school_teams").update({ is_published: true, published_at: new Date().toISOString() }).eq("id", r.id);
                                 if (error) return toast.error(error.message);
@@ -158,7 +158,7 @@ export default function TeamsAdminPage() {
                             </Button>
                           )}
                           {(canDelete || canManage) && (
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => setTarget(r)} title="Delete team">
+                            <Button variant="ghost" size="icon" className="min-h-11 w-11 text-destructive hover:text-destructive" onClick={() => setTarget(r)} title="Delete team">
                               <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           )}
@@ -172,7 +172,7 @@ export default function TeamsAdminPage() {
           </CardContent>
         </Card>
 
-        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
+        <p className="text-xs text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
       </div>
 
       <AlertDialog open={!!target} onOpenChange={(o) => { if (!o) setTarget(null); }}>

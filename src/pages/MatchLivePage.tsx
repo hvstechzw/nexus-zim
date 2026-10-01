@@ -112,7 +112,7 @@ export default function MatchLivePage() {
           <div className="text-xs uppercase opacity-70 flex justify-between">
             <span>{(fixture as any).competition?.name ?? "Live fixture"}</span>
             <span className="inline-flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full animate-pulse" style={{ background: accent }} />
+              <span className="h-2 w-2 rounded-full " style={{ background: accent }} />
               LIVE · {cfg.label}
             </span>
           </div>
@@ -131,7 +131,7 @@ export default function MatchLivePage() {
             </div>
           </div>
           <div className="mt-4">
-            <div className="text-[10px] uppercase opacity-60 flex justify-between"><span>Win prob {winHome}%</span><span>{100 - winHome}%</span></div>
+            <div className="text-xs uppercase opacity-60 flex justify-between"><span>Win prob {winHome}%</span><span>{100 - winHome}%</span></div>
             <div className="h-1.5 rounded-full overflow-hidden bg-muted">
               <div className="h-full" style={{ width: `${winHome}%`, background: accent }} />
             </div>

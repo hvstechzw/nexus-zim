@@ -24,8 +24,8 @@ export function sportName(code: string): string {
 export function SportBadge({ code, className }: { code: string; className?: string }) {
   const s = SPORT_BY_CODE[code as SportCode];
   return (
-    <Badge variant="outline" className={cn("font-mono text-[10px] tracking-wider", className)}>
-      <span className="text-accent mr-1">{code}</span>
+    <Badge variant="outline" className={cn("font-mono text-xs tracking-wider", className)}>
+      <span className="text-foreground mr-1">{code}</span>
       <span>{s?.name ?? code}</span>
     </Badge>
   );

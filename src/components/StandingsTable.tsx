@@ -61,7 +61,7 @@ export function StandingsTable() {
               <button
                 key={comp.id}
                 onClick={() => setActiveCompId(comp.id)}
-                className={`px-3 sm:px-5 py-1.5 sm:py-2 text-[10px] sm:text-xs font-semibold tracking-wide rounded-lg transition-all duration-200 btn-click whitespace-nowrap flex-shrink-0
+                className={`px-3 sm:px-5 py-1.5 sm:py-2 text-xs sm:text-xs font-semibold tracking-wide rounded-lg transition-all duration-200 btn-click whitespace-nowrap flex-shrink-0
                   ${activeCompId === comp.id
                     ? "bg-foreground text-primary-foreground"
                     : "bg-nexus-surface text-nexus-muted hover:text-foreground"}`}
@@ -83,7 +83,7 @@ export function StandingsTable() {
                     {["#", "Team / Athlete", "P", "W", "D", "L", "GF", "GA", "GD", "PTS"].map((col) => (
                       <th
                         key={col}
-                        className={`pb-2 sm:pb-3 text-[9px] sm:text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold
+                        className={`pb-2 sm:pb-3 text-xs sm:text-xs mono tracking-[0.15em] uppercase text-nexus-muted font-semibold
                           ${col === "Team / Athlete" ? "text-left px-2 sm:px-4" : "text-center px-1.5 sm:px-3"}`}
                       >
                         {col}

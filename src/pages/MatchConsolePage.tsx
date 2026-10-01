@@ -219,7 +219,7 @@ export default function MatchConsolePage() {
           </div>
           {/* Win-prob bar */}
           <div className="mt-4">
-            <div className="text-[10px] uppercase opacity-60 flex justify-between"><span>Win prob {winHome}%</span><span>{100 - winHome}%</span></div>
+            <div className="text-xs uppercase opacity-60 flex justify-between"><span>Win prob {winHome}%</span><span>{100 - winHome}%</span></div>
             <div className="h-1.5 rounded-full overflow-hidden bg-muted">
               <div className="h-full" style={{ width: `${winHome}%`, background: accent }} />
             </div>
@@ -252,7 +252,7 @@ export default function MatchConsolePage() {
             <div className="rounded-xl border bg-card/50 p-3">
               <div className="flex items-center justify-between mb-2">
                 <div className="text-xs uppercase opacity-60">Roster · {side === "home" ? homeName : awayName}</div>
-                <div className="text-[10px] opacity-60">Tap a player to attribute the next action</div>
+                <div className="text-xs opacity-60">Tap a player to attribute the next action</div>
               </div>
               <div className="flex gap-2 flex-wrap">
                 {sortedRoster(side === "home" ? rosters?.home : rosters?.away).map((p) => (
@@ -262,8 +262,8 @@ export default function MatchConsolePage() {
                     <span>{p.name}</span>
                     {p.position ? <span className="opacity-60 text-xs">· {p.position}</span> : null}
                     {p.verified
-                      ? <span title="Scholastic-verified" className="text-[9px] px-1.5 py-px rounded bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">✓</span>
-                      : <span title="Not yet Scholastic-verified" className="text-[9px] px-1.5 py-px rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 uppercase tracking-wider">unv</span>}
+                      ? <span title="Scholastic-verified" className="text-xs px-1.5 py-px rounded bg-success/15 text-success dark:text-success uppercase tracking-wider">✓</span>
+                      : <span title="Not yet Scholastic-verified" className="text-xs px-1.5 py-px rounded bg-warning/15 text-warning dark:text-warning uppercase tracking-wider">unv</span>}
                   </button>
                 ))}
                 {!(sortedRoster(side === "home" ? rosters?.home : rosters?.away).length) && (
@@ -274,7 +274,7 @@ export default function MatchConsolePage() {
                 <div className="mt-2 text-xs opacity-70">Attributing actions to <b>{selected.name}</b>. <button className="underline" onClick={() => setSelected(null)}>clear</button></div>
               )}
               {!selected && (
-                <div className="mt-2 text-[11px] opacity-60">No player selected — events will be recorded as team-level.</div>
+                <div className="mt-2 text-xs opacity-60">No player selected — events will be recorded as team-level.</div>
               )}
             </div>
 
@@ -364,7 +364,7 @@ export default function MatchConsolePage() {
                   <div key={e.id} className={`flex items-center justify-between gap-2 ${e.is_void ? "opacity-40 line-through" : ""}`}>
                     <span className="truncate">
                       <span className="font-mono opacity-60 mr-2">{e.period} {formatClock(e.clock_seconds)}</span>
-                      <span className="uppercase text-[10px] mr-2 opacity-70">{e.team_side}</span>
+                      <span className="uppercase text-xs mr-2 opacity-70">{e.team_side}</span>
                       {e.event_type}{e.value > 0 ? ` +${e.value}` : ""}
                     </span>
                     {!e.is_void && canScore && (

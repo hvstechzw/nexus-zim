@@ -100,7 +100,7 @@ export function MoMVote({ fixtureId }: { fixtureId: string }) {
             <div key={c.athlete_id} className="rounded-md border p-2">
               <div className="flex items-center justify-between">
                 <div className="text-sm truncate">
-                  <Badge variant="outline" className="mr-2 uppercase text-[10px]">{c.team_side}</Badge>
+                  <Badge variant="outline" className="mr-2 uppercase text-xs">{c.team_side}</Badge>
                   {c.name}
                 </div>
                 <Button size="sm" variant={mine ? "secondary" : "default"} disabled={busy} onClick={() => vote(c.athlete_id)}>

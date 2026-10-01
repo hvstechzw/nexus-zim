@@ -40,19 +40,19 @@ export function SyncStatusBanner() {
     <Link to="/admin/sync" className="block">
       <Card className={stale ? "border-[hsl(var(--nash-warning))]/40 bg-[hsl(var(--nash-warning))]/5" : "border-border"}>
         <CardContent className="p-3 flex items-center gap-3">
-          <RefreshCw className={`h-4 w-4 ${stale ? "text-[hsl(var(--nash-warning))]" : "text-accent"}`} />
+          <RefreshCw className={`h-4 w-4 ${stale ? "text-[hsl(var(--nash-warning))]" : "text-foreground"}`} />
           <div className="flex-1 min-w-0 text-sm">
             <div className="font-medium text-xs flex items-center gap-2">
               Scholastic Services Sync
-              {loading ? <Badge variant="secondary" className="text-[9px]">checking…</Badge>
-                : latest?.status === "success" ? <Badge variant="outline" className="text-[9px] border-[hsl(var(--nash-success))]/50 text-[hsl(var(--nash-success))] gap-1"><CheckCircle2 className="h-2.5 w-2.5" />OK</Badge>
-                : latest?.status === "partial" ? <Badge variant="outline" className="text-[9px] border-[hsl(var(--nash-warning))]/60 text-[hsl(var(--nash-warning))]">PARTIAL</Badge>
-                : latest?.status === "failed" ? <Badge variant="destructive" className="text-[9px]">FAILED</Badge>
-                : <Badge variant="secondary" className="text-[9px]">no syncs yet</Badge>}
-              {stale && latest && <Badge variant="outline" className="text-[9px] border-[hsl(var(--nash-warning))]/60 text-[hsl(var(--nash-warning))] gap-1"><AlertTriangle className="h-2.5 w-2.5" />stale</Badge>}
+              {loading ? <Badge variant="secondary" className="text-xs">checking…</Badge>
+                : latest?.status === "success" ? <Badge variant="outline" className="text-xs border-[hsl(var(--nash-success))]/50 text-[hsl(var(--nash-success))] gap-1"><CheckCircle2 className="h-2.5 w-2.5" />OK</Badge>
+                : latest?.status === "partial" ? <Badge variant="outline" className="text-xs border-[hsl(var(--nash-warning))]/60 text-[hsl(var(--nash-warning))]">PARTIAL</Badge>
+                : latest?.status === "failed" ? <Badge variant="destructive" className="text-xs">FAILED</Badge>
+                : <Badge variant="secondary" className="text-xs">no syncs yet</Badge>}
+              {stale && latest && <Badge variant="outline" className="text-xs border-[hsl(var(--nash-warning))]/60 text-[hsl(var(--nash-warning))] gap-1"><AlertTriangle className="h-2.5 w-2.5" />stale</Badge>}
             </div>
             {latest && (
-              <div className="text-[11px] text-muted-foreground mt-0.5">
+              <div className="text-xs text-muted-foreground mt-0.5">
                 Last sync {new Date(latest.created_at).toLocaleString()} · {latest.schools_synced ?? 0} schools · {latest.students_synced ?? 0} students
               </div>
             )}

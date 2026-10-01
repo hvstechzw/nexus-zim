@@ -62,7 +62,7 @@ export default function LoginPage() {
             <Button type="submit" disabled={busy} className="w-full">{busy ? "Signing in…" : "Sign in"}</Button>
           </form>
           <div className="my-4 flex items-center gap-3">
-            <div className="flex-1 hairline-b" /><span className="text-[10px] mono text-nexus-muted">OR</span><div className="flex-1 hairline-b" />
+            <div className="flex-1 hairline-b" /><span className="text-xs mono text-nexus-muted">OR</span><div className="flex-1 hairline-b" />
           </div>
           <Button type="button" variant="outline" className="w-full" disabled={busy} onClick={onGoogle}>Continue with Google</Button>
           <p className="mt-6 text-xs text-center text-nexus-muted">

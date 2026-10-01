@@ -120,12 +120,12 @@ export default function MoPSEReportPage() {
       <div className="max-w-[1000px] mx-auto px-4 md:px-6 py-6 space-y-6">
         <div className="print:hidden flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">Federation · MoPSE Reporting</p>
+            <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">Federation · MoPSE Reporting</p>
             <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">Annual Report Generator</h1>
             <p className="text-xs text-muted-foreground mt-0.5">Compiles the season's full participation, competition, official deployment and disciplinary statistics for ministerial submission.</p>
           </div>
           <div className="flex items-end gap-2">
-            <SeasonSelector value={seasonId} onChange={(id, s) => { setSeasonId(id); setSeason(s); }} className="h-9 w-56" />
+            <SeasonSelector value={seasonId} onChange={(id, s) => { setSeasonId(id); setSeason(s); }} className="min-h-11 w-56" />
             <Button onClick={() => window.print()} disabled={loading || !seasonId}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Printer className="h-4 w-4 mr-1" />}
               Print / Save as PDF
@@ -135,11 +135,11 @@ export default function MoPSEReportPage() {
 
         <div className="bg-card text-card-foreground rounded border border-border print:border-0 print:shadow-none p-8 md:p-12 print:p-8 space-y-6 print-document">
           {/* Letterhead */}
-          <div className="text-center pb-6 border-b-2 border-accent">
-            <p className="text-[10px] font-display tracking-[0.3em] uppercase text-accent">National Association of Secondary School Heads (NASH) &amp; National Association of Primary School Heads (NAPH)</p>
+          <div className="text-center pb-6 border-b-2 border-border">
+            <p className="text-xs font-display tracking-[0.3em] uppercase text-foreground">National Association of Secondary School Heads (NASH) &amp; National Association of Primary School Heads (NAPH)</p>
             <h1 className="text-3xl font-display font-bold mt-2">ZIMBABWE</h1>
             <p className="text-xs text-muted-foreground mt-1">Annual School Sport Report · {season?.name ?? "—"}</p>
-            <p className="text-[10px] text-muted-foreground mt-3 font-mono">Prepared for the Ministry of Primary and Secondary Education · {new Date().toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" })}</p>
+            <p className="text-xs text-muted-foreground mt-3 font-mono">Prepared for the Ministry of Primary and Secondary Education · {new Date().toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" })}</p>
           </div>
 
           <Section title="Executive Summary" icon={FileText}>
@@ -240,10 +240,10 @@ export default function MoPSEReportPage() {
             </table>
           </Section>
 
-          <div className="border-t-2 border-accent pt-4 text-center">
+          <div className="border-t-2 border-border pt-4 text-center">
             <p className="text-xs">Submitted by the NASH Secretary General · {new Date().getFullYear()}</p>
-            <p className="text-[10px] text-muted-foreground mt-1">Produced by Nexus Zimbabwe · Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
-            <Badge variant="outline" className="mt-2 text-[9px] font-mono">Report ID: MOPSE-{season?.academic_year ?? "----"}-T{season?.term ?? "-"}</Badge>
+            <p className="text-xs text-muted-foreground mt-1">Produced by Nexus Zimbabwe · Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
+            <Badge variant="outline" className="mt-2 text-xs font-mono">Report ID: MOPSE-{season?.academic_year ?? "----"}-T{season?.term ?? "-"}</Badge>
           </div>
         </div>
       </div>
@@ -264,7 +264,7 @@ function Section({ title, icon: Icon, children }: { title: string; icon: any; ch
   return (
     <section className="space-y-2">
       <h2 className="text-base font-display font-bold tracking-wide flex items-center gap-2 border-b border-border/60 pb-1">
-        <Icon className="h-4 w-4 text-accent" /> {title}
+        <Icon className="h-4 w-4 text-foreground" /> {title}
       </h2>
       {children}
     </section>

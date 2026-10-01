@@ -41,16 +41,16 @@ export default function RecordsPage() {
   return (
     <div className="min-h-screen bg-background">
       <NashHeader />
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="max-w-workspace mx-auto px-4 md:px-6 py-6 space-y-6">
         <div>
-          <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">Public · Records</p>
+          <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">Public · Records</p>
           <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">National Records &amp; Champions</h1>
           <p className="text-xs text-muted-foreground mt-0.5">The historical registry NASH has never had — permanent record of champions, runners-up and athletic records.</p>
         </div>
 
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><Crown className="h-4 w-4 text-accent" /> Champions Registry</CardTitle>
+            <CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><Crown className="h-4 w-4 text-foreground" /> Champions Registry</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <Table>
@@ -61,7 +61,7 @@ export default function RecordsPage() {
                 {awards.map((a) => (
                   <TableRow key={a.id}>
                     <TableCell><AwardBadge kind={a.award_type || "champion"} /></TableCell>
-                    <TableCell className="text-sm">{a.competition?.name ?? "—"}{a.competition?.tier && <Badge variant="outline" className="ml-2 text-[9px] font-display">{a.competition.tier.toUpperCase()}</Badge>}</TableCell>
+                    <TableCell className="text-sm">{a.competition?.name ?? "—"}{a.competition?.tier && <Badge variant="outline" className="ml-2 text-xs font-display">{a.competition.tier.toUpperCase()}</Badge>}</TableCell>
                     <TableCell>{a.competition?.discipline && <SportBadge code={a.competition.discipline.toUpperCase().slice(0, 2)} />}</TableCell>
                     <TableCell className="text-sm font-medium">{a.team?.name ?? (a.athlete ? `${a.athlete.first_name} ${a.athlete.last_name}` : "—")}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">{a.awarded_at ? new Date(a.awarded_at).toLocaleDateString() : "—"}</TableCell>
@@ -73,7 +73,7 @@ export default function RecordsPage() {
         </Card>
 
         <Card>
-          <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><Trophy className="h-4 w-4 text-accent" /> Athletic Records</CardTitle></CardHeader>
+          <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><Trophy className="h-4 w-4 text-foreground" /> Athletic Records</CardTitle></CardHeader>
           <CardContent className="p-0">
             <Table>
               <TableHeader><TableRow><TableHead>Event</TableHead><TableHead>Age / Gender</TableHead><TableHead>Athlete</TableHead><TableHead>Performance</TableHead><TableHead>Record Type</TableHead></TableRow></TableHeader>
@@ -85,8 +85,8 @@ export default function RecordsPage() {
                     <TableCell className="text-sm">{r.event?.event_name ?? "—"}</TableCell>
                     <TableCell className="text-xs">{r.event?.age_group} {r.event?.gender}</TableCell>
                     <TableCell className="text-sm font-medium">{r.athlete ? `${r.athlete.first_name} ${r.athlete.last_name}` : r.team?.name ?? "—"}</TableCell>
-                    <TableCell className="font-mono tabular-nums text-sm text-accent">{r.performance} {r.event?.unit ? <span className="text-[10px] text-muted-foreground">{r.event.unit}</span> : null}</TableCell>
-                    <TableCell><Badge variant="outline" className="text-[10px] font-display tracking-wider uppercase">{r.record_type}</Badge></TableCell>
+                    <TableCell className="font-mono tabular-nums text-sm text-foreground">{r.performance} {r.event?.unit ? <span className="text-xs text-muted-foreground">{r.event.unit}</span> : null}</TableCell>
+                    <TableCell><Badge variant="outline" className="text-xs font-display tracking-wider uppercase">{r.record_type}</Badge></TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -94,7 +94,7 @@ export default function RecordsPage() {
           </CardContent>
         </Card>
 
-        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
+        <p className="text-xs text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
       </div>
     </div>
   );

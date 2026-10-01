@@ -50,9 +50,9 @@ export default function CalendarPage() {
   return (
     <div className="min-h-screen bg-background">
       <NashHeader />
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="max-w-workspace mx-auto px-4 md:px-6 py-6 space-y-6">
         <div>
-          <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">Public · Calendar</p>
+          <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">Public · Calendar</p>
           <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">Competition Calendar</h1>
           <p className="text-xs text-muted-foreground mt-0.5">All NASH/NAPH competitions across all provinces, levels and sports.</p>
         </div>
@@ -60,12 +60,12 @@ export default function CalendarPage() {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex flex-wrap items-center gap-2">
-              <CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><CalIcon className="h-4 w-4 text-accent" /> Filters</CardTitle>
+              <CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><CalIcon className="h-4 w-4 text-foreground" /> Filters</CardTitle>
               <div className="flex-1" />
-              <SportSelector value={sport} onChange={setSport} allOption className="h-9 w-48" />
-              <ProvinceSelector value={province} onChange={setProvince} allOption className="h-9 w-48" />
+              <SportSelector value={sport} onChange={setSport} allOption className="min-h-11 w-48" />
+              <ProvinceSelector value={province} onChange={setProvince} allOption className="min-h-11 w-48" />
               <Select value={tier || "__all__"} onValueChange={(v) => setTier(v === "__all__" ? "" : v)}>
-                <SelectTrigger className="h-9 w-40"><SelectValue placeholder="All Tiers" /></SelectTrigger>
+                <SelectTrigger className="min-h-11 w-40"><SelectValue placeholder="All Tiers" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__all__">All Tiers</SelectItem>
                   <SelectItem value="zonal">Zonal</SelectItem>
@@ -85,14 +85,14 @@ export default function CalendarPage() {
 
         {groups.map(([month, items]) => (
           <div key={month} className="space-y-3">
-            <h2 className="text-sm font-display tracking-[0.15em] uppercase text-accent border-b border-border pb-1">{month}</h2>
+            <h2 className="text-sm font-display tracking-[0.15em] uppercase text-foreground border-b border-border pb-1">{month}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {items.map((c) => <CompetitionCard key={c.id} comp={c} />)}
             </div>
           </div>
         ))}
 
-        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
+        <p className="text-xs text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
       </div>
     </div>
   );

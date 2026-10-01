@@ -117,7 +117,7 @@ export default function SchoolProfilePage() {
           <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: "radial-gradient(circle at 20% 30%, white 1px, transparent 1px), radial-gradient(circle at 70% 60%, white 1px, transparent 1px)", backgroundSize: "40px 40px, 60px 60px" }} />
           <div className="absolute inset-0 flex items-end">
             <div className="max-w-[1200px] mx-auto px-4 sm:px-8 pb-4 w-full">
-              <Link to="/schools" className="text-[11px] text-primary-foreground/80 hover:text-primary-foreground transition-colors">← All schools</Link>
+              <Link to="/schools" className="text-xs text-primary-foreground/80 hover:text-primary-foreground transition-colors">← All schools</Link>
             </div>
           </div>
         </div>
@@ -133,7 +133,7 @@ export default function SchoolProfilePage() {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted">{tierLabel(school.level)}</p>
+              <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted">{tierLabel(school.level)}</p>
               <h1 className="display-font text-2xl sm:text-3xl font-bold mt-1 tracking-tight">{school.school_name || school.name}</h1>
               <p className="text-sm text-nexus-muted mt-1 flex items-center gap-1.5">
                 <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2C8 2 5 5 5 9c0 5.5 7 13 7 13s7-7.5 7-13c0-4-3-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
@@ -142,14 +142,14 @@ export default function SchoolProfilePage() {
               <div className="mt-3 flex flex-wrap gap-2">
                 <ScholasticBadge size="sm" />
                 {(school.sports_offered || []).slice(0, 6).map((s: string) => (
-                  <span key={s} className="text-[10px] mono px-2.5 py-1 hairline rounded-full text-nexus-muted">{s}</span>
+                  <span key={s} className="text-xs mono px-2.5 py-1 hairline rounded-full text-nexus-muted">{s}</span>
                 ))}
               </div>
             </div>
             <div className="grid grid-cols-3 gap-4 sm:gap-6 w-full sm:w-auto">
-              <div><p className="score-display text-xl text-foreground">{schoolTeams.filter((t: any) => t.is_published).length}</p><p className="text-[10px] mono uppercase tracking-wider text-nexus-muted">Teams</p></div>
-              <div><p className="score-display text-xl text-foreground">{studentCount}</p><p className="text-[10px] mono uppercase tracking-wider text-nexus-muted">Players</p></div>
-              <div><p className="score-display text-xl text-foreground">{fixtures.length}</p><p className="text-[10px] mono uppercase tracking-wider text-nexus-muted">Fixtures</p></div>
+              <div><p className="score-display text-xl text-foreground">{schoolTeams.filter((t: any) => t.is_published).length}</p><p className="text-xs mono uppercase tracking-wider text-nexus-muted">Teams</p></div>
+              <div><p className="score-display text-xl text-foreground">{studentCount}</p><p className="text-xs mono uppercase tracking-wider text-nexus-muted">Players</p></div>
+              <div><p className="score-display text-xl text-foreground">{fixtures.length}</p><p className="text-xs mono uppercase tracking-wider text-nexus-muted">Fixtures</p></div>
             </div>
           </div>
 
@@ -173,12 +173,12 @@ export default function SchoolProfilePage() {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="text-sm font-semibold">{t.name}</p>
-                            <p className="text-[10px] mono uppercase tracking-wider text-nexus-muted mt-0.5">{t.discipline} · {t.age_group || "All ages"}{t.gender ? ` · ${t.gender}` : ""}</p>
+                            <p className="text-xs mono uppercase tracking-wider text-nexus-muted mt-0.5">{t.discipline} · {t.age_group || "All ages"}{t.gender ? ` · ${t.gender}` : ""}</p>
                           </div>
-                          <span className={`text-[10px] mono px-2 py-0.5 rounded-full hairline ${t.is_published ? "text-foreground" : "text-nexus-muted"}`}>{t.is_published ? "Published" : "Draft"}</span>
+                          <span className={`text-xs mono px-2 py-0.5 rounded-full hairline ${t.is_published ? "text-foreground" : "text-nexus-muted"}`}>{t.is_published ? "Published" : "Draft"}</span>
                         </div>
                         {players.length === 0 ? (
-                          <p className="text-[11px] text-nexus-muted mt-2">No players added.</p>
+                          <p className="text-xs text-nexus-muted mt-2">No players added.</p>
                         ) : (
                           <div className="mt-2 flex flex-wrap gap-1.5">
                             {players.map((p: any) => {
@@ -186,7 +186,7 @@ export default function SchoolProfilePage() {
                               if (!a) return null;
                               const initial = (a.last_name || "").charAt(0).toUpperCase();
                               return (
-                                <span key={a.id} className="text-[11px] px-2 py-1 rounded-md hairline bg-background inline-flex items-center gap-1.5" title="Vetted via Scholastic Services">
+                                <span key={a.id} className="text-xs px-2 py-1 rounded-md hairline bg-background inline-flex items-center gap-1.5" title="Vetted via Scholastic Services">
                                   {p.jersey_number != null && <span className="mono text-nexus-muted">#{p.jersey_number}</span>}
                                   {a.first_name} {initial}{initial && "."}
                                   {a.scholastic_card_verified && <span className="w-1.5 h-1.5 rounded-full bg-foreground" title="Card verified" />}
@@ -200,7 +200,7 @@ export default function SchoolProfilePage() {
                   })}
                 </div>
               )}
-              <p className="text-[10px] text-nexus-muted mt-3">Ages, identity and eligibility are auto-vetted via Scholastic Services. Personal details are never exposed.</p>
+              <p className="text-xs text-nexus-muted mt-3">Ages, identity and eligibility are auto-vetted via Scholastic Services. Personal details are never exposed.</p>
             </div>
 
             {/* Fixtures */}
@@ -216,7 +216,7 @@ export default function SchoolProfilePage() {
                     return (
                       <div key={f.id} className="hairline rounded-lg p-3 bg-nexus-surface/50">
                         <p className="text-xs font-semibold">{f.competition?.name || "Competition"}</p>
-                        <p className="text-[10px] text-nexus-muted mt-0.5">{f.competition?.discipline} · {f.competition?.age_group || "All"} · {f.competition?.stage || ""} · {f.status}</p>
+                        <p className="text-xs text-nexus-muted mt-0.5">{f.competition?.discipline} · {f.competition?.age_group || "All"} · {f.competition?.stage || ""} · {f.status}</p>
                         <div className="flex items-center justify-between mt-2">
                           <span className="text-xs">{home?.name || "—"} <span className="text-nexus-muted">vs</span> {away?.name || "—"}</span>
                           <span className="mono text-sm">{f.home_score ?? "-"} : {f.away_score ?? "-"}</span>
