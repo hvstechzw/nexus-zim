@@ -114,9 +114,9 @@ export default function AdminSyncPage() {
   return (
     <div className="min-h-screen bg-background">
       <NashHeader />
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="max-w-workspace mx-auto px-4 md:px-6 py-6 space-y-6">
         <div>
-          <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">Federation · SS Integration</p>
+          <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">Federation · SS Integration</p>
           <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">Scholastic Services Sync</h1>
           <p className="text-xs text-muted-foreground mt-0.5">Federated bridge to SS for schools, students, rosters, academic eligibility & card verification.</p>
         </div>
@@ -131,9 +131,9 @@ export default function AdminSyncPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
-            <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><RefreshCw className="h-4 w-4 text-accent" /> Run Sync</CardTitle></CardHeader>
+            <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><RefreshCw className="h-4 w-4 text-foreground" /> Run Sync</CardTitle></CardHeader>
             <CardContent className="space-y-2">
-              <Button onClick={() => run("full-sync")} disabled={!!busy} className="w-full justify-start h-10">
+              <Button onClick={() => run("full-sync")} disabled={!!busy} className="w-full justify-start min-h-11">
                 {busy === "full-sync" ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Syncing…</> : <><RefreshCw className="h-4 w-4 mr-2" /> Full sync</>}
               </Button>
               <div className="grid grid-cols-3 gap-2">
@@ -141,43 +141,43 @@ export default function AdminSyncPage() {
                 <Button variant="outline" size="sm" onClick={() => run("sync-students")} disabled={!!busy}>Students</Button>
                 <Button variant="outline" size="sm" onClick={() => run("sync-rosters")} disabled={!!busy}>Rosters</Button>
               </div>
-              <p className="text-[11px] text-muted-foreground pt-1">Federation auth (HMAC + JWT) is handled server-side. SS credentials never reach the browser.</p>
+              <p className="text-xs text-muted-foreground pt-1">Federation auth (HMAC + JWT) is handled server-side. SS credentials never reach the browser.</p>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><GraduationCap className="h-4 w-4 text-accent" /> Academic Eligibility Check</CardTitle></CardHeader>
+            <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><GraduationCap className="h-4 w-4 text-foreground" /> Academic Eligibility Check</CardTitle></CardHeader>
             <CardContent className="space-y-2">
               <p className="text-xs text-muted-foreground">Re-runs the academic eligibility check across all athlete registrations that don't yet have a decision recorded. When SS exposes a marks endpoint, this becomes a real per-student check (default threshold: passing 5+ subjects in the last available term).</p>
-              <Button onClick={runEligibilityCheck} disabled={eligBusy} className="w-full justify-start h-10">
+              <Button onClick={runEligibilityCheck} disabled={eligBusy} className="w-full justify-start min-h-11">
                 {eligBusy ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Running…</> : <><GraduationCap className="h-4 w-4 mr-2" /> Run academic check</>}
               </Button>
-              {eligResult && <p className="text-[11px] text-muted-foreground border-t pt-2">{eligResult}</p>}
-              <Link to="/admin/eligibility" className="text-xs text-accent hover:underline block pt-1">View flagged athletes →</Link>
+              {eligResult && <p className="text-xs text-muted-foreground border-t pt-2">{eligResult}</p>}
+              <Link to="/admin/eligibility" className="text-xs text-foreground underline underline-offset-4 block pt-1">View flagged athletes →</Link>
             </CardContent>
           </Card>
         </div>
 
         <Card>
-          <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><FileText className="h-4 w-4 text-accent" /> Recent Runs</CardTitle></CardHeader>
+          <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><FileText className="h-4 w-4 text-foreground" /> Recent Runs</CardTitle></CardHeader>
           <CardContent className="p-0">
             <div className="divide-y divide-border/40">
               {logs.length === 0 && <div className="py-8 text-center text-xs text-muted-foreground">No sync runs yet.</div>}
               {logs.map((l: any) => (
                 <div key={l.id} className="px-4 py-3 grid grid-cols-[auto_1fr_auto] items-center gap-3 text-xs">
-                  <Badge variant="outline" className={`${STATUS_BADGE[l.status] || "text-muted-foreground"} font-display tracking-wider text-[9px] uppercase`}>{l.status}</Badge>
+                  <Badge variant="outline" className={`${STATUS_BADGE[l.status] || "text-muted-foreground"} font-display tracking-wider text-xs uppercase`}>{l.status}</Badge>
                   <div className="min-w-0">
                     <div className="font-medium">{l.sync_type} · {l.schools_synced} schools · {l.students_synced} students {l.eligibility_checks_run ? `· ${l.eligibility_checks_run} eligibility` : ""}</div>
-                    {l.error_message && <div className="text-destructive truncate text-[10px]">{l.error_message}</div>}
+                    {l.error_message && <div className="text-destructive truncate text-xs">{l.error_message}</div>}
                   </div>
-                  <span className="text-muted-foreground font-mono text-[10px]">{new Date(l.created_at).toLocaleString()}</span>
+                  <span className="text-muted-foreground font-mono text-xs">{new Date(l.created_at).toLocaleString()}</span>
                 </div>
               ))}
             </div>
           </CardContent>
         </Card>
 
-        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
+        <p className="text-xs text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
       </div>
     </div>
   );

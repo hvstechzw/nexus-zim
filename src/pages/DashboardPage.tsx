@@ -50,11 +50,11 @@ export default function DashboardPage() {
       <main className="flex-1 px-4 sm:px-8 py-8 max-w-6xl w-full mx-auto">
         <header className="flex items-start justify-between mb-8 gap-4">
           <div>
-            <p className="text-[10px] mono tracking-widest uppercase text-nexus-muted mb-1">Dashboard</p>
+            <p className="text-xs mono tracking-widest uppercase text-nexus-muted mb-1">Dashboard</p>
             <h1 className="text-2xl sm:text-3xl font-semibold">Hello, {profile?.display_name || user?.email}</h1>
             <div className="flex flex-wrap gap-1.5 mt-2">
               {roles.length === 0 && <span className="text-xs text-nexus-muted">No roles assigned</span>}
-              {roles.map(r => <span key={r} className="text-[10px] mono uppercase bg-nexus-surface px-2 py-1 rounded">{r}</span>)}
+              {roles.map(r => <span key={r} className="text-xs mono uppercase bg-nexus-surface px-2 py-1 rounded">{r}</span>)}
             </div>
           </div>
           <Button variant="outline" size="sm" onClick={signOut}>Sign out</Button>

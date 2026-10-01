@@ -72,13 +72,13 @@ export function EventsGrid() {
         <SectionHeader
           eyebrow="Competitions"
           title="Upcoming & active events"
-          right={<span className="text-[10px] sm:text-xs mono text-nexus-muted">{competitions.length} event{competitions.length !== 1 ? "s" : ""}</span>}
+          right={<span className="text-xs sm:text-xs mono text-nexus-muted">{competitions.length} event{competitions.length !== 1 ? "s" : ""}</span>}
         />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 p-4 sm:p-8">
         {isLoading && Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="hairline rounded-xl p-5 sm:p-6 animate-pulse">
+          <div key={i} className="hairline rounded-xl p-5 sm:p-6 ">
             <div className="h-3 bg-nexus-surface rounded w-1/3 mb-3" />
             <div className="h-5 bg-nexus-surface rounded w-3/4 mb-2" />
             <div className="h-3 bg-nexus-surface rounded w-1/2" />
@@ -103,15 +103,15 @@ export function EventsGrid() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                   {comp.logo_url && <img src={comp.logo_url} className="w-5 h-5 rounded object-cover bg-white" alt="" />}
-                  <span className="text-[9px] sm:text-[10px] mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2 py-0.5 sm:py-1 rounded-full">
+                  <span className="text-xs sm:text-xs mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2 py-0.5 sm:py-1 rounded-full">
                     {comp.discipline}
                   </span>
-                  <span className="text-[9px] sm:text-[10px] mono tracking-widest uppercase text-nexus-muted/70 bg-nexus-surface px-2 py-0.5 sm:py-1 rounded-full">
+                  <span className="text-xs sm:text-xs mono tracking-widest uppercase text-nexus-muted/70 bg-nexus-surface px-2 py-0.5 sm:py-1 rounded-full">
                     {comp.level?.replace(/_/g, " ")}
                   </span>
                 </div>
-                <span className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-[10px] mono tracking-widest uppercase text-nexus-muted">
-                  {status.dot && <span className="w-1.5 h-1.5 rounded-full bg-nexus-live animate-pulse" />}
+                <span className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-xs mono tracking-widest uppercase text-nexus-muted">
+                  {status.dot && <span className="w-1.5 h-1.5 rounded-full bg-nexus-live " />}
                   {status.label}
                 </span>
               </div>
@@ -121,34 +121,34 @@ export function EventsGrid() {
               </h3>
 
               {comp.description && (
-                <p className="text-[10px] sm:text-xs text-nexus-muted leading-relaxed line-clamp-2">{comp.description}</p>
+                <p className="text-xs sm:text-xs text-nexus-muted leading-relaxed line-clamp-2">{comp.description}</p>
               )}
 
               <div className="flex flex-wrap gap-1 sm:gap-1.5">
-                <span className="text-[10px] sm:text-[11px] mono text-nexus-muted hairline px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md">
+                <span className="text-xs sm:text-xs mono text-nexus-muted hairline px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md">
                   {comp.format?.replace(/_/g, " ")}
                 </span>
                 {comp.season && (
-                  <span className="text-[10px] sm:text-[11px] mono text-nexus-muted hairline px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md">{comp.season}</span>
+                  <span className="text-xs sm:text-xs mono text-nexus-muted hairline px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md">{comp.season}</span>
                 )}
                 {comp.province && (
-                  <span className="text-[10px] sm:text-[11px] mono text-nexus-muted hairline px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md">{comp.province}</span>
+                  <span className="text-xs sm:text-xs mono text-nexus-muted hairline px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md">{comp.province}</span>
                 )}
                 {fixtureCount > 0 && (
-                  <span className="text-[10px] sm:text-[11px] mono text-nexus-muted hairline px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md">{fixtureCount} fixtures</span>
+                  <span className="text-xs sm:text-xs mono text-nexus-muted hairline px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md">{fixtureCount} fixtures</span>
                 )}
               </div>
 
               <div className="mt-auto pt-3 sm:pt-4 hairline-t flex items-end justify-between gap-4">
                 <div>
                   {comp.start_date && (
-                    <p className="text-[10px] sm:text-xs mono text-nexus-muted font-medium">
+                    <p className="text-xs sm:text-xs mono text-nexus-muted font-medium">
                       {new Date(comp.start_date).toLocaleDateString("en-ZW", { day: "numeric", month: "short", year: "numeric" })}
                       {comp.end_date && ` - ${new Date(comp.end_date).toLocaleDateString("en-ZW", { day: "numeric", month: "short" })}`}
                     </p>
                   )}
                   {comp.prize_pool && comp.prize_pool > 0 && (
-                    <p className="text-[10px] mono text-nexus-muted/70 mt-0.5">Prize: ${Number(comp.prize_pool).toLocaleString()}</p>
+                    <p className="text-xs mono text-nexus-muted/70 mt-0.5">Prize: ${Number(comp.prize_pool).toLocaleString()}</p>
                   )}
                 </div>
                 {comp.max_participants && (
@@ -157,9 +157,9 @@ export function EventsGrid() {
                       <div className="w-10 sm:w-14 h-1.5 bg-nexus-silver rounded-full overflow-hidden">
                         <div className="h-full bg-foreground transition-all duration-700 rounded-full" style={{ width: `${fillPct}%` }} />
                       </div>
-                      <span className="text-[10px] sm:text-[11px] mono text-nexus-muted">{regCount}/{comp.max_participants}</span>
+                      <span className="text-xs sm:text-xs mono text-nexus-muted">{regCount}/{comp.max_participants}</span>
                     </div>
-                    <p className="text-[9px] sm:text-[10px] mono text-nexus-muted/60 mt-0.5">entries</p>
+                    <p className="text-xs sm:text-xs mono text-nexus-muted/60 mt-0.5">entries</p>
                   </div>
                 )}
               </div>

@@ -45,7 +45,7 @@ export function LevelSwitcher({ onLevelChange, onSportChange }: LevelSwitcherPro
   return (
     <div className="hairline-b">
       <div className="px-4 sm:px-8 py-3 sm:py-4 hairline-b">
-        <p className="text-[10px] sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">Filter by Level & Discipline</p>
+        <p className="text-xs sm:text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">Filter by Level & Discipline</p>
       </div>
 
       {/* Level pills */}
@@ -61,7 +61,7 @@ export function LevelSwitcher({ onLevelChange, onSportChange }: LevelSwitcherPro
                 className={`relative px-3 sm:px-5 py-2 sm:py-3 flex flex-col items-start gap-0.5 rounded-xl transition-all duration-200 btn-click
                   ${active ? "bg-foreground shadow-sm" : "bg-nexus-surface hover:bg-nexus-silver/60"}`}
               >
-                <span className={`text-[9px] sm:text-[10px] tracking-[0.12em] uppercase font-medium transition-colors duration-200 ${active ? "text-primary-foreground/70" : "text-nexus-muted"}`}>
+                <span className={`text-xs sm:text-xs tracking-[0.12em] uppercase font-medium transition-colors duration-200 ${active ? "text-primary-foreground/70" : "text-nexus-muted"}`}>
                   {LEVEL_MAP[level]}
                 </span>
                 <span className={`mono text-sm sm:text-base font-bold transition-colors duration-200 ${active ? "text-primary-foreground" : "text-foreground"}`}>
@@ -80,7 +80,7 @@ export function LevelSwitcher({ onLevelChange, onSportChange }: LevelSwitcherPro
             <button
               key={sport}
               onClick={() => { setActiveSport(sport); onSportChange?.(sport); }}
-              className={`px-3 sm:px-4 py-1 sm:py-1.5 text-[11px] sm:text-xs tracking-wide font-medium rounded-full transition-all duration-200 btn-click
+              className={`px-3 sm:px-4 py-1 sm:py-1.5 text-xs sm:text-xs tracking-wide font-medium rounded-full transition-all duration-200 btn-click
                 ${activeSport === sport
                   ? "bg-foreground text-primary-foreground"
                   : "bg-nexus-surface text-nexus-muted hover:text-foreground hover:bg-nexus-silver/50"

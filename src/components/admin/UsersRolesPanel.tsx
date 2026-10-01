@@ -149,13 +149,13 @@ export function UsersRolesPanel() {
               <li key={u.user_id} className="p-4 flex flex-wrap gap-4 items-start">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-foreground">{u.display_name || u.user_id.slice(0, 8)}</p>
-                  <p className="text-[10px] mono text-nexus-muted">{u.user_id}</p>
+                  <p className="text-xs mono text-nexus-muted">{u.user_id}</p>
                   <div className="flex flex-wrap gap-1.5 mt-2">
-                    {u.roles.length === 0 && <span className="text-[10px] mono text-nexus-muted">no roles</span>}
+                    {u.roles.length === 0 && <span className="text-xs mono text-nexus-muted">no roles</span>}
                     {u.roles.map((r) => (
                       <span
                         key={r}
-                        className={`text-[10px] mono uppercase tracking-wider px-2 py-1 rounded ${
+                        className={`text-xs mono uppercase tracking-wider px-2 py-1 rounded ${
                           r === "super_admin"
                             ? "bg-foreground text-primary-foreground"
                             : "bg-nexus-surface text-foreground"

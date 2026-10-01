@@ -82,7 +82,7 @@ export default function LivePage() {
       <main className="max-w-6xl mx-auto px-4 sm:px-8 py-8 sm:py-12">
         <header className="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
           <div>
-            <p className="text-[10px] mono tracking-[0.2em] uppercase text-nexus-muted">Realtime</p>
+            <p className="text-xs mono tracking-[0.2em] uppercase text-nexus-muted">Realtime</p>
             <h1 className="text-display-lg display-font font-semibold mt-1">Live matches</h1>
             <p className="text-sm text-nexus-muted mt-1">
               All 15 NASH &amp; NAPH sports across Nexus, updating in realtime.
@@ -93,7 +93,7 @@ export default function LivePage() {
               <button
                 key={s}
                 onClick={() => setSport(s)}
-                className={`px-3 py-2 text-[10px] mono font-semibold tracking-widest uppercase transition-colors whitespace-nowrap ${
+                className={`px-3 py-2 text-xs mono font-semibold tracking-widest uppercase transition-colors whitespace-nowrap ${
                   sport === s ? "bg-foreground text-primary-foreground" : "bg-background text-nexus-muted hover:text-foreground"
                 }`}
               >
@@ -126,9 +126,9 @@ function Section({
     <section className="mb-10">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          {live && count > 0 && <span className="w-2 h-2 rounded-full bg-nexus-live animate-pulse" />}
+          {live && count > 0 && <span className="w-2 h-2 rounded-full bg-nexus-live " />}
           <h2 className="text-sm display-font font-semibold uppercase tracking-widest text-foreground">{title}</h2>
-          <span className="text-[10px] mono text-nexus-muted">{count}</span>
+          <span className="text-xs mono text-nexus-muted">{count}</span>
         </div>
       </div>
       {rows.length === 0 ? (
@@ -155,13 +155,13 @@ function FixtureCard({ f }: { f: FixtureRow }) {
           {(sport as string) === "other" ? (f.competition?.discipline || "match") : sport}
         </span>
         {f.status === "live" ? (
-          <span className="flex items-center gap-1.5 text-[9px] mono uppercase tracking-widest text-nexus-live">
-            <span className="w-1.5 h-1.5 rounded-full bg-nexus-live animate-pulse" /> Live
+          <span className="flex items-center gap-1.5 text-xs mono uppercase tracking-widest text-nexus-live">
+            <span className="w-1.5 h-1.5 rounded-full bg-nexus-live " /> Live
           </span>
         ) : f.status === "completed" ? (
-          <span className="text-[9px] mono uppercase tracking-widest text-nexus-muted">FT</span>
+          <span className="text-xs mono uppercase tracking-widest text-nexus-muted">FT</span>
         ) : (
-          <span className="text-[9px] mono uppercase tracking-widest text-nexus-muted">
+          <span className="text-xs mono uppercase tracking-widest text-nexus-muted">
             {when ? new Date(when).toLocaleString("en-ZW", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "TBD"}
           </span>
         )}
@@ -176,7 +176,7 @@ function FixtureCard({ f }: { f: FixtureRow }) {
           <p className="score-display text-xl text-nexus-muted">{f.away_score ?? 0}</p>
         </div>
       </div>
-      <div className="mt-3 flex items-center justify-between text-[10px] mono text-nexus-muted">
+      <div className="mt-3 flex items-center justify-between text-xs mono text-nexus-muted">
         <span className="truncate">{f.competition?.name || ""}</span>
         <span className="truncate">{f.venue?.name ? `${f.venue.name}${f.venue.city ? ` · ${f.venue.city}` : ""}` : ""}</span>
       </div>

@@ -23,17 +23,17 @@ export function AthleteCard({ nashId, firstName, lastName, schoolName, photoUrl,
             {firstName.charAt(0)}{lastName.charAt(0)}
           </div>}
         {typeof jerseyNumber === "number" && (
-          <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-accent text-accent-foreground text-[10px] font-bold flex items-center justify-center border border-background">
+          <span className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-accent text-accent-foreground text-xs font-bold flex items-center justify-center border border-background">
             {jerseyNumber}
           </span>
         )}
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-sm font-medium truncate">
-          {firstName} {lastName}{isCaptain && <Badge variant="outline" className="ml-1 text-[9px]">C</Badge>}
+          {firstName} {lastName}{isCaptain && <Badge variant="outline" className="ml-1 text-xs">C</Badge>}
         </div>
-        <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-          <span className="font-mono text-accent">{nashId}</span>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="font-mono text-foreground">{nashId}</span>
           {schoolName && <span className="truncate">· {schoolName}</span>}
         </div>
       </div>

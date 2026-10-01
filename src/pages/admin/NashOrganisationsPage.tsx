@@ -47,16 +47,16 @@ function OrgRow({ node, depth }: { node: TreeNode; depth: number }) {
         <span className="text-muted-foreground">
           {hasChildren ? (open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />) : <span className="inline-block w-3.5" />}
         </span>
-        <Icon className="h-4 w-4 text-accent" />
+        <Icon className="h-4 w-4 text-foreground" />
         <div className="min-w-0">
           <div className="text-sm font-medium truncate">{node.name}</div>
-          <div className="text-[10px] text-muted-foreground">
+          <div className="text-xs text-muted-foreground">
             {node.level.toUpperCase()}
-            {node.province && <> · {node.province} <Badge variant="outline" className="ml-1 font-mono text-[9px]">{provinceCode(node.province)}</Badge></>}
+            {node.province && <> · {node.province} <Badge variant="outline" className="ml-1 font-mono text-xs">{provinceCode(node.province)}</Badge></>}
             {node.chair_name && <> · Chair: {node.chair_name}</>}
           </div>
         </div>
-        <Badge variant={node.type === "nash" ? "default" : "secondary"} className="text-[9px] font-display tracking-wider uppercase">{node.type}</Badge>
+        <Badge variant={node.type === "nash" ? "default" : "secondary"} className="text-xs font-display tracking-wider uppercase">{node.type}</Badge>
       </div>
       {open && node.children.map((c) => <OrgRow key={c.id} node={c} depth={depth + 1} />)}
     </>
@@ -80,9 +80,9 @@ export default function NashOrganisationsPage() {
   return (
     <div className="min-h-screen bg-background">
       <NashHeader />
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="max-w-workspace mx-auto px-4 md:px-6 py-6 space-y-6">
         <div>
-          <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">Federation · Organisations</p>
+          <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">Federation · Organisations</p>
           <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">NASH / NAPH Organisation Tree</h1>
           <p className="text-xs text-muted-foreground mt-0.5">National → Provincial → District → Zonal hierarchy across both federations.</p>
         </div>
@@ -96,7 +96,7 @@ export default function NashOrganisationsPage() {
             {tree.map((n) => <OrgRow key={n.id} node={n} depth={0} />)}
           </CardContent>
         </Card>
-        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
+        <p className="text-xs text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
       </div>
     </div>
   );

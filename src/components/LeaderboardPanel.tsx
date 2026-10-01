@@ -74,8 +74,8 @@ export function LeaderboardPanel({
   return (
     <div className="space-y-6">
       {tournamentMVP?.athlete && (
-        <section className="hairline rounded-2xl p-5 bg-gradient-to-br from-nexus-surface/60 to-background">
-          <p className="text-[10px] mono tracking-[0.22em] uppercase text-nexus-muted mb-2">Player of the Tournament (live)</p>
+        <section className="hairline rounded-2xl p-5 bg-card">
+          <p className="text-xs mono tracking-[0.22em] uppercase text-nexus-muted mb-2">Player of the Tournament (live)</p>
           <Link to={`/players/${tournamentMVP.athlete_id}`} className="flex items-center gap-4 group">
             {tournamentMVP.athlete.photo_url ? (
               <img src={tournamentMVP.athlete.photo_url} alt="" className="w-14 h-14 rounded-full object-cover" />
@@ -86,8 +86,8 @@ export function LeaderboardPanel({
               <p className="text-base sm:text-lg font-bold text-foreground group-hover:underline truncate">
                 {displayName(tournamentMVP.athlete)}
               </p>
-              <p className="text-[11px] mono text-nexus-muted truncate">{tournamentMVP.athlete.school_name || "—"}</p>
-              <p className="text-[11px] mono text-nexus-muted mt-1">
+              <p className="text-xs mono text-nexus-muted truncate">{tournamentMVP.athlete.school_name || "—"}</p>
+              <p className="text-xs mono text-nexus-muted mt-1">
                 Impact <b className="text-foreground">{tournamentMVP.impact_score.toFixed(1)}</b>
                 {"  ·  "}Goals <b className="text-foreground">{tournamentMVP.goals}</b>
                 {"  ·  "}Assists <b className="text-foreground">{tournamentMVP.assists}</b>
@@ -99,7 +99,7 @@ export function LeaderboardPanel({
 
       <div className="grid lg:grid-cols-2 gap-6">
         <section>
-          <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted mb-3">Top Scorers</p>
+          <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted mb-3">Top Scorers</p>
           {liveScorers.length > 0 ? (
             <div className="hairline rounded-xl overflow-hidden">
               {liveScorers.slice(0, 20).map((s, i) => (
@@ -108,7 +108,7 @@ export function LeaderboardPanel({
                   <Link to={`/players/${s.athlete_id}`} className="text-sm font-semibold text-foreground flex-1 truncate hover:underline">
                     {displayName(s.athlete)}
                   </Link>
-                  <span className="text-[10px] mono text-nexus-muted">{s.assists} ast</span>
+                  <span className="text-xs mono text-nexus-muted">{s.assists} ast</span>
                   <span className="text-base font-bold mono text-foreground w-10 text-right">{s.goals}</span>
                 </div>
               ))}
@@ -119,7 +119,7 @@ export function LeaderboardPanel({
                 <div key={s.athleteId} className="flex items-center gap-3 px-4 py-3 hairline-b last:border-b-0 hover:bg-nexus-surface/40 transition-colors">
                   <span className="text-sm font-bold w-6 text-nexus-muted">{i + 1}</span>
                   <Link to={`/players/${s.athleteId}`} className="text-sm font-semibold text-foreground flex-1 truncate hover:underline">{s.name}</Link>
-                  <span className="text-[10px] mono text-nexus-muted">{s.goals} {s.goals === 1 ? "goal" : "goals"}</span>
+                  <span className="text-xs mono text-nexus-muted">{s.goals} {s.goals === 1 ? "goal" : "goals"}</span>
                   <span className="text-base font-bold mono text-foreground w-10 text-right">{s.points}</span>
                 </div>
               ))}
@@ -131,7 +131,7 @@ export function LeaderboardPanel({
 
         <section className="space-y-6">
           <div>
-            <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted mb-3">Impact Leaders</p>
+            <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted mb-3">Impact Leaders</p>
             {impact.length > 0 ? (
               <div className="hairline rounded-xl overflow-hidden">
                 {impact.slice(0, 10).map((s, i) => (
@@ -140,7 +140,7 @@ export function LeaderboardPanel({
                     <Link to={`/players/${s.athlete_id}`} className="text-sm font-semibold text-foreground flex-1 truncate hover:underline">
                       {displayName(s.athlete)}
                     </Link>
-                    <span className="text-[10px] mono text-nexus-muted">
+                    <span className="text-xs mono text-nexus-muted">
                       G{s.goals} · A{s.assists} · D{s.defensive_actions}
                     </span>
                     <span className="text-base font-bold mono text-foreground w-12 text-right">{s.impact_score.toFixed(1)}</span>
@@ -153,7 +153,7 @@ export function LeaderboardPanel({
           </div>
 
           <div>
-            <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted mb-3">Discipline</p>
+            <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted mb-3">Discipline</p>
             {discipline.length === 0 ? (
               <p className="text-xs mono text-nexus-muted">No cards or suspensions recorded.</p>
             ) : (
@@ -161,10 +161,10 @@ export function LeaderboardPanel({
                 {discipline.slice(0, 10).map((d) => (
                   <div key={d.athleteId} className="flex items-center gap-3 px-4 py-3 hairline-b last:border-b-0">
                     <span className="text-sm font-semibold text-foreground flex-1 truncate">{d.name}</span>
-                    <span className="flex items-center gap-2 text-[10px] mono text-nexus-muted">
-                      {d.yellow > 0 && <span className="flex items-center gap-1"><span className="w-2 h-3 rounded-[1px] bg-yellow-400" />{d.yellow}</span>}
+                    <span className="flex items-center gap-2 text-xs mono text-nexus-muted">
+                      {d.yellow > 0 && <span className="flex items-center gap-1"><span className="w-2 h-3 rounded-[1px] bg-warning" />{d.yellow}</span>}
                       {d.suspensions > 0 && <span>{d.suspensions}×2′</span>}
-                      {d.red > 0 && <span className="flex items-center gap-1"><span className="w-2 h-3 rounded-[1px] bg-red-500" />{d.red}</span>}
+                      {d.red > 0 && <span className="flex items-center gap-1"><span className="w-2 h-3 rounded-[1px] bg-danger" />{d.red}</span>}
                     </span>
                   </div>
                 ))}

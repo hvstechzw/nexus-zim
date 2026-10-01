@@ -36,13 +36,13 @@ export function PagePlaceholder({ title, description, tier, routeHint }: Props) 
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <CardTitle className="text-2xl font-display tracking-wide">{title}</CardTitle>
-              {tier && <Badge variant="secondary" className="uppercase text-[10px] tracking-wider">{TIER_LABEL[tier] || tier}</Badge>}
+              {tier && <Badge variant="secondary" className="uppercase text-xs tracking-wider">{TIER_LABEL[tier] || tier}</Badge>}
             </div>
-            {routeHint && <p className="text-[11px] font-mono text-muted-foreground">{routeHint}</p>}
+            {routeHint && <p className="text-xs font-mono text-muted-foreground">{routeHint}</p>}
           </CardHeader>
           <CardContent className="space-y-3">
-            <div className="flex items-start gap-3 p-3 rounded border border-accent/30 bg-accent/5">
-              <Construction className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+            <div className="flex items-start gap-3 p-3 rounded border border-border bg-accent/5">
+              <Construction className="h-5 w-5 text-foreground shrink-0 mt-0.5" />
               <p className="text-sm text-muted-foreground">
                 {description || "This NASH module is scaffolded. Functionality lands in a later overhaul session."}
               </p>

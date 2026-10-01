@@ -126,23 +126,23 @@ export default function AthleteRegisterNexusPage() {
   return (
     <Shell>
       <div>
-        <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">Athlete Registration</p>
+        <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">Athlete Registration</p>
         <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">Register on Nexus</h1>
         <p className="text-xs text-muted-foreground mt-0.5">Create your athlete profile so coaches can add you to team cards and score sheets.</p>
       </div>
 
       {existing && (
         <div className="flex items-center gap-2 p-3 rounded border bg-accent/5">
-          <ShieldCheck className="h-4 w-4 text-accent" />
+          <ShieldCheck className="h-4 w-4 text-foreground" />
           <span className="text-xs">You already have a profile — updating below will overwrite it.</span>
-          <Badge variant="outline" className="ml-auto text-[10px]">{existing.is_ss_linked ? "SS-linked" : "Nexus-only"}</Badge>
+          <Badge variant="outline" className="ml-auto text-xs">{existing.is_ss_linked ? "SS-linked" : "Nexus-only"}</Badge>
         </div>
       )}
 
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-display tracking-wide flex items-center gap-2">
-            <UserPlus className="h-4 w-4 text-accent" /> Athlete Profile
+            <UserPlus className="h-4 w-4 text-foreground" /> Athlete Profile
           </CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -176,8 +176,8 @@ export default function AthleteRegisterNexusPage() {
           <div className="space-y-1"><Label className="text-xs">Height (cm)</Label>
             <Input type="number" value={form.height_cm} onChange={(e) => setForm({ ...form, height_cm: e.target.value })} /></div>
           <div className="space-y-1"><Label className="text-xs">Photo</Label>
-            <label className="flex items-center justify-center h-10 px-3 border-2 border-dashed rounded cursor-pointer hover:border-accent">
-              {photoFile ? <span className="text-xs flex items-center gap-1"><Check className="h-3 w-3 text-accent" /> {photoFile.name}</span>
+            <label className="flex items-center justify-center h-10 px-3 border-2 border-dashed rounded cursor-pointer hover:border-border">
+              {photoFile ? <span className="text-xs flex items-center gap-1"><Check className="h-3 w-3 text-foreground" /> {photoFile.name}</span>
                 : <span className="text-xs text-muted-foreground flex items-center gap-1"><Upload className="h-3 w-3" /> Upload profile photo</span>}
               <input type="file" accept="image/*" className="hidden" onChange={(e) => setPhotoFile(e.target.files?.[0] || null)} />
             </label>
@@ -189,7 +189,7 @@ export default function AthleteRegisterNexusPage() {
                 {teams.map((t) => <SelectItem key={t.id} value={t.id}>{t.name} — {t.school?.school_name || t.school?.name} · {t.age_group}</SelectItem>)}
               </SelectContent>
             </Select>
-            <p className="text-[10px] text-muted-foreground">Only approved (published) teams appear here. Coach still confirms the placement.</p>
+            <p className="text-xs text-muted-foreground">Only approved (published) teams appear here. Coach still confirms the placement.</p>
           </div>
         </CardContent>
       </Card>
@@ -207,7 +207,7 @@ function Shell({ children }: { children: React.ReactNode }) {
       <NashHeader />
       <div className="max-w-2xl mx-auto px-4 md:px-6 py-6 space-y-4">
         {children}
-        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
+        <p className="text-xs text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
       </div>
     </div>
   );

@@ -40,7 +40,7 @@ export function StandingsTable({ rows, hideGoals }: Props) {
     <div className="space-y-4">
       {Array.from(groups.entries()).map(([group, items]) => (
         <div key={group}>
-          {showGroups && <div className="text-[10px] font-display tracking-[0.15em] uppercase text-accent border-b border-border pb-1 mb-2">Group {group}</div>}
+          {showGroups && <div className="text-xs font-display tracking-[0.15em] uppercase text-foreground border-b border-border pb-1 mb-2">Group {group}</div>}
           <Table>
             <TableHeader>
               <TableRow>
@@ -70,7 +70,7 @@ export function StandingsTable({ rows, hideGoals }: Props) {
                 return (
                   <TableRow key={`${group}-${r.team_name}-${i}`} className={isLeader ? "bg-accent/5" : undefined}>
                     <TableCell className="text-center font-mono text-xs">{pos}</TableCell>
-                    <TableCell className="text-sm font-medium">{r.team_name}{isLeader && <Badge variant="outline" className="ml-2 text-[9px] border-accent text-accent">LEAD</Badge>}</TableCell>
+                    <TableCell className="text-sm font-medium">{r.team_name}{isLeader && <Badge variant="outline" className="ml-2 text-xs border-border text-foreground">LEAD</Badge>}</TableCell>
                     <TableCell className="text-center tabular-nums text-xs">{r.played ?? 0}</TableCell>
                     <TableCell className="text-center tabular-nums text-xs">{r.won ?? 0}</TableCell>
                     <TableCell className="text-center tabular-nums text-xs">{r.drawn ?? 0}</TableCell>

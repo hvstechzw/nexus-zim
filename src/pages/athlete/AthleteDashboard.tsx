@@ -52,10 +52,10 @@ export default function AthleteDashboard() {
   return (
     <div className="min-h-screen bg-background">
       <NashHeader />
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="max-w-workspace mx-auto px-4 md:px-6 py-6 space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">Athlete</p>
+            <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">Athlete</p>
             <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">
               {profile ? `${profile.first_name} ${profile.last_name}` : (user?.email?.split("@")[0] ?? "My Profile")}
             </h1>
@@ -73,7 +73,7 @@ export default function AthleteDashboard() {
         </div>
 
         {!profile && !loading && (
-          <Card className="border-accent/30 bg-accent/5">
+          <Card className="border-border bg-accent/5">
             <CardContent className="p-4 text-sm">
               No athlete record linked to your account yet. Your coach or school sports master registers athletes in the NASH registry.
             </CardContent>
@@ -89,21 +89,21 @@ export default function AthleteDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
-            <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><Calendar className="h-4 w-4 text-accent" /> Upcoming Fixtures</CardTitle></CardHeader>
+            <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><Calendar className="h-4 w-4 text-foreground" /> Upcoming Fixtures</CardTitle></CardHeader>
             <CardContent><p className="text-sm text-muted-foreground py-6 text-center">Fixtures will appear as your teams register for competitions.</p></CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-accent" /> Identity</CardTitle></CardHeader>
+            <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-foreground" /> Identity</CardTitle></CardHeader>
             <CardContent className="space-y-2 text-sm">
-              <div className="flex items-center justify-between"><span className="text-muted-foreground">NASH ID</span><span className="font-mono text-accent">{profile?.nash_id ?? "—"}</span></div>
-              <div className="flex items-center justify-between"><span className="text-muted-foreground">ID Verified</span>{profile?.id_verified ? <Badge variant="outline" className="text-[10px] border-[hsl(var(--nash-success))]/50 text-[hsl(var(--nash-success))]">Verified</Badge> : <span className="text-xs">Pending</span>}</div>
-              <div className="flex items-center justify-between"><span className="text-muted-foreground">Scholastic Card</span>{profile?.ss_student_id ? <Badge variant="outline" className="text-[10px] border-accent/50 text-accent">SS-Linked</Badge> : <span className="text-xs">—</span>}</div>
+              <div className="flex items-center justify-between"><span className="text-muted-foreground">NASH ID</span><span className="font-mono text-foreground">{profile?.nash_id ?? "—"}</span></div>
+              <div className="flex items-center justify-between"><span className="text-muted-foreground">ID Verified</span>{profile?.id_verified ? <Badge variant="outline" className="text-xs border-[hsl(var(--nash-success))]/50 text-[hsl(var(--nash-success))]">Verified</Badge> : <span className="text-xs">Pending</span>}</div>
+              <div className="flex items-center justify-between"><span className="text-muted-foreground">Scholastic Card</span>{profile?.ss_student_id ? <Badge variant="outline" className="text-xs border-border text-foreground">SS-Linked</Badge> : <span className="text-xs">—</span>}</div>
               <Button asChild variant="outline" size="sm" className="w-full mt-2"><Link to="/athletes/id-cards"><IdCard className="h-4 w-4 mr-1" /> View ID card</Link></Button>
             </CardContent>
           </Card>
         </div>
 
-        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
+        <p className="text-xs text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
       </div>
     </div>
   );

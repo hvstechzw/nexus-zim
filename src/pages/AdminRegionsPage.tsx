@@ -143,20 +143,20 @@ export default function AdminRegionsPage() {
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-semibold">
                   {profiles[a.user_id]?.display_name || a.user_id.slice(0, 8)}
-                  <span className="ml-2 text-[10px] mono uppercase tracking-wider text-nexus-muted">{a.level}</span>
+                  <span className="ml-2 text-xs mono uppercase tracking-wider text-nexus-muted">{a.level}</span>
                 </p>
                 <p className="text-xs text-nexus-muted">{regionLabel(a)}</p>
-                {a.notes && <p className="text-[10px] text-nexus-muted mt-1 italic">{a.notes}</p>}
-                <p className="text-[10px] mono text-nexus-muted mt-1">
+                {a.notes && <p className="text-xs text-nexus-muted mt-1 italic">{a.notes}</p>}
+                <p className="text-xs mono text-nexus-muted mt-1">
                   Requested {new Date(a.created_at).toLocaleString()}
                   {a.approved_at ? ` · Approved ${new Date(a.approved_at).toLocaleString()}` : ""}
                 </p>
               </div>
               <div className="flex items-center gap-2">
-                <span className={`text-[10px] mono uppercase tracking-wider px-2 py-1 rounded ${
-                  a.status === "approved" ? "bg-emerald-500/10 text-emerald-600" :
-                  a.status === "revoked" ? "bg-red-500/10 text-red-600" :
-                  "bg-amber-500/10 text-amber-600"
+                <span className={`text-xs mono uppercase tracking-wider px-2 py-1 rounded ${
+                  a.status === "approved" ? "bg-success/10 text-success" :
+                  a.status === "revoked" ? "bg-danger/10 text-danger" :
+                  "bg-warning/10 text-warning"
                 }`}>{a.status}</span>
                 {a.status === "pending" && (
                   <Button size="sm" disabled={busy === a.id} onClick={() => approve(a)}>{busy === a.id ? "…" : "Approve"}</Button>

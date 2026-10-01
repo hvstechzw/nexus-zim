@@ -1,11 +1,7 @@
-// Compatibility shim — the legacy NexusHeader is now a thin alias around
-// NashHeader so every page that still imports NexusHeader gets the NASH
-// green/gold lockup and role-aware nav without each page being touched.
-// Don't add new features here; add them to NashHeader.
-import { NashHeader } from "@/components/nash/NashHeader";
-
+// The application header now lives in the single shell (components/shell/AppShell).
+// Pages that still render <NexusHeader /> get nothing extra, so there is one shell owner.
 export function NexusHeader() {
-  return <NashHeader />;
+  return null;
 }
 
 export default NexusHeader;

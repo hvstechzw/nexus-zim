@@ -186,16 +186,16 @@ export default function RegisterPage() {
               <Label>Role you are applying for</Label>
               {groups.map(g => (
                 <div key={g}>
-                  <p className="text-[10px] mono uppercase tracking-wider text-nexus-muted mb-1.5">{g}</p>
+                  <p className="text-xs mono uppercase tracking-wider text-nexus-muted mb-1.5">{g}</p>
                   <div className="grid sm:grid-cols-2 gap-2">
                     {ROLES.filter(r => r.group === g).map(r => (
                       <button key={r.value} type="button" onClick={() => setRequestedRole(r.value)}
                         className={`hairline rounded-md px-3 py-2 text-xs text-left transition ${requestedRole === r.value ? "bg-foreground text-primary-foreground" : "bg-background hover:bg-nexus-surface"}`}>
                         <div className="flex items-center justify-between gap-2">
                           <span>{r.label}</span>
-                          <span className="text-[9px] opacity-70">{r.auto ? "instant" : `weight ${r.weight}`}</span>
+                          <span className="text-xs opacity-70">{r.auto ? "instant" : `weight ${r.weight}`}</span>
                         </div>
-                        {!r.auto && <div className="text-[9px] opacity-70 mt-0.5">Needs admin approval</div>}
+                        {!r.auto && <div className="text-xs opacity-70 mt-0.5">Needs admin approval</div>}
                       </button>
                     ))}
                   </div>
@@ -205,7 +205,7 @@ export default function RegisterPage() {
 
             {def.fields.length > 0 && (
               <div className="hairline rounded-lg p-4 space-y-3 bg-nexus-surface/40">
-                <p className="text-[10px] mono uppercase tracking-wider text-nexus-muted">Required details for {def.label}</p>
+                <p className="text-xs mono uppercase tracking-wider text-nexus-muted">Required details for {def.label}</p>
 
                 {def.fields.includes("school") && (
                   <div>

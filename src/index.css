@@ -1,149 +1,142 @@
-/* Dark mode CSS variables */
-@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /*
-  NEXUS by Aetheris — Design System
-  Philosophy: A high-precision competition intelligence platform.
-  Strictly grayscale HSL. Rounded, airy, and editorial.
+  Nexus on the Aetheris Universal Design System v1.1 (light theme).
+  Primitive values are the fixed company palette (§5.1). Components consume the
+  semantic aliases below, never the primitives. Colours are stored as HSL
+  triplets so Tailwind opacity modifiers keep working.
 */
 
 @layer base {
   :root {
-    /* Surfaces — pure grayscale */
-    --background: 0 0% 100%;
-    --foreground: 216 61% 12%;
+    /* Primitives (§5.1) */
+    --aetheris-ivory-50: 42.9 46.7% 97.1%;   /* #FBF9F4 */
+    --aetheris-ivory-100: 43.6 35.5% 93.9%;  /* #F5F2EA */
+    --aetheris-white: 0 0% 100%;             /* #FFFFFF */
+    --aetheris-gray-100: 45 12.5% 93.7%;     /* #F1F0ED */
+    --aetheris-gray-200: 45 12.5% 87.5%;     /* #E3E1DB */
+    --aetheris-gray-300: 43.6 10.3% 79%;     /* #CFCCC4 */
+    --aetheris-gray-400: 45 8.2% 62%;        /* #A6A296 — decoration only, never text */
+    --aetheris-border-control: 41.5 5.1% 50.4%; /* #87837A */
+    --aetheris-gray-500: 44 7.3% 40.2%;      /* #6E6A5F */
+    --aetheris-gray-600: 45 6.7% 34.9%;      /* #5F5C53 */
+    --aetheris-gray-700: 40 9.8% 23.9%;      /* #433F37 */
+    --aetheris-gray-800: 205.7 11.9% 34.7%;  /* #4E5A63 */
+    --aetheris-gray-900: 204 18.8% 26.1%;    /* #36454F */
 
-    --card: 0 0% 100%;
-    --card-foreground: 216 61% 12%;
+    /* Semantic surfaces and text (§5.2) */
+    --background: var(--aetheris-ivory-50);
+    --foreground: var(--aetheris-gray-900);
+    --card: var(--aetheris-white);
+    --card-foreground: var(--aetheris-gray-900);
+    --popover: var(--aetheris-white);
+    --popover-foreground: var(--aetheris-gray-900);
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 216 61% 12%;
+    --primary: var(--aetheris-gray-900);
+    --primary-hover: var(--aetheris-gray-800);
+    --primary-foreground: var(--aetheris-ivory-50);
 
-    /* Brand — NASH Zimbabwe green */
-    --primary: 124 55% 24%;
-    --primary-foreground: 0 0% 100%;
+    --secondary: var(--aetheris-gray-100);
+    --secondary-foreground: var(--aetheris-gray-900);
 
-    --secondary: 140 30% 95%;
-    --secondary-foreground: 124 55% 24%;
+    --muted: var(--aetheris-ivory-100);
+    --muted-foreground: var(--aetheris-gray-500);
+    --supporting: var(--aetheris-gray-600);
 
-    /* Muted */
-    --muted: 210 20% 96%;
-    --muted-foreground: 215 14% 40%;
+    /* shadcn "accent" is the quiet selection/hover fill (selection-neutral) */
+    --accent: var(--aetheris-gray-100);
+    --accent-foreground: var(--aetheris-gray-900);
 
-    /* Accent — Zimbabwe gold */
-    --accent: 40 95% 56%;
-    --accent-foreground: 216 61% 12%;
+    --destructive: 12.8 79.6% 40.4%;
+    --destructive-foreground: var(--aetheris-white);
 
-    --destructive: 1 77% 55%;
-    --destructive-foreground: 0 0% 100%;
+    --border: var(--aetheris-gray-200);
+    --control: var(--aetheris-border-control);
+    --input: var(--aetheris-border-control);
+    --ring: var(--aetheris-gray-900);
 
-    /* Borders */
-    --border: 216 30% 12% / 0.12;
-    --input: 216 30% 12% / 0.16;
-    --ring: 124 55% 24%;
-
-    /* Radius — sharp/competitive feel */
-    --radius: 4px;
-
-    /* NASH semantic tokens */
-    --nash-green: 124 55% 24%;
-    --nash-green-mid: 123 46% 34%;
-    --nash-gold: 40 95% 56%;
-    --nash-gold-light: 50 98% 60%;
-    --nash-success: 123 40% 45%;
-    --nash-warning: 33 98% 49%;
-    --nash-error: 1 77% 55%;
-    --nash-info: 208 79% 51%;
-
-    /* Signal colors — grayscale only */
-    --live-red: 0 0% 18%;
-    --silver-mid: 215 14% 40%;
-    --silver-light: 140 30% 96%;
-    --silver-line: 124 30% 80%;
+    /* State palette (§5.3): always paired with a word and, where possible, an icon */
+    --success: 146.3 51.6% 24.3%;
+    --success-bg: 140 40% 94.1%;
+    --warning: 21.8 91.5% 37.1%;
+    --warning-bg: 34.6 100% 94.9%;
+    --danger: 12.8 79.6% 40.4%;
+    --danger-bg: 0 81% 95.9%;
+    --info: 218 80.3% 45.9%;
+    --info-bg: 217.1 100% 95.9%;
 
     /* Typography */
-    --font-display: "Rajdhani", "Segoe UI", system-ui, sans-serif;
-    --font-mono: "JetBrains Mono", "Geist Mono", Consolas, monospace;
-    --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
+    --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, Consolas, monospace;
 
-    /* Motion */
-    --precision-curve: cubic-bezier(0.16, 1, 0.3, 1);
+    /* Radius scale (§7.2) */
+    --radius: 10px;
 
-    /* Sidebar */
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 0 0% 9%;
-    --sidebar-primary: 0 0% 9%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 95%;
-    --sidebar-accent-foreground: 0 0% 9%;
-    --sidebar-border: 0 0% 87%;
-    --sidebar-ring: 0 0% 9%;
+    /* Layout tokens (§11.0) */
+    --layout-gutter-mobile: 16px;
+    --layout-gutter-wide: 24px;
+    --layout-header-height: 64px;
+    --layout-reading: 640px;
+    --layout-form: 520px;
+    --layout-workspace: 1200px;
+    --layout-workspace-wide: 1320px;
+    --layout-nav-mobile: 480px;
+    --layout-nav-height: 60px;
+    --layout-nav-bottom: max(14px, env(safe-area-inset-bottom));
+    --layout-nav-clearance: calc(88px + env(safe-area-inset-bottom));
+    --layout-rail-width: 240px;
 
-    /* Nexus semantic */
-    /* Legacy compat tokens — re-aimed at the NASH palette so pages still on
-       bg-nexus-surface / text-nexus-muted / etc. inherit the new look. */
-    --nexus-surface: 140 30% 95%;
-    --nexus-silver: 124 30% 80%;
-    --nexus-muted-fg: 215 14% 40%;
-    --nexus-live: 1 77% 55%;
+    /* Elevation (§7.3) */
+    --shadow-sm: 0 1px 2px rgba(26,24,21,.04), 0 1px 1px rgba(26,24,21,.03);
+    --shadow-md: 0 2px 8px rgba(26,24,21,.06), 0 1px 2px rgba(26,24,21,.04);
+    --shadow-lg: 0 8px 24px rgba(26,24,21,.08), 0 2px 6px rgba(26,24,21,.04);
+    --scrim: rgba(17, 17, 17, 0.45);
 
-    /* Sport accents (used sparingly as pills/dots only — grayscale UI overall) */
-    --sport-handball: 18 90% 56%;   /* #FF6B35 */
-    --sport-netball:  271 67% 57%;  /* #9B5DE5 */
-  }
+    --sidebar-background: var(--aetheris-ivory-50);
+    --sidebar-foreground: var(--aetheris-gray-900);
+    --sidebar-primary: var(--aetheris-gray-900);
+    --sidebar-primary-foreground: var(--aetheris-ivory-50);
+    --sidebar-accent: var(--aetheris-gray-100);
+    --sidebar-accent-foreground: var(--aetheris-gray-900);
+    --sidebar-border: var(--aetheris-gray-200);
+    --sidebar-ring: var(--aetheris-gray-900);
 
-  .dark {
-    --background: 216 61% 10%;
-    --foreground: 0 0% 100%;
+    /* Legacy NASH tokens, re-aimed at shared roles so older markup resolves to Aetheris colours */
+    --nash-green: var(--aetheris-gray-900);
+    --nash-green-mid: var(--aetheris-gray-800);
+    --nash-gold: var(--aetheris-gray-600);
+    --nash-gold-light: var(--aetheris-gray-500);
+    --nash-success: var(--success);
+    --nash-warning: var(--warning);
+    --nash-error: var(--danger);
+    --nash-info: var(--info);
+    --live-red: var(--info);
+    --silver-mid: var(--aetheris-gray-500);
+    --silver-light: var(--aetheris-ivory-100);
+    --sport-handball: var(--aetheris-gray-700);
+    --sport-netball: var(--aetheris-gray-700);
 
-    --card: 216 45% 16%;
-    --card-foreground: 0 0% 100%;
+    /* Legacy Nexus aliases, re-aimed at Aetheris roles so older markup inherits the new look */
+    --nexus-surface: var(--aetheris-ivory-100);
+    --nexus-silver: var(--aetheris-gray-200);
+    --nexus-muted-fg: var(--aetheris-gray-500);
+    --nexus-live: var(--info);
+    --silver-line: var(--aetheris-gray-200);
 
-    --popover: 221 54% 16%;
-    --popover-foreground: 0 0% 100%;
-
-    --primary: 123 46% 34%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 221 54% 18%;
-    --secondary-foreground: 0 0% 100%;
-
-    --muted: 216 40% 20%;
-    --muted-foreground: 200 14% 73%;
-
-    --accent: 40 95% 56%;
-    --accent-foreground: 216 61% 10%;
-
-    --destructive: 1 77% 55%;
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 0 0% 100% / 0.10;
-    --input: 0 0% 100% / 0.14;
-    --ring: 40 95% 56%;
-
-    --live-red: 0 0% 72%;
-    --silver-mid: 200 14% 73%;
-    --silver-light: 216 40% 18%;
-    --silver-line: 124 30% 25%;
-
-    --sidebar-background: 221 54% 13%;
-    --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 40 95% 56%;
-    --sidebar-primary-foreground: 216 61% 10%;
-    --sidebar-accent: 216 45% 20%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 100% / 0.08;
-    --sidebar-ring: 40 95% 56%;
-
-    --nexus-surface: 216 45% 16%;
-    --nexus-silver: 124 30% 25%;
-    --nexus-muted-fg: 200 14% 73%;
-    --nexus-live: 1 77% 60%;
+    /* Sly's ported files use the Vimera v1 token names; they resolve to the same primitives */
+    --v1-ivory-50: #FBF9F4;
+    --v1-ivory-100: #F5F2EA;
+    --v1-gray-200: #E3E1DB;
+    --v1-gray-300: #CFCCC4;
+    --v1-gray-400: #A6A296;
+    --v1-gray-600: #5F5C53;
+    --v1-gray-700: #433F37;
+    --v1-gray-900: #36454F;
   }
 }
 
@@ -155,7 +148,7 @@
 
   html {
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
   }
 
@@ -166,116 +159,80 @@
 
   h1, h2, h3, h4, h5 {
     font-family: var(--font-display);
-    letter-spacing: -0.03em;
+    letter-spacing: -0.01em;
+  }
+
+  /* Focus is always visible: carbon edge plus a 3px gray-300 halo (§5.2) */
+  :focus-visible {
+    outline: 2px solid hsl(var(--aetheris-gray-900));
+    outline-offset: 2px;
+    box-shadow: 0 0 0 5px hsl(var(--aetheris-gray-300));
+  }
+
+  [id] {
+    scroll-margin-top: calc(var(--layout-header-height) + 16px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 
 @layer utilities {
-  /* Hairline borders — grayscale */
-  .hairline {
-    border: 1px solid hsl(var(--silver-line));
-    border-radius: var(--radius);
-  }
-  .hairline-b {
-    border-bottom: 1px solid hsl(var(--silver-line));
-  }
-  .hairline-t {
-    border-top: 1px solid hsl(var(--silver-line));
-  }
-  .hairline-l {
-    border-left: 1px solid hsl(var(--silver-line));
-  }
-  .hairline-r {
-    border-right: 1px solid hsl(var(--silver-line));
-  }
+  .hairline { border: 1px solid hsl(var(--border)); border-radius: var(--radius); }
+  .hairline-b { border-bottom: 1px solid hsl(var(--border)); }
+  .hairline-t { border-top: 1px solid hsl(var(--border)); }
+  .hairline-l { border-left: 1px solid hsl(var(--border)); }
+  .hairline-r { border-right: 1px solid hsl(var(--border)); }
 
-  /* Score / Mono displays */
+  /* Scores and other changing values: tabular numerals */
   .score-display {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
-    letter-spacing: -0.04em;
     font-weight: 600;
   }
+  .mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .display-font { font-family: var(--font-display); }
+  .tabular { font-variant-numeric: tabular-nums; }
 
-  .mono {
-    font-family: var(--font-mono);
-    font-variant-numeric: tabular-nums;
+  /* One content rail for header and page (§11.0) */
+  .rail {
+    width: 100%;
+    max-width: var(--layout-workspace);
+    margin-inline: auto;
+    padding-inline: var(--layout-gutter-mobile);
   }
+  @media (min-width: 640px) { .rail { padding-inline: var(--layout-gutter-wide); } }
+  .measure { max-width: var(--layout-reading); }
 
-  .display-font {
-    font-family: var(--font-display);
-  }
-
-  /* The Mechanical Click — active state */
-  .btn-click:active {
-    transform: translateY(1px);
-    transition-duration: 75ms;
-  }
-
-  /* Live pulse dot */
+  /* Live is a word plus a static marker; nothing loops (§16.2) */
   .live-dot::before {
     content: '';
     display: inline-block;
-    width: 7px;
-    height: 7px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
-    background: hsl(var(--live-red));
-    margin-right: 7px;
-    animation: pulse-live 2s ease-in-out infinite;
+    background: hsl(var(--info));
+    margin-right: 8px;
   }
 
-  @keyframes pulse-live {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
-  /* Stagger lift entrance */
-  .stagger-item {
-    animation: lift-in 400ms var(--precision-curve) both;
-  }
-
+  .stagger-item { animation: lift-in 200ms ease-out both; }
   @keyframes lift-in {
-    from { opacity: 0; transform: translateY(6px); }
+    from { opacity: 0; transform: translateY(4px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  /* Flip counter animation */
-  @keyframes flip-number {
-    0%   { transform: rotateX(0deg); }
-    50%  { transform: rotateX(90deg); opacity: 0; }
-    51%  { transform: rotateX(-90deg); opacity: 0; }
-    100% { transform: rotateX(0deg); opacity: 1; }
-  }
-
-  .flip-in {
-    animation: flip-number 300ms var(--precision-curve);
-  }
-
-  /* Hide scrollbar for filter rows */
   .scrollbar-hide::-webkit-scrollbar { display: none; }
   .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* Scrollbar — minimal */
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-track { background: hsl(var(--background)); }
-  ::-webkit-scrollbar-thumb { background: hsl(var(--silver-line)); border-radius: 4px; }
+  .card-shadow { box-shadow: var(--shadow-sm); }
+  .card-shadow-md { box-shadow: var(--shadow-md); }
 
-  /* Card shadow */
-  .card-shadow {
-    box-shadow: 0 1px 3px 0 hsl(0 0% 0% / 0.07), 0 1px 2px -1px hsl(0 0% 0% / 0.05);
-  }
-  .card-shadow-md {
-    box-shadow: 0 4px 16px -2px hsl(0 0% 0% / 0.08), 0 2px 6px -2px hsl(0 0% 0% / 0.05);
-  }
-
-  .dark .card-shadow {
-    box-shadow: 0 1px 3px 0 hsl(0 0% 0% / 0.35), 0 1px 2px -1px hsl(0 0% 0% / 0.25);
-  }
-  .dark .card-shadow-md {
-    box-shadow: 0 4px 16px -2px hsl(0 0% 0% / 0.45), 0 2px 6px -2px hsl(0 0% 0% / 0.30);
-  }
-
-  /* Nexus surface / silver — use CSS variables so they theme with dark mode */
   .bg-nexus-surface { background-color: hsl(var(--nexus-surface)); }
   .bg-nexus-silver  { background-color: hsl(var(--nexus-silver)); }
   .text-nexus-muted { color: hsl(var(--nexus-muted-fg)); }
@@ -283,58 +240,34 @@
   .bg-nexus-live    { background-color: hsl(var(--nexus-live)); }
   .border-nexus-silver { border-color: hsl(var(--nexus-silver)); }
 
-  /* Sport pills — tiny accent only */
+  /* Sport label: always carries the sport's name */
   .pill-sport {
     display: inline-flex; align-items: center; gap: 6px;
-    padding: 2px 8px; border-radius: 9999px;
-    font-family: var(--font-mono); font-size: 10px; font-weight: 600;
-    letter-spacing: 0.12em; text-transform: uppercase;
-    border: 1px solid hsl(var(--silver-line));
+    padding: 2px 8px; border-radius: 999px;
+    font-size: 12px; font-weight: 600;
+    border: 1px solid hsl(var(--border));
   }
-  .pill-sport::before {
-    content: ''; width: 6px; height: 6px; border-radius: 9999px;
-    background: hsl(var(--nexus-muted-fg));
-  }
-  .pill-sport[data-sport="handball"]::before { background: hsl(var(--sport-handball)); }
-  .pill-sport[data-sport="netball"]::before  { background: hsl(var(--sport-netball)); }
 
-  /* Score sizes */
   .text-score-lg { font-size: clamp(52px, 8vw, 88px); line-height: 1; }
   .text-score-md { font-size: clamp(28px, 4vw, 44px); line-height: 1; }
   .text-score-sm { font-size: clamp(18px, 2.5vw, 28px); line-height: 1; }
-  .text-display-lg { font-size: clamp(26px, 4vw, 48px); line-height: 1.1; }
+  .text-display-lg { font-size: clamp(26px, 4vw, 40px); line-height: 1.1; }
 
-  /* Gradient shimmer for live events */
-  @keyframes shimmer {
-    0% { background-position: -400px 0; }
-    100% { background-position: 400px 0; }
-  }
-  .shimmer-live {
-    background: linear-gradient(90deg, hsl(var(--nexus-surface)) 25%, hsl(var(--nexus-silver)) 50%, hsl(var(--nexus-surface)) 75%);
-    background-size: 800px 100%;
-    animation: shimmer 1.8s infinite linear;
-  }
+  /* Loading placeholder: static, not an endless shimmer (§10) */
+  .shimmer-live { background: hsl(var(--nexus-surface)); }
+  .glow-live { box-shadow: none; }
 
-  /* Subtle neon glow for live indicator */
-  .glow-live {
-    box-shadow: 0 0 10px 2px hsl(var(--nexus-live) / 0.4);
+  .skip-link {
+    position: absolute; left: 16px; top: -64px; z-index: 110;
+    min-height: 44px; display: inline-flex; align-items: center;
+    padding-inline: 16px; border-radius: 14px;
+    background: hsl(var(--primary)); color: hsl(var(--primary-foreground));
+    font-size: 14px; font-weight: 500;
   }
+  .skip-link:focus { top: 12px; }
+}
 
-  /* Score pop animation */
-  @keyframes score-pop {
-    0% { transform: scale(1); }
-    40% { transform: scale(1.25); }
-    70% { transform: scale(0.95); }
-    100% { transform: scale(1); }
-  }
-  .score-pop {
-    animation: score-pop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  /* Mobile tap targets */
-  @media (max-width: 640px) {
-    .hairline { border-radius: 8px; }
-    .text-score-lg { font-size: 48px; }
-    .text-display-lg { font-size: 24px; }
-  }
+/* Legacy motion hooks kept as no-ops so older markup stays valid: nothing moves under the pointer (§16.2) */
+@layer utilities {
+  .btn-click, .score-pop, .flip-in { animation: none; transform: none; }
 }

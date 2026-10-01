@@ -18,10 +18,10 @@ interface RoleRequest {
 }
 
 const STATUS_TINT: Record<RoleRequest["status"], string> = {
-  pending: "bg-amber-500/10 text-amber-600",
-  approved: "bg-emerald-500/10 text-emerald-600",
-  rejected: "bg-red-500/10 text-red-600",
-  revoked: "bg-zinc-500/10 text-zinc-600",
+  pending: "bg-warning/10 text-warning",
+  approved: "bg-success/10 text-success",
+  rejected: "bg-danger/10 text-danger",
+  revoked: "bg-muted-foreground/10 text-zinc-600",
 };
 
 /**
@@ -131,27 +131,27 @@ export function RoleRequestsPanel() {
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold">
                     {profiles[r.user_id]?.display_name || p.display_name || r.user_id.slice(0,8)}
-                    <span className="ml-2 text-[10px] mono uppercase tracking-wider text-nexus-muted">{r.requested_role}</span>
+                    <span className="ml-2 text-xs mono uppercase tracking-wider text-nexus-muted">{r.requested_role}</span>
                   </p>
-                  {p.phone && <p className="text-[10px] mono text-nexus-muted">{p.phone}</p>}
+                  {p.phone && <p className="text-xs mono text-nexus-muted">{p.phone}</p>}
                   {entries.length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-1.5">
                       {entries.map(([k, v]) => (
-                        <span key={k} className="text-[10px] mono px-2 py-0.5 rounded bg-nexus-surface">
+                        <span key={k} className="text-xs mono px-2 py-0.5 rounded bg-nexus-surface">
                           <span className="opacity-60">{k}:</span> {String(v)}
                         </span>
                       ))}
                     </div>
                   )}
-                  {r.notes && <p className="text-[10px] text-nexus-muted mt-1 italic">“{r.notes}”</p>}
-                  {r.review_notes && <p className="text-[10px] text-red-600 mt-1">Reviewer: {r.review_notes}</p>}
-                  <p className="text-[10px] mono text-nexus-muted mt-1">
+                  {r.notes && <p className="text-xs text-nexus-muted mt-1 italic">“{r.notes}”</p>}
+                  {r.review_notes && <p className="text-xs text-danger mt-1">Reviewer: {r.review_notes}</p>}
+                  <p className="text-xs mono text-nexus-muted mt-1">
                     Requested {new Date(r.created_at).toLocaleString()}
                     {r.reviewed_at ? ` · Reviewed ${new Date(r.reviewed_at).toLocaleString()}` : ""}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`text-[10px] mono uppercase tracking-wider px-2 py-1 rounded ${STATUS_TINT[r.status]}`}>{r.status}</span>
+                  <span className={`text-xs mono uppercase tracking-wider px-2 py-1 rounded ${STATUS_TINT[r.status]}`}>{r.status}</span>
                   {r.status === "pending" && (
                     <>
                       <Button size="sm" disabled={busy === r.id} onClick={() => approve(r)}>{busy === r.id ? "…" : "Approve"}</Button>

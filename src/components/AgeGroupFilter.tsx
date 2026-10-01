@@ -23,12 +23,12 @@ export function AgeGroupFilter({ value = "All", onChange, allowCustom = true }: 
 
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold">Age Group</p>
+      <p className="text-xs mono tracking-[0.15em] uppercase text-nexus-muted font-semibold">Age Group</p>
       <div className="flex flex-wrap gap-1.5">
         <button
           type="button"
           onClick={() => select("All")}
-          className={`px-3 py-1.5 text-[11px] mono font-semibold rounded-full transition-colors ${value === "All" ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted hover:text-foreground"}`}
+          className={`px-3 py-1.5 text-xs mono font-semibold rounded-full transition-colors ${value === "All" ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted hover:text-foreground"}`}
         >
           All
         </button>
@@ -37,7 +37,7 @@ export function AgeGroupFilter({ value = "All", onChange, allowCustom = true }: 
             key={g}
             type="button"
             onClick={() => select(g)}
-            className={`px-3 py-1.5 text-[11px] mono font-semibold rounded-full transition-colors ${value === g ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted hover:text-foreground"}`}
+            className={`px-3 py-1.5 text-xs mono font-semibold rounded-full transition-colors ${value === g ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted hover:text-foreground"}`}
           >
             {g}
           </button>
@@ -52,7 +52,7 @@ export function AgeGroupFilter({ value = "All", onChange, allowCustom = true }: 
             className="flex-1 bg-nexus-surface hairline rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-foreground/20"
             onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addCustom())}
           />
-          <button type="button" onClick={addCustom} className="h-8 px-3 text-[11px] font-semibold rounded-lg bg-nexus-surface hover:bg-nexus-silver transition-colors">
+          <button type="button" onClick={addCustom} className="min-h-11 px-3 text-xs font-semibold rounded-lg bg-nexus-surface hover:bg-nexus-silver transition-colors">
             Add
           </button>
         </div>

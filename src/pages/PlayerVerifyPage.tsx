@@ -187,7 +187,7 @@ export default function PlayerVerifyPage() {
           <Link to="/admin" className="hover:text-foreground">← Admin</Link>
         </div>
         <header className="mb-6">
-          <p className="text-[10px] mono tracking-widest uppercase text-nexus-muted">HIC · Player Verification</p>
+          <p className="text-xs mono tracking-widest uppercase text-nexus-muted">HIC · Player Verification</p>
           <h1 className="text-2xl sm:text-3xl font-semibold mt-1">Verify Scholastic Card</h1>
           <p className="text-sm text-nexus-muted mt-1">Scan the QR on the athlete's Scholastic Card, or enter the SS Student ID manually.</p>
         </header>
@@ -246,7 +246,7 @@ export default function PlayerVerifyPage() {
                   }}
                 />
               </label>
-              <span className="text-[10px] text-nexus-muted">Live = continuous webcam · Device = opens your phone's camera app</span>
+              <span className="text-xs text-nexus-muted">Live = continuous webcam · Device = opens your phone's camera app</span>
             </div>
           ) : (
             <div className="space-y-2">
@@ -266,10 +266,10 @@ export default function PlayerVerifyPage() {
               <div className="min-w-0">
                 <p className="text-lg font-semibold">{athlete.display_name}</p>
                 <p className="text-xs text-nexus-muted">{athlete.school_name || "—"}</p>
-                <p className="text-[10px] mono text-nexus-muted">SS ID: {athlete.external_student_id}</p>
+                <p className="text-xs mono text-nexus-muted">SS ID: {athlete.external_student_id}</p>
                 <div className="flex gap-1 mt-1">
                   {athlete.nexus_sport && <span className="pill-sport" data-sport={athlete.nexus_sport}>{athlete.nexus_sport}</span>}
-                  {athlete.scholastic_card_verified && <span className="text-[9px] mono uppercase bg-nexus-live/10 text-nexus-live px-2 py-0.5 rounded">verified</span>}
+                  {athlete.scholastic_card_verified && <span className="text-xs mono uppercase bg-nexus-live/10 text-nexus-live px-2 py-0.5 rounded">verified</span>}
                 </div>
               </div>
             </div>

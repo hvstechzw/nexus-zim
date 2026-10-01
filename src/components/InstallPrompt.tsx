@@ -49,17 +49,17 @@ export function InstallPrompt() {
   };
 
   return (
-    <div className="fixed bottom-4 inset-x-4 sm:inset-x-auto sm:right-4 sm:w-[360px] z-[60] hairline rounded-2xl bg-background card-shadow-md p-4 flex items-center gap-3 animate-fade-in">
-      <div className="w-10 h-10 rounded-xl bg-foreground flex items-center justify-center flex-shrink-0">
+    <div role="region" aria-label="Install Nexus" style={{ bottom: "calc(var(--layout-nav-clearance) + 8px)" }} className="fixed inset-x-4 sm:inset-x-auto sm:right-4 sm:w-[360px] z-popover rounded-xl border border-border bg-card shadow-md p-4 flex items-center gap-3">
+      <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
         <img src="/icon.svg" alt="" className="w-7 h-7" />
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-sm font-semibold text-foreground leading-tight">Install Nexus</p>
-        <p className="text-[11px] text-nexus-muted mt-0.5">Add to your home screen for fast, offline-capable access at venues.</p>
+        <p className="text-sm text-supporting mt-0.5">Add to your home screen for fast, offline-capable access at venues.</p>
       </div>
       <div className="flex items-center gap-1.5 flex-shrink-0">
-        <button onClick={dismiss} className="text-[11px] mono text-nexus-muted hover:text-foreground px-2 py-1.5">Later</button>
-        <button onClick={install} className="text-[11px] font-semibold bg-foreground text-primary-foreground rounded-lg px-3 py-1.5 hover:opacity-85 btn-click">Install</button>
+        <button onClick={dismiss} className="min-h-11 rounded-lg px-3 text-sm font-medium text-foreground hover:bg-accent">Later</button>
+        <button onClick={install} className="min-h-11 rounded-lg bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary-hover">Install</button>
       </div>
     </div>
   );

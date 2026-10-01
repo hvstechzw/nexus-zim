@@ -274,9 +274,9 @@ export default function ScoringPage() {
     return (
       <div className="min-h-screen bg-background text-foreground">
         <NexusHeader />
-        <div className="max-w-[1400px] mx-auto pt-16 sm:pt-20">
+        <div className="max-w-workspace mx-auto pt-16 sm:pt-20">
           <div className="px-4 sm:px-8 py-6 sm:py-10 hairline-b">
-            <p className="text-[10px] mono tracking-[0.25em] uppercase text-nexus-muted">Officials Portal</p>
+            <p className="text-xs mono tracking-[0.25em] uppercase text-nexus-muted">Officials Portal</p>
             <h1 className="display-font text-xl sm:text-3xl font-bold mt-1">Live Scoring Engine</h1>
             <p className="text-xs sm:text-sm text-nexus-muted mt-2 max-w-[60ch]">Sport-accurate scoring for netball and handball — period clocks, player attribution, discipline tracking and live standings.</p>
           </div>
@@ -290,10 +290,10 @@ export default function ScoringPage() {
                   <div className="flex items-center gap-3 mb-3">
                     <span className="w-3 h-3 rounded-full" style={{ background: `hsl(var(${s.accentVar}))` }} />
                     <span className="display-font text-lg font-bold">{s.label}</span>
-                    <span className="text-[9px] mono uppercase tracking-widest text-nexus-muted ml-auto">{s.governing}</span>
+                    <span className="text-xs mono uppercase tracking-widest text-nexus-muted ml-auto">{s.governing}</span>
                   </div>
                   <p className="text-xs text-nexus-muted">{s.blurb}</p>
-                  <p className="text-[10px] mono text-nexus-muted mt-3">{s.regulationPeriods} {s.periodNoun.toLowerCase()}s · {s.onCourt}-a-side</p>
+                  <p className="text-xs mono text-nexus-muted mt-3">{s.regulationPeriods} {s.periodNoun.toLowerCase()}s · {s.onCourt}-a-side</p>
                 </motion.button>
               ))}
             </div>
@@ -313,7 +313,7 @@ export default function ScoringPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <NexusHeader />
-      <div className="max-w-[1400px] mx-auto pt-16 sm:pt-20">
+      <div className="max-w-workspace mx-auto pt-16 sm:pt-20">
         <div className="px-4 sm:px-8 py-5 sm:py-7 hairline-b flex items-center justify-between flex-wrap gap-3">
           <div>
             <button onClick={() => { setSport(null); resetMatch(); }} className="text-xs mono text-nexus-muted hover:text-foreground mb-1">← Change sport</button>
@@ -326,10 +326,10 @@ export default function ScoringPage() {
             <div className="flex gap-1 p-1 bg-nexus-surface rounded-xl">
               {(["official", "friendly", "local"] as SessionMode[]).map((m) => (
                 <button key={m} onClick={() => setSessionMode(m)}
-                  className={`px-3 py-1.5 text-[11px] font-semibold rounded-lg capitalize transition-all ${sessionMode === m ? "bg-background shadow-sm" : "text-nexus-muted hover:text-foreground"}`}>{m}</button>
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg capitalize transition-all ${sessionMode === m ? "bg-background shadow-sm" : "text-nexus-muted hover:text-foreground"}`}>{m}</button>
               ))}
             </div>
-            <button onClick={finalize} className="h-8 px-4 text-xs font-semibold rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click">Finalize</button>
+            <button onClick={finalize} className="min-h-11 px-4 text-xs font-semibold rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click">Finalize</button>
             <button onClick={resetMatch} className="text-xs mono text-nexus-muted hover:text-foreground hairline px-3 py-1.5 rounded-md">Reset</button>
           </div>
         </div>
@@ -372,21 +372,21 @@ export default function ScoringPage() {
             <div className="hairline rounded-xl overflow-hidden mb-3">
               <div className="grid grid-cols-[1fr_auto_1fr]">
                 <button onClick={() => { setActiveSide("home"); setSelectedPlayer(null); }} className={`p-4 sm:p-7 text-center transition-all ${activeSide === "home" ? "bg-foreground" : "hover:bg-nexus-surface/50"}`}>
-                  <p className={`text-[10px] mono tracking-widest uppercase mb-2 truncate ${activeSide === "home" ? "text-primary-foreground/60" : "text-nexus-muted"}`}>{homeName}</p>
+                  <p className={`text-xs mono tracking-widest uppercase mb-2 truncate ${activeSide === "home" ? "text-primary-foreground/60" : "text-nexus-muted"}`}>{homeName}</p>
                   <motion.p key={homeScore} animate={{ scale: [1.15, 1] }} transition={{ duration: 0.2 }} className={`score-display text-4xl sm:text-score-lg ${activeSide === "home" ? "text-primary-foreground" : "text-foreground"}`}>{homeScore}</motion.p>
-                  {suspHome.length > 0 && <p className="text-[9px] mono mt-1 text-nexus-live">−{suspHome.length} player{suspHome.length > 1 ? "s" : ""}</p>}
+                  {suspHome.length > 0 && <p className="text-xs mono mt-1 text-nexus-live">−{suspHome.length} player{suspHome.length > 1 ? "s" : ""}</p>}
                 </button>
                 <div className="px-3 sm:px-5 flex flex-col items-center justify-center bg-nexus-surface/50 gap-1.5 min-w-[78px]">
                   <div className={`px-2.5 py-1 rounded-md ${running ? "bg-foreground" : "bg-nexus-surface"}`}>
                     <span className={`text-[13px] mono font-bold tracking-wider ${running ? "text-primary-foreground" : "text-nexus-muted"}`}>{clockText}</span>
                   </div>
-                  <span className="text-[9px] mono text-nexus-muted">{period?.short} · {cfg!.periodNoun}</span>
-                  {sport === "netball" && <span className="text-[8px] mono text-nexus-muted">CP: {centre === "home" ? homeName : awayName}</span>}
+                  <span className="text-xs mono text-nexus-muted">{period?.short} · {cfg!.periodNoun}</span>
+                  {sport === "netball" && <span className="text-xs mono text-nexus-muted">CP: {centre === "home" ? homeName : awayName}</span>}
                 </div>
                 <button onClick={() => { setActiveSide("away"); setSelectedPlayer(null); }} className={`p-4 sm:p-7 text-center transition-all ${activeSide === "away" ? "bg-foreground" : "hover:bg-nexus-surface/50"}`}>
-                  <p className={`text-[10px] mono tracking-widest uppercase mb-2 truncate ${activeSide === "away" ? "text-primary-foreground/60" : "text-nexus-muted"}`}>{awayName}</p>
+                  <p className={`text-xs mono tracking-widest uppercase mb-2 truncate ${activeSide === "away" ? "text-primary-foreground/60" : "text-nexus-muted"}`}>{awayName}</p>
                   <motion.p key={awayScore} animate={{ scale: [1.15, 1] }} transition={{ duration: 0.2 }} className={`score-display text-4xl sm:text-score-lg ${activeSide === "away" ? "text-primary-foreground" : "text-foreground"}`}>{awayScore}</motion.p>
-                  {suspAway.length > 0 && <p className="text-[9px] mono mt-1 text-nexus-live">−{suspAway.length} player{suspAway.length > 1 ? "s" : ""}</p>}
+                  {suspAway.length > 0 && <p className="text-xs mono mt-1 text-nexus-live">−{suspAway.length} player{suspAway.length > 1 ? "s" : ""}</p>}
                 </button>
               </div>
             </div>
@@ -394,15 +394,15 @@ export default function ScoringPage() {
             {/* Clock controls + period selector */}
             <div className="flex items-center gap-2 mb-3 flex-wrap">
               {!running ? (
-                <button onClick={startClock} className="flex items-center gap-2 h-9 px-4 bg-foreground text-primary-foreground text-xs font-bold rounded-lg hover:opacity-85 btn-click"><span className="w-2 h-2 rounded-full bg-primary-foreground/70 animate-pulse" />Start</button>
+                <button onClick={startClock} className="flex items-center gap-2 min-h-11 px-4 bg-foreground text-primary-foreground text-xs font-bold rounded-lg hover:opacity-85 btn-click"><span className="w-2 h-2 rounded-full bg-primary-foreground/70 " />Start</button>
               ) : (
-                <button onClick={() => setRunning(false)} className="flex items-center gap-2 h-9 px-4 bg-nexus-surface text-foreground text-xs font-bold rounded-lg hover:bg-nexus-silver btn-click"><span className="w-2 h-2 rounded-full bg-nexus-live animate-pulse" />Pause</button>
+                <button onClick={() => setRunning(false)} className="flex items-center gap-2 min-h-11 px-4 bg-nexus-surface text-foreground text-xs font-bold rounded-lg hover:bg-nexus-silver btn-click"><span className="w-2 h-2 rounded-full bg-nexus-live " />Pause</button>
               )}
-              <button onClick={() => setElapsed(0)} className="h-9 px-3 text-[11px] mono text-nexus-muted hover:text-foreground hairline rounded-lg" title="Reset period clock">⟲ Clock</button>
+              <button onClick={() => setElapsed(0)} className="min-h-11 px-3 text-xs mono text-nexus-muted hover:text-foreground hairline rounded-lg" title="Reset period clock">⟲ Clock</button>
               <div className="flex gap-1.5 overflow-x-auto scrollbar-hide ml-auto">
                 {cfg!.periods.map((p) => (
                   <button key={p.key} onClick={() => { setPeriodKey(p.key); setElapsed(0); }}
-                    className={`px-3 py-1.5 text-[11px] font-semibold rounded-lg whitespace-nowrap btn-click transition-all ${periodKey === p.key ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted hover:text-foreground"}`}>{p.short}</button>
+                    className={`px-3 py-1.5 text-xs font-semibold rounded-lg whitespace-nowrap btn-click transition-all ${periodKey === p.key ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted hover:text-foreground"}`}>{p.short}</button>
                 ))}
               </div>
             </div>
@@ -419,18 +419,18 @@ export default function ScoringPage() {
 
             {activeRoster.length > 0 && (
               <div className="mb-4">
-                <p className="text-[10px] mono tracking-widest uppercase text-nexus-muted mb-2">Attribute to player {selectedPlayer && <span className="text-foreground">· {selectedPlayer.name}</span>}</p>
+                <p className="text-xs mono tracking-widest uppercase text-nexus-muted mb-2">Attribute to player {selectedPlayer && <span className="text-foreground">· {selectedPlayer.name}</span>}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {activeRoster.map((p) => (
                     <button key={p.id} onClick={() => p.elig.eligible && setSelectedPlayer(selectedPlayer?.id === p.id ? null : p)}
                       disabled={!p.elig.eligible}
                       title={p.elig.status !== "eligible" ? p.elig.label : undefined}
-                      className={`flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold rounded-lg hairline btn-click transition-all ${
+                      className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-semibold rounded-lg hairline btn-click transition-all ${
                         !p.elig.eligible ? "opacity-40 cursor-not-allowed line-through"
                         : selectedPlayer?.id === p.id ? "bg-foreground text-primary-foreground"
                         : "bg-nexus-surface text-foreground hover:bg-nexus-silver"}`}>
-                      {p.elig.status === "suspended" && <span className="w-2 h-3 rounded-[1px] bg-red-500" title="Suspended" />}
-                      {p.elig.status === "unverified" && <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" title="Card unverified" />}
+                      {p.elig.status === "suspended" && <span className="w-2 h-3 rounded-[1px] bg-danger" title="Suspended" />}
+                      {p.elig.status === "unverified" && <span className="w-1.5 h-1.5 rounded-full bg-warning" title="Card unverified" />}
                       {p.jersey != null && <span className="mono text-nexus-muted mr-1">#{p.jersey}</span>}{p.name}{p.position ? ` · ${p.position}` : ""}
                     </button>
                   ))}
@@ -439,35 +439,35 @@ export default function ScoringPage() {
             )}
 
             {/* Score events */}
-            <p className="text-[10px] mono tracking-widest uppercase text-nexus-muted mb-2">Score — {activeSide === "home" ? homeName : awayName}</p>
+            <p className="text-xs mono tracking-widest uppercase text-nexus-muted mb-2">Score — {activeSide === "home" ? homeName : awayName}</p>
             <div className="flex flex-wrap gap-2 mb-4">
               {cfg!.scoreEvents.map((e) => (
                 <button key={e.type} onClick={() => logEvent(e.type)} title={e.hint}
                   className="flex items-center gap-2 px-4 py-3 text-sm font-bold rounded-xl bg-foreground text-primary-foreground hover:opacity-85 btn-click">
-                  {e.label}<span className="text-[10px] mono bg-primary-foreground/15 rounded px-1.5 py-0.5">+{e.value}</span>
+                  {e.label}<span className="text-xs mono bg-primary-foreground/15 rounded px-1.5 py-0.5">+{e.value}</span>
                 </button>
               ))}
             </div>
 
             {/* Other events */}
-            <p className="text-[10px] mono tracking-widest uppercase text-nexus-muted mb-2">Match events</p>
+            <p className="text-xs mono tracking-widest uppercase text-nexus-muted mb-2">Match events</p>
             <div className="flex flex-wrap gap-1.5">
               {cfg!.otherEvents.map((e) => (
                 <button key={e.type} onClick={() => logEvent(e.type)} title={e.hint}
-                  className={`flex items-center gap-1.5 px-3 py-2 text-[11px] font-semibold rounded-xl hairline btn-click transition-all ${e.card === "red" ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-foreground hover:bg-foreground hover:text-primary-foreground"}`}>
-                  {e.card && <span className={`w-2 h-3 rounded-[1px] ${e.card === "yellow" ? "bg-yellow-400" : e.card === "blue" ? "bg-blue-500" : "bg-red-500"}`} />}
-                  {e.label}{e.suspensionSeconds ? <span className="text-[9px] mono text-nexus-muted">2:00</span> : null}
+                  className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-xl hairline btn-click transition-all ${e.card === "red" ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-foreground hover:bg-foreground hover:text-primary-foreground"}`}>
+                  {e.card && <span className={`w-2 h-3 rounded-[1px] ${e.card === "yellow" ? "bg-warning" : e.card === "blue" ? "bg-info" : "bg-danger"}`} />}
+                  {e.label}{e.suspensionSeconds ? <span className="text-xs mono text-nexus-muted">2:00</span> : null}
                 </button>
               ))}
             </div>
 
             <div className="flex items-center gap-2 mt-4">
               <button onClick={undo} disabled={events.length === 0}
-                className="h-9 px-4 text-xs font-semibold rounded-lg hairline text-foreground hover:bg-nexus-surface btn-click disabled:opacity-40 disabled:cursor-not-allowed">↶ Undo last</button>
-              <span className="text-[10px] mono text-nexus-muted">{events.length} events {isDbMode ? "· saving to DB" : sessionMode !== "official" ? `· ${sessionMode}` : "· local"}</span>
+                className="min-h-11 px-4 text-xs font-semibold rounded-lg hairline text-foreground hover:bg-nexus-surface btn-click disabled:opacity-40 disabled:cursor-not-allowed">↶ Undo last</button>
+              <span className="text-xs mono text-nexus-muted">{events.length} events {isDbMode ? "· saving to DB" : sessionMode !== "official" ? `· ${sessionMode}` : "· local"}</span>
               {pendingOffline > 0 && (
-                <span className="text-[10px] mono text-nexus-live flex items-center gap-1" title="Will sync when back online">
-                  <span className="w-1.5 h-1.5 rounded-full bg-nexus-live animate-pulse" />{pendingOffline} queued offline
+                <span className="text-xs mono text-nexus-live flex items-center gap-1" title="Will sync when back online">
+                  <span className="w-1.5 h-1.5 rounded-full bg-nexus-live " />{pendingOffline} queued offline
                 </span>
               )}
             </div>
@@ -476,7 +476,7 @@ export default function ScoringPage() {
           {/* Side panel: breakdown, scorers, log */}
           <div className="flex flex-col">
             <div className="px-4 sm:px-6 py-4 hairline-b">
-              <p className="text-[10px] mono tracking-widest uppercase text-nexus-muted mb-2">By {cfg!.periodNoun}</p>
+              <p className="text-xs mono tracking-widest uppercase text-nexus-muted mb-2">By {cfg!.periodNoun}</p>
               <div className="space-y-1">
                 {breakdown.length === 0 ? <p className="text-xs mono text-nexus-muted">No scoring yet.</p> :
                   breakdown.map((b) => (
@@ -489,20 +489,20 @@ export default function ScoringPage() {
             </div>
 
             <div className="px-4 sm:px-6 py-4 hairline-b">
-              <p className="text-[10px] mono tracking-widest uppercase text-nexus-muted mb-2">Top scorers</p>
+              <p className="text-xs mono tracking-widest uppercase text-nexus-muted mb-2">Top scorers</p>
               <div className="grid grid-cols-2 gap-3">
                 {([["home", homeName, homeScorers], ["away", awayName, awayScorers]] as const).map(([side, name, list]) => (
                   <div key={side}>
-                    <p className="text-[10px] mono text-nexus-muted truncate mb-1">{name}</p>
-                    {list.length === 0 ? <p className="text-[10px] mono text-nexus-muted/60">—</p> :
+                    <p className="text-xs mono text-nexus-muted truncate mb-1">{name}</p>
+                    {list.length === 0 ? <p className="text-xs mono text-nexus-muted/60">—</p> :
                       list.slice(0, 5).map((s) => (
-                        <div key={s.playerId} className="flex justify-between text-[11px]"><span className="truncate">{s.playerName}</span><span className="mono font-semibold">{s.points}</span></div>
+                        <div key={s.playerId} className="flex justify-between text-xs"><span className="truncate">{s.playerName}</span><span className="mono font-semibold">{s.points}</span></div>
                       ))}
                   </div>
                 ))}
               </div>
               {sport === "handball" && (
-                <div className="mt-3 pt-3 hairline-t grid grid-cols-2 gap-3 text-[10px] mono text-nexus-muted">
+                <div className="mt-3 pt-3 hairline-t grid grid-cols-2 gap-3 text-xs mono text-nexus-muted">
                   {(["home", "away"] as Side[]).map((side) => {
                     const t = cardTally(events, side);
                     return <div key={side}>{side === "home" ? homeName : awayName}: {t.yellow}Y · {t.suspensions}×2′ · {t.red}R</div>;
@@ -513,8 +513,8 @@ export default function ScoringPage() {
 
             <div className="flex-1">
               <div className="px-4 sm:px-6 py-3 hairline-b flex items-center justify-between">
-                <p className="text-[10px] mono tracking-widest uppercase text-nexus-muted">Event log</p>
-                {running && <span className="text-[10px] mono text-nexus-live flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-nexus-live animate-pulse" />Live</span>}
+                <p className="text-xs mono tracking-widest uppercase text-nexus-muted">Event log</p>
+                {running && <span className="text-xs mono text-nexus-live flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-nexus-live " />Live</span>}
               </div>
               <div className="overflow-y-auto max-h-[420px]">
                 {events.length === 0 ? <div className="p-6 text-center"><p className="text-xs mono text-nexus-muted">Logged events appear here.</p></div> :
@@ -522,9 +522,9 @@ export default function ScoringPage() {
                     <div key={e.id} className="px-4 sm:px-6 py-3 hairline-b flex items-center justify-between gap-2 group">
                       <div className="min-w-0">
                         <p className="text-xs font-semibold truncate">{e.label}{e.value > 0 ? ` +${e.value}` : ""}</p>
-                        <p className="text-[10px] mono text-nexus-muted truncate">{e.side === "home" ? homeName : awayName} · {e.period} · {formatClock(e.clock)}{e.playerName ? ` · ${e.playerName}` : ""}</p>
+                        <p className="text-xs mono text-nexus-muted truncate">{e.side === "home" ? homeName : awayName} · {e.period} · {formatClock(e.clock)}{e.playerName ? ` · ${e.playerName}` : ""}</p>
                       </div>
-                      <button onClick={() => removeOne(e.id)} className="text-[10px] mono text-nexus-muted hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
+                      <button onClick={() => removeOne(e.id)} className="text-xs mono text-nexus-muted hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity">✕</button>
                     </div>
                   ))}
               </div>

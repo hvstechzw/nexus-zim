@@ -61,10 +61,10 @@ export default function OfficialDashboard() {
   return (
     <div className="min-h-screen bg-background">
       <NashHeader />
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="max-w-workspace mx-auto px-4 md:px-6 py-6 space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">Official Dashboard</p>
+            <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">Official Dashboard</p>
             <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">
               {profile ? `${profile.first_name} ${profile.last_name}` : (user?.email?.split("@")[0] ?? "Official")}
             </h1>
@@ -78,7 +78,7 @@ export default function OfficialDashboard() {
         </div>
 
         {!profile && !loading && (
-          <Card className="border-accent/30 bg-accent/5">
+          <Card className="border-border bg-accent/5">
             <CardContent className="p-4 text-sm">
               You're signed in as an official but don't yet have an entry in the NASH officials registry. Contact your district's referee coordinator to be added.
             </CardContent>
@@ -100,7 +100,7 @@ export default function OfficialDashboard() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
-            <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><Calendar className="h-4 w-4 text-accent" /> Upcoming Assignments</CardTitle></CardHeader>
+            <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><Calendar className="h-4 w-4 text-foreground" /> Upcoming Assignments</CardTitle></CardHeader>
             <CardContent className="space-y-2">
               {!loading && upcoming.length === 0 && (
                 <p className="text-sm text-muted-foreground py-6 text-center">No assignments yet. District coordinators will assign you to fixtures.</p>
@@ -109,24 +109,24 @@ export default function OfficialDashboard() {
                 <div key={a.id} className="flex items-center justify-between gap-2 py-2 border-b border-border/50 last:border-0">
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate">{a.fixture?.home_team?.name ?? "TBD"} vs {a.fixture?.away_team?.name ?? "TBD"}</p>
-                    <p className="text-[10px] text-muted-foreground font-mono truncate">{a.competition?.name} · {a.role}</p>
+                    <p className="text-xs text-muted-foreground font-mono truncate">{a.competition?.name} · {a.role}</p>
                   </div>
-                  <Badge variant="secondary" className="text-[10px] shrink-0">{a.status ?? "assigned"}</Badge>
+                  <Badge variant="secondary" className="text-xs shrink-0">{a.status ?? "assigned"}</Badge>
                 </div>
               ))}
               <Button asChild variant="outline" className="w-full mt-2"><Link to="/official/assignments">View all assignments →</Link></Button>
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><DollarSign className="h-4 w-4 text-accent" /> Stipends</CardTitle></CardHeader>
+            <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><DollarSign className="h-4 w-4 text-foreground" /> Stipends</CardTitle></CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground py-6 text-center">No pending stipend payments.</p>
-              <p className="text-[10px] text-muted-foreground text-center">Match fees are tracked through nash_entry_fee_payments and disbursed by the host organiser.</p>
+              <p className="text-xs text-muted-foreground text-center">Match fees are tracked through nash_entry_fee_payments and disbursed by the host organiser.</p>
             </CardContent>
           </Card>
         </div>
 
-        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
+        <p className="text-xs text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
       </div>
     </div>
   );

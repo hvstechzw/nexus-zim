@@ -214,7 +214,7 @@ export default function FixtureScoringPage() {
           <div className="grid grid-cols-[1fr_auto_1fr] items-stretch">
             <TeamPanel name={f.home_team?.name || "Home"} score={f.home_score ?? 0} active={activeSide === "home"} onSelect={() => { setActiveSide("home"); setSelectedPlayer(null); }} />
             <div className="px-4 sm:px-8 py-6 flex flex-col items-center justify-center gap-2 bg-nexus-surface/50 min-w-[120px]">
-              <span className="text-[10px] mono tracking-widest uppercase text-nexus-muted">{config.periodLabel}</span>
+              <span className="text-xs mono tracking-widest uppercase text-nexus-muted">{config.periodLabel}</span>
               <span className="text-sm font-semibold">{activePeriod}</span>
               <span ref={clockRef} className="score-display text-lg text-nexus-muted">{isLive ? "00:00" : f.status}</span>
             </div>
@@ -224,7 +224,7 @@ export default function FixtureScoringPage() {
             <div className="flex gap-1 flex-wrap">
               {config.periods.map(p => (
                 <button key={p} onClick={() => setActivePeriod(p)}
-                  className={`px-3 py-1.5 text-[10px] mono rounded-md transition ${activePeriod === p ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted hover:text-foreground"}`}>
+                  className={`px-3 py-1.5 text-xs mono rounded-md transition ${activePeriod === p ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted hover:text-foreground"}`}>
                   {p}
                 </button>
               ))}
@@ -242,17 +242,17 @@ export default function FixtureScoringPage() {
           <Card title={`Score — ${activeSide === "home" ? f.home_team?.name : f.away_team?.name}`}>
             {activeRoster.length > 0 && (
               <div className="mb-3">
-                <p className="text-[9px] mono tracking-widest uppercase text-nexus-muted mb-1.5">Attribute to {selectedPlayer ? <span className="text-foreground">{selectedPlayer.name}</span> : "player (optional)"}</p>
+                <p className="text-xs mono tracking-widest uppercase text-nexus-muted mb-1.5">Attribute to {selectedPlayer ? <span className="text-foreground">{selectedPlayer.name}</span> : "player (optional)"}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {activeRoster.map((p) => (
                     <button key={p.id} disabled={!p.elig.eligible} title={p.elig.status !== "eligible" ? p.elig.label : undefined}
                       onClick={() => p.elig.eligible && setSelectedPlayer(selectedPlayer?.id === p.id ? null : p)}
-                      className={`flex items-center gap-1 px-2 py-1 text-[10px] font-semibold rounded-md hairline btn-click transition-all ${
+                      className={`flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-md hairline btn-click transition-all ${
                         !p.elig.eligible ? "opacity-40 cursor-not-allowed line-through"
                         : selectedPlayer?.id === p.id ? "bg-foreground text-primary-foreground"
                         : "bg-nexus-surface text-foreground hover:bg-nexus-silver"}`}>
-                      {p.elig.status === "suspended" && <span className="w-1.5 h-2.5 rounded-[1px] bg-red-500" />}
-                      {p.elig.status === "unverified" && <span className="w-1.5 h-1.5 rounded-full bg-yellow-400" />}
+                      {p.elig.status === "suspended" && <span className="w-1.5 h-2.5 rounded-[1px] bg-danger" />}
+                      {p.elig.status === "unverified" && <span className="w-1.5 h-1.5 rounded-full bg-warning" />}
                       {p.jersey != null && <span className="mono text-nexus-muted">#{p.jersey}</span>}{p.name}
                     </button>
                   ))}
@@ -264,7 +264,7 @@ export default function FixtureScoringPage() {
                 <button key={e.type} onClick={() => logEvent(e.type, e.value)}
                   className="hairline rounded-lg px-4 py-6 text-center hover:bg-nexus-surface transition btn-click">
                   <div className="text-base font-semibold">{e.label}</div>
-                  <div className="text-[10px] mono text-nexus-muted mt-1">+{e.value}</div>
+                  <div className="text-xs mono text-nexus-muted mt-1">+{e.value}</div>
                 </button>
               ))}
             </div>
@@ -311,9 +311,9 @@ function TeamPanel({ name, score, active, onSelect, align = "left" }: { name: st
   return (
     <button onClick={onSelect}
       className={`p-6 sm:p-10 text-center transition ${active ? "bg-nexus-surface" : "bg-background hover:bg-nexus-surface/50"}`}>
-      <div className={`text-[10px] mono tracking-widest uppercase text-nexus-muted mb-3 truncate text-${align}`}>{name}</div>
+      <div className={`text-xs mono tracking-widest uppercase text-nexus-muted mb-3 truncate text-${align}`}>{name}</div>
       <div className="score-display text-5xl sm:text-6xl text-foreground">{score}</div>
-      <div className={`text-[9px] mono text-nexus-muted mt-2 ${active ? "opacity-100" : "opacity-0"}`}>● scoring</div>
+      <div className={`text-xs mono text-nexus-muted mt-2 ${active ? "opacity-100" : "opacity-0"}`}>● scoring</div>
     </button>
   );
 }
@@ -322,7 +322,7 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
   return (
     <section className="hairline rounded-xl overflow-hidden">
       <header className="px-4 py-2.5 hairline-b bg-nexus-surface/40">
-        <h3 className="text-[10px] mono tracking-widest uppercase text-nexus-muted">{title}</h3>
+        <h3 className="text-xs mono tracking-widest uppercase text-nexus-muted">{title}</h3>
       </header>
       <div className="p-4">{children}</div>
     </section>

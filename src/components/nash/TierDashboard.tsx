@@ -101,15 +101,15 @@ export function TierDashboard({ tier, tierLabel, description }: Props) {
   return (
     <div className="min-h-screen bg-background">
       <NashHeader />
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="max-w-workspace mx-auto px-4 md:px-6 py-6 space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">{tierLabel}</p>
+            <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">{tierLabel}</p>
             <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">{scope || `${tierLabel} Dashboard`}</h1>
             <p className="text-xs text-muted-foreground mt-0.5">{description}{season?.name ? ` · ${season.name}` : ""}</p>
           </div>
           <div className="flex items-end gap-2">
-            <SeasonSelector value={seasonId} onChange={(id, s) => { setSeasonId(id); setSeason(s); }} className="h-9 w-56" />
+            <SeasonSelector value={seasonId} onChange={(id, s) => { setSeasonId(id); setSeason(s); }} className="min-h-11 w-56" />
             <Button asChild><Link to="/admin/competitions/new"><Plus className="h-4 w-4 mr-1" /> Create Competition</Link></Button>
           </div>
         </div>
@@ -123,13 +123,13 @@ export function TierDashboard({ tier, tierLabel, description }: Props) {
 
         <Card>
           <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><Trophy className="h-4 w-4 text-accent" /> {tierLabel} Competitions</CardTitle>
-            <Link to="/admin/competitions" className="text-xs text-accent hover:underline">View all →</Link>
+            <CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><Trophy className="h-4 w-4 text-foreground" /> {tierLabel} Competitions</CardTitle>
+            <Link to="/admin/competitions" className="text-xs text-foreground underline underline-offset-4">View all →</Link>
           </CardHeader>
           <CardContent>
             {loading && <p className="text-xs text-muted-foreground">Loading…</p>}
             {!loading && comps.length === 0 && (
-              <p className="text-sm text-muted-foreground py-6 text-center">No {tier} competitions for this season yet. <Link to="/admin/competitions/new" className="text-accent hover:underline">Create one →</Link></p>
+              <p className="text-sm text-muted-foreground py-6 text-center">No {tier} competitions for this season yet. <Link to="/admin/competitions/new" className="text-foreground underline underline-offset-4">Create one →</Link></p>
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {comps.map((c) => <CompetitionCard key={c.id} comp={c} />)}
@@ -138,16 +138,16 @@ export function TierDashboard({ tier, tierLabel, description }: Props) {
         </Card>
 
         <Card>
-          <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><FileText className="h-4 w-4 text-accent" /> Operations</CardTitle></CardHeader>
+          <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><FileText className="h-4 w-4 text-foreground" /> Operations</CardTitle></CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <Button asChild variant="outline" className="justify-start h-10"><Link to="/admin/eligibility"><AlertTriangle className="h-4 w-4 mr-2 text-accent" />Eligibility flags</Link></Button>
-            <Button asChild variant="outline" className="justify-start h-10"><Link to="/admin/officials"><ShieldCheck className="h-4 w-4 mr-2 text-accent" />Officials registry</Link></Button>
-            <Button asChild variant="outline" className="justify-start h-10"><Link to="/admin/finances"><Trophy className="h-4 w-4 mr-2 text-accent" />Finances &amp; entry fees</Link></Button>
-            <Button asChild variant="outline" className="justify-start h-10"><Link to="/admin/sync"><FileText className="h-4 w-4 mr-2 text-accent" />Scholastic Services sync</Link></Button>
+            <Button asChild variant="outline" className="justify-start min-h-11"><Link to="/admin/eligibility"><AlertTriangle className="h-4 w-4 mr-2 text-foreground" />Eligibility flags</Link></Button>
+            <Button asChild variant="outline" className="justify-start min-h-11"><Link to="/admin/officials"><ShieldCheck className="h-4 w-4 mr-2 text-foreground" />Officials registry</Link></Button>
+            <Button asChild variant="outline" className="justify-start min-h-11"><Link to="/admin/finances"><Trophy className="h-4 w-4 mr-2 text-foreground" />Finances &amp; entry fees</Link></Button>
+            <Button asChild variant="outline" className="justify-start min-h-11"><Link to="/admin/sync"><FileText className="h-4 w-4 mr-2 text-foreground" />Scholastic Services sync</Link></Button>
           </CardContent>
         </Card>
 
-        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
+        <p className="text-xs text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
       </div>
     </div>
   );

@@ -15,7 +15,7 @@ interface Props {
 
 const TONE_BG: Record<NonNullable<Props["tone"]>, string> = {
   primary: "bg-primary/10 text-primary",
-  accent:  "bg-accent/15 text-accent",
+  accent:  "bg-accent/15 text-foreground",
   success: "bg-[hsl(var(--nash-success))]/15 text-[hsl(var(--nash-success))]",
   warning: "bg-[hsl(var(--nash-warning))]/15 text-[hsl(var(--nash-warning))]",
   error:   "bg-[hsl(var(--nash-error))]/15 text-[hsl(var(--nash-error))]",
@@ -28,11 +28,11 @@ export function StatCard({ label, value, icon: Icon, hint, tone = "primary", cla
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-0.5 min-w-0">
-            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-display">{label}</p>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground font-display">{label}</p>
             <p className="text-2xl font-display font-bold tabular-nums">
-              {loading ? <span className="inline-block w-12 h-7 rounded bg-muted animate-pulse" /> : (value ?? "—")}
+              {loading ? <span className="inline-block w-12 h-7 rounded bg-muted " /> : (value ?? "—")}
             </p>
-            {hint && <p className="text-[11px] text-muted-foreground truncate">{hint}</p>}
+            {hint && <p className="text-xs text-muted-foreground truncate">{hint}</p>}
           </div>
           {Icon && (
             <div className={cn("rounded p-2 shrink-0", TONE_BG[tone])}>

@@ -20,7 +20,7 @@ export function SportSelector({ value, onChange, allOption, className, placehold
         {allOption && <SelectItem value="__all__">All Sports</SelectItem>}
         {NASH_SPORTS.map((s) => (
           <SelectItem key={s.code} value={s.code}>
-            <span className="font-mono text-[10px] text-accent mr-2">{s.code}</span>
+            <span className="font-mono text-xs text-foreground mr-2">{s.code}</span>
             {s.name}
           </SelectItem>
         ))}

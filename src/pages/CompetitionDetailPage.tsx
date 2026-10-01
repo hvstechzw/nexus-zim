@@ -141,9 +141,9 @@ export default function CompetitionDetailPage() {
             )}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap mb-1">
-                <span className="text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted bg-nexus-surface px-2.5 py-1 rounded-full">{comp.discipline}</span>
-                <span className="text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted bg-nexus-surface px-2.5 py-1 rounded-full">{comp.level?.replace(/_/g, " ")}</span>
-                <span className={`text-[10px] mono tracking-[0.15em] uppercase px-2.5 py-1 rounded-full ${
+                <span className="text-xs mono tracking-[0.15em] uppercase text-nexus-muted bg-nexus-surface px-2.5 py-1 rounded-full">{comp.discipline}</span>
+                <span className="text-xs mono tracking-[0.15em] uppercase text-nexus-muted bg-nexus-surface px-2.5 py-1 rounded-full">{comp.level?.replace(/_/g, " ")}</span>
+                <span className={`text-xs mono tracking-[0.15em] uppercase px-2.5 py-1 rounded-full ${
                   comp.status === "ongoing" ? "bg-nexus-live text-primary-foreground" : "bg-nexus-surface text-nexus-muted"
                 }`}>{comp.status?.replace(/_/g, " ")}</span>
               </div>
@@ -155,19 +155,19 @@ export default function CompetitionDetailPage() {
           {/* Stats Row */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
             <div className="hairline rounded-xl p-4">
-              <p className="text-[9px] mono tracking-[0.15em] uppercase text-nexus-muted">Fixtures</p>
+              <p className="text-xs mono tracking-[0.15em] uppercase text-nexus-muted">Fixtures</p>
               <p className="text-2xl font-bold text-foreground mt-1">{fixtures.length}</p>
             </div>
             <div className="hairline rounded-xl p-4">
-              <p className="text-[9px] mono tracking-[0.15em] uppercase text-nexus-muted">Completed</p>
+              <p className="text-xs mono tracking-[0.15em] uppercase text-nexus-muted">Completed</p>
               <p className="text-2xl font-bold text-foreground mt-1">{completedFixtures.length}</p>
             </div>
             <div className="hairline rounded-xl p-4">
-              <p className="text-[9px] mono tracking-[0.15em] uppercase text-nexus-muted">Registrations</p>
+              <p className="text-xs mono tracking-[0.15em] uppercase text-nexus-muted">Registrations</p>
               <p className="text-2xl font-bold text-foreground mt-1">{regs.length}</p>
             </div>
             <div className="hairline rounded-xl p-4">
-              <p className="text-[9px] mono tracking-[0.15em] uppercase text-nexus-muted">Format</p>
+              <p className="text-xs mono tracking-[0.15em] uppercase text-nexus-muted">Format</p>
               <p className="text-lg font-bold text-foreground mt-1 capitalize">{comp.format?.replace(/_/g, " ")}</p>
             </div>
           </div>
@@ -202,7 +202,7 @@ export default function CompetitionDetailPage() {
                     {f.home_team?.logo_url && <img src={f.home_team.logo_url} className="w-8 h-8 rounded-lg object-cover bg-white flex-shrink-0" alt="" />}
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-foreground truncate">{f.home_team?.name || "TBD"} vs {f.away_team?.name || "TBD"}</p>
-                      <p className="text-[10px] text-nexus-muted mono">{f.round_label || "—"} · {f.scheduled_at ? new Date(f.scheduled_at).toLocaleDateString("en-ZW", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "TBD"}</p>
+                      <p className="text-xs text-nexus-muted mono">{f.round_label || "—"} · {f.scheduled_at ? new Date(f.scheduled_at).toLocaleDateString("en-ZW", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "TBD"}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
@@ -210,11 +210,11 @@ export default function CompetitionDetailPage() {
                       <span className="text-lg font-bold mono text-foreground">{f.home_score ?? 0} — {f.away_score ?? 0}</span>
                     ) : f.status === "live" ? (
                       <span className="flex items-center gap-1.5 text-xs font-bold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-nexus-live animate-pulse" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-nexus-live " />
                         <span className="text-lg mono font-bold">{f.home_score ?? 0} — {f.away_score ?? 0}</span>
                       </span>
                     ) : (
-                      <span className="text-[10px] mono px-2.5 py-1 rounded-full bg-nexus-surface text-nexus-muted uppercase">{f.status}</span>
+                      <span className="text-xs mono px-2.5 py-1 rounded-full bg-nexus-surface text-nexus-muted uppercase">{f.status}</span>
                     )}
                   </div>
                 </div>
@@ -233,7 +233,7 @@ export default function CompetitionDetailPage() {
                     <thead>
                       <tr className="hairline-b">
                         {["#", "Team", "P", "W", "D", "L", "GF", "GA", "GD", "Pts"].map(h => (
-                          <th key={h} className="px-3 py-3 text-[9px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold text-left whitespace-nowrap">{h}</th>
+                          <th key={h} className="px-3 py-3 text-xs mono tracking-[0.15em] uppercase text-nexus-muted font-semibold text-left whitespace-nowrap">{h}</th>
                         ))}
                       </tr>
                     </thead>
@@ -286,7 +286,7 @@ export default function CompetitionDetailPage() {
                     <p className="text-sm font-semibold text-foreground truncate">
                       {r.team?.name || (r.athlete ? `${r.athlete.first_name} ${r.athlete.last_name}` : "—")}
                     </p>
-                    <p className="text-[10px] mono text-nexus-muted capitalize">{r.registration_type} · {r.status}</p>
+                    <p className="text-xs mono text-nexus-muted capitalize">{r.registration_type} · {r.status}</p>
                   </div>
                 </div>
               ))}
@@ -315,13 +315,13 @@ export default function CompetitionDetailPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2 mt-2 justify-center flex-wrap">
-                    <span className="text-[10px] mono text-nexus-muted">{f.round_label || "—"}</span>
+                    <span className="text-xs mono text-nexus-muted">{f.round_label || "—"}</span>
                     {Array.isArray(f.period_scores) && f.period_scores.length > 0 && (
-                      <span className="text-[10px] mono text-nexus-muted">
+                      <span className="text-xs mono text-nexus-muted">
                         {(f.period_scores as any[]).map((p) => `${p.period} ${p.home}-${p.away}`).join(" · ")}
                       </span>
                     )}
-                    <span className="text-[10px] mono px-2 py-0.5 rounded-full bg-nexus-surface text-nexus-muted">FT</span>
+                    <span className="text-xs mono px-2 py-0.5 rounded-full bg-nexus-surface text-nexus-muted">FT</span>
                   </div>
                 </div>
               ))}

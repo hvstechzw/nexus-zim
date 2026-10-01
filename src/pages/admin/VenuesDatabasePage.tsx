@@ -156,7 +156,7 @@ export default function VenuesDatabasePage() {
     <Shell>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">Federation · Venues</p>
+          <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">Federation · Venues</p>
           <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">Venues Database</h1>
           <p className="text-xs text-muted-foreground mt-0.5">National catalogue of venues available for competition selection.</p>
         </div>
@@ -177,7 +177,7 @@ export default function VenuesDatabasePage() {
             <div className="flex-1" />
             <div className="relative">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input className="h-9 pl-8 w-64" placeholder="Search name, city, province" value={search} onChange={(e) => setSearch(e.target.value)} />
+              <Input className="min-h-11 pl-8 w-64" placeholder="Search name, city, province" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
           </div>
         </CardHeader>
@@ -202,20 +202,20 @@ export default function VenuesDatabasePage() {
                   <TableRow key={v.id}>
                     <TableCell className="font-medium text-sm">{v.name}</TableCell>
                     <TableCell className="text-xs">{v.type}</TableCell>
-                    <TableCell className="text-xs">{v.city}<div className="text-[10px] text-muted-foreground">{v.province}</div></TableCell>
-                    <TableCell className="text-[10px]">{(v.sports_supported || []).join(", ") || "—"}</TableCell>
+                    <TableCell className="text-xs">{v.city}<div className="text-xs text-muted-foreground">{v.province}</div></TableCell>
+                    <TableCell className="text-xs">{(v.sports_supported || []).join(", ") || "—"}</TableCell>
                     <TableCell className="text-xs tabular-nums">{v.spectator_capacity ?? v.capacity ?? "—"}</TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-0.5">
-                        {v.nash_approved && <Badge variant="outline" className="text-[10px] border-accent text-accent w-fit">NASH</Badge>}
-                        {!v.is_active && <Badge variant="secondary" className="text-[10px] w-fit">Inactive</Badge>}
+                        {v.nash_approved && <Badge variant="outline" className="text-xs border-border text-foreground w-fit">NASH</Badge>}
+                        {!v.is_active && <Badge variant="secondary" className="text-xs w-fit">Inactive</Badge>}
                       </div>
                     </TableCell>
                     <TableCell className="text-right whitespace-nowrap">
                       {isAdmin && (
                         <>
-                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(v)}><Pencil className="h-3.5 w-3.5" /></Button>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => setConfirmDel(v)}><Trash2 className="h-3.5 w-3.5" /></Button>
+                          <Button variant="ghost" size="icon" className="min-h-11 w-11" onClick={() => openEdit(v)}><Pencil className="h-3.5 w-3.5" /></Button>
+                          <Button variant="ghost" size="icon" className="min-h-11 w-11 text-destructive" onClick={() => setConfirmDel(v)}><Trash2 className="h-3.5 w-3.5" /></Button>
                         </>
                       )}
                     </TableCell>
@@ -259,7 +259,7 @@ export default function VenuesDatabasePage() {
                     const on = (editing.sports_supported || []).includes(s);
                     return (
                       <button key={s} type="button" onClick={() => toggleSport(s)}
-                        className={`px-3 py-1 text-xs rounded-full border transition ${on ? "border-accent bg-accent/10 text-accent" : "border-border text-muted-foreground hover:border-primary/40"}`}>
+                        className={`px-3 py-1 text-xs rounded-full border transition ${on ? "border-border bg-accent/10 text-foreground" : "border-border text-muted-foreground hover:border-primary/40"}`}>
                         {s}
                       </button>
                     );
@@ -317,9 +317,9 @@ function Shell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background">
       <NashHeader />
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="max-w-workspace mx-auto px-4 md:px-6 py-6 space-y-6">
         {children}
-        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
+        <p className="text-xs text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
       </div>
     </div>
   );

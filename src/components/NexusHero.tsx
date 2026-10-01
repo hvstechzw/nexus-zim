@@ -50,7 +50,7 @@ export function NexusHero() {
             wordClass="text-3xl sm:text-4xl"
             subtitle="Inter-School Sports · Zimbabwe"
           />
-          <p className="text-[10px] sm:text-[11px] mono tracking-[0.2em] uppercase text-nexus-muted mt-4">
+          <p className="text-xs sm:text-xs mono tracking-[0.2em] uppercase text-nexus-muted mt-4">
             by Aetheris Innovative Enterprises
           </p>
         </motion.div>
@@ -74,7 +74,7 @@ export function NexusHero() {
 
           <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
             <a href="#live" className="flex items-center justify-center gap-2 h-11 sm:h-12 px-7 bg-foreground text-primary-foreground text-sm font-semibold rounded-xl hover:opacity-85 transition-opacity btn-click">
-              <span className="w-2 h-2 rounded-full bg-primary-foreground/60 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-primary-foreground/60 " />
               View Live
             </a>
             <a href="#schools" className="flex items-center justify-center h-11 sm:h-12 px-7 bg-nexus-surface text-foreground text-sm font-medium rounded-xl hover:bg-nexus-silver transition-colors btn-click">
@@ -85,14 +85,14 @@ export function NexusHero() {
           {/* Sport chips — Nexus is scoped to handball + netball */}
           <div className="mt-6 flex flex-wrap gap-2">
             {["Handball", "Netball"].map(d => (
-              <span key={d} className="text-[10px] sm:text-[11px] mono text-foreground hairline px-2.5 py-1 rounded-full">{d}</span>
+              <span key={d} className="text-xs sm:text-xs mono text-foreground hairline px-2.5 py-1 rounded-full">{d}</span>
             ))}
           </div>
 
           {/* Scholastic Services integration badge */}
           <div className="mt-5 flex items-center gap-3">
             <ScholasticBadge size="md" />
-            <span className="text-[10px] text-nexus-muted">Exclusive data partner — schools, students & house rosters</span>
+            <span className="text-xs text-nexus-muted">Exclusive data partner — schools, students & house rosters</span>
           </div>
         </motion.div>
       </div>
@@ -103,7 +103,7 @@ export function NexusHero() {
         transition={{ delay: 0.5, duration: 0.5 }}
         className="hairline-t"
       >
-        <div className="max-w-[1400px] mx-auto grid grid-cols-3 sm:grid-cols-6">
+        <div className="max-w-workspace mx-auto grid grid-cols-3 sm:grid-cols-6">
           {STAT_ITEMS.map((stat, i) => (
             <div
               key={stat.label}
@@ -111,7 +111,7 @@ export function NexusHero() {
               style={{ animationDelay: `${0.55 + i * 0.08}s` }}
             >
               <p className="score-display text-lg sm:text-score-md text-foreground">{stat.value}</p>
-              <p className="text-[9px] sm:text-[10px] tracking-wide uppercase text-nexus-muted mt-0.5 font-medium">{stat.label}</p>
+              <p className="text-xs sm:text-xs tracking-wide uppercase text-nexus-muted mt-0.5 font-medium">{stat.label}</p>
             </div>
           ))}
         </div>

@@ -98,15 +98,15 @@ export function SyncStatusWidget({ autoSyncIfEmpty = true }: { autoSyncIfEmpty?:
   return (
     <div className="hairline rounded-xl p-4 sm:p-5 bg-background flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 card-shadow">
       <div className="flex items-center gap-3 sm:gap-4">
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${syncing ? "bg-foreground/10 animate-pulse" : "bg-emerald-500/10"}`}>
-          <span className={`w-2.5 h-2.5 rounded-full ${syncing ? "bg-foreground animate-pulse" : "bg-emerald-500 animate-pulse"}`} />
+        <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${syncing ? "bg-foreground/10 " : "bg-success/10"}`}>
+          <span className={`w-2.5 h-2.5 rounded-full ${syncing ? "bg-foreground " : "bg-success "}`} />
         </div>
         <div>
           <p className="text-xs font-semibold text-foreground flex items-center gap-2">
             Scholastic Services Sync
-            <span className="text-[9px] mono uppercase tracking-widest text-emerald-600">● Live</span>
+            <span className="text-xs mono uppercase tracking-widest text-success">● Live</span>
           </p>
-          <p className="text-[10px] text-nexus-muted mt-0.5">
+          <p className="text-xs text-nexus-muted mt-0.5">
             {syncing
               ? "Syncing…"
               : lastSync
@@ -118,16 +118,16 @@ export function SyncStatusWidget({ autoSyncIfEmpty = true }: { autoSyncIfEmpty?:
       <div className="flex items-center gap-4 sm:gap-6">
         <div className="text-right">
           <p className="score-display text-base sm:text-lg text-foreground">{counts?.schools ?? "—"}</p>
-          <p className="text-[9px] mono uppercase tracking-wider text-nexus-muted">Schools</p>
+          <p className="text-xs mono uppercase tracking-wider text-nexus-muted">Schools</p>
         </div>
         <div className="text-right">
           <p className="score-display text-base sm:text-lg text-foreground">{counts?.students ?? "—"}</p>
-          <p className="text-[9px] mono uppercase tracking-wider text-nexus-muted">Students</p>
+          <p className="text-xs mono uppercase tracking-wider text-nexus-muted">Students</p>
         </div>
         <button
           onClick={() => runSync(false)}
           disabled={syncing || !canSync}
-          className="h-9 px-4 text-xs font-semibold rounded-lg bg-foreground text-primary-foreground hover:opacity-85 transition-opacity btn-click disabled:opacity-50"
+          className="min-h-11 px-4 text-xs font-semibold rounded-lg bg-foreground text-primary-foreground hover:opacity-85 transition-opacity btn-click disabled:opacity-50"
         >
           {syncing ? "Syncing…" : "Sync now"}
         </button>

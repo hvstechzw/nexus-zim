@@ -6,8 +6,8 @@ interface ScholasticBadgeProps {
 
 export function ScholasticBadge({ size = "sm", showLink = true, className = "" }: ScholasticBadgeProps) {
   const sizeMap = {
-    sm: "text-[9px] px-2.5 py-1 gap-1.5",
-    md: "text-[10px] px-3 py-1.5 gap-2",
+    sm: "text-xs px-2.5 py-1 gap-1.5",
+    md: "text-xs px-3 py-1.5 gap-2",
     lg: "text-xs px-4 py-2 gap-2.5",
   };
 
@@ -15,7 +15,7 @@ export function ScholasticBadge({ size = "sm", showLink = true, className = "" }
 
   const content = (
     <span className={`inline-flex items-center ${sizeMap[size]} mono tracking-wider uppercase font-semibold rounded-full hairline bg-nexus-surface text-nexus-muted hover:text-foreground transition-colors ${className}`}>
-      <span className={`${dotSize[size]} rounded-full bg-emerald-500 flex-shrink-0`} />
+      <span className={`${dotSize[size]} rounded-full bg-success flex-shrink-0`} />
       Scholastic Services Verified
     </span>
   );
@@ -43,14 +43,14 @@ export function ScholasticIntegrationBanner() {
         </div>
         <div>
           <p className="text-xs font-semibold text-foreground">Exclusively connected to Scholastic Services</p>
-          <p className="text-[10px] text-nexus-muted mt-0.5">School vetting, student registration & sports tracking</p>
+          <p className="text-xs text-nexus-muted mt-0.5">School vetting, student registration & sports tracking</p>
         </div>
       </div>
       <a
         href="https://scholasticservices.online"
         target="_blank"
         rel="noopener noreferrer"
-        className="ml-auto flex-shrink-0 h-7 px-3 text-[10px] font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 transition-opacity inline-flex items-center gap-1.5"
+        className="ml-auto flex-shrink-0 h-7 px-3 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 transition-opacity inline-flex items-center gap-1.5"
       >
         scholasticservices.online
         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

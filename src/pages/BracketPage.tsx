@@ -49,7 +49,7 @@ export default function BracketPage() {
     <div className="min-h-screen bg-background text-foreground">
       <Helmet><title>{`${comp?.name || "Bracket"} — Nexus`}</title></Helmet>
       <NexusHeader />
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-8 pt-20 pb-16">
+      <div className="max-w-workspace mx-auto px-4 sm:px-8 pt-20 pb-16">
         <Link to={`/competition/${id}`} className="text-xs mono text-nexus-muted hover:text-foreground">← Competition</Link>
         <h1 className="display-font text-display-md font-bold mt-2 mb-2">{comp?.name || "Bracket"}</h1>
         <p className="text-xs mono text-nexus-muted mb-8">{comp?.discipline} · single elimination bracket</p>
@@ -61,13 +61,13 @@ export default function BracketPage() {
             <div className="flex gap-6 min-w-max">
               {byRound.map((round, ri) => (
                 <div key={ri} className="flex flex-col justify-around gap-4 min-w-[240px]">
-                  <p className="text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted mb-2">{round[0]?.round_label || `Round ${ri + 1}`}</p>
+                  <p className="text-xs mono tracking-[0.15em] uppercase text-nexus-muted mb-2">{round[0]?.round_label || `Round ${ri + 1}`}</p>
                   {round.map((f) => (
                     <Link to={`/live/${f.id}`} key={f.id} className="block hairline rounded-xl p-3 hover:bg-nexus-surface/40">
                       <MatchRow team={teamName(f.home_school_team_id)} score={f.home_score} winner={(f.home_score ?? 0) > (f.away_score ?? 0) && f.status === "completed"} />
                       <div className="hairline-b my-1" />
                       <MatchRow team={teamName(f.away_school_team_id)} score={f.away_score} winner={(f.away_score ?? 0) > (f.home_score ?? 0) && f.status === "completed"} />
-                      <p className="text-[9px] mono uppercase tracking-[0.15em] text-nexus-muted mt-1">{f.status}</p>
+                      <p className="text-xs mono uppercase tracking-[0.15em] text-nexus-muted mt-1">{f.status}</p>
                     </Link>
                   ))}
                 </div>

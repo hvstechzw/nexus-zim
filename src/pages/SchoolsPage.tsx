@@ -39,7 +39,7 @@ export default function SchoolsPage() {
     <div className="min-h-screen bg-background text-foreground">
       <NexusHeader />
       <main className="pt-16 sm:pt-20">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-8 py-6 sm:py-10 flex flex-col gap-6">
+        <div className="max-w-workspace mx-auto px-4 sm:px-8 py-6 sm:py-10 flex flex-col gap-6">
           <ScholasticIntegrationBanner />
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -51,7 +51,7 @@ export default function SchoolsPage() {
 
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
             <div>
-              <p className="text-[10px] sm:text-xs mono tracking-[0.25em] uppercase text-nexus-muted">Directory</p>
+              <p className="text-xs sm:text-xs mono tracking-[0.25em] uppercase text-nexus-muted">Directory</p>
               <h1 className="display-font text-2xl sm:text-3xl font-bold tracking-tight mt-1">Schools on Nexus</h1>
               <p className="text-xs sm:text-sm text-nexus-muted mt-1">{filtered.length} of {schools.length} schools — all verified by Scholastic Services.</p>
             </div>
@@ -60,17 +60,17 @@ export default function SchoolsPage() {
           {/* Filters */}
           <div className="hairline rounded-xl p-4 bg-background flex flex-col md:flex-row gap-3 md:items-end">
             <div className="flex-1">
-              <p className="text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold mb-1.5">Search</p>
+              <p className="text-xs mono tracking-[0.15em] uppercase text-nexus-muted font-semibold mb-1.5">Search</p>
               <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="School name…" className="bg-nexus-surface hairline rounded-lg px-4 py-2.5 text-sm w-full focus:outline-none focus:ring-2 focus:ring-foreground/20" />
             </div>
             <div className="md:w-48">
-              <p className="text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold mb-1.5">Tier</p>
+              <p className="text-xs mono tracking-[0.15em] uppercase text-nexus-muted font-semibold mb-1.5">Tier</p>
               <select value={tier} onChange={(e) => setTier(e.target.value)} className="bg-nexus-surface hairline rounded-lg px-4 py-2.5 text-sm w-full cursor-pointer">
                 {SCHOOL_TIERS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
             </div>
             <div className="md:w-56">
-              <p className="text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold mb-1.5">Province</p>
+              <p className="text-xs mono tracking-[0.15em] uppercase text-nexus-muted font-semibold mb-1.5">Province</p>
               <select value={province} onChange={(e) => setProvince(e.target.value)} className="bg-nexus-surface hairline rounded-lg px-4 py-2.5 text-sm w-full cursor-pointer">
                 {PROVINCES.map((p) => <option key={p}>{p}</option>)}
               </select>
@@ -89,8 +89,8 @@ export default function SchoolsPage() {
                     {s.logo_url ? <img src={s.logo_url} alt={`${s.school_name || s.name} logo`} className="w-full h-full object-contain" onError={(event) => { event.currentTarget.style.display = "none"; }} /> : <span className="text-sm font-bold">{s.name.charAt(0)}</span>}
                   </div>
                   <p className="text-xs sm:text-sm font-semibold line-clamp-2 leading-tight">{s.school_name || s.name}</p>
-                  <p className="text-[10px] mono uppercase tracking-wider text-nexus-muted">{tierLabel(s.level)}</p>
-                  <p className="text-[10px] text-nexus-muted">{s.province}</p>
+                  <p className="text-xs mono uppercase tracking-wider text-nexus-muted">{tierLabel(s.level)}</p>
+                  <p className="text-xs text-nexus-muted">{s.province}</p>
                 </Link>
               ))}
             </div>

@@ -33,9 +33,9 @@ export default function NashSportsPage() {
   return (
     <div className="min-h-screen bg-background">
       <NashHeader />
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="max-w-workspace mx-auto px-4 md:px-6 py-6 space-y-6">
         <div>
-          <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">Federation · Sports</p>
+          <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">Federation · Sports</p>
           <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">NASH Sports Registry</h1>
           <p className="text-xs text-muted-foreground mt-0.5">All sports governed by NASH/NAPH with their scoring, age groups and squad rules.</p>
         </div>
@@ -68,18 +68,18 @@ export default function NashSportsPage() {
                   {sports.map((s) => (
                     <TableRow key={s.id}>
                       <TableCell><SportBadge code={s.code} /></TableCell>
-                      <TableCell className="text-sm font-medium">{s.name}<div className="text-[11px] text-muted-foreground">{s.full_name}</div></TableCell>
+                      <TableCell className="text-sm font-medium">{s.name}<div className="text-xs text-muted-foreground">{s.full_name}</div></TableCell>
                       <TableCell className="text-xs capitalize">{s.gender}</TableCell>
                       <TableCell className="text-xs">{TERM_NAME(s.primary_term)}</TableCell>
-                      <TableCell className="text-xs"><code className="text-[10px] bg-muted px-1 py-0.5 rounded">{s.scoring_type}</code></TableCell>
+                      <TableCell className="text-xs"><code className="text-xs bg-muted px-1 py-0.5 rounded">{s.scoring_type}</code></TableCell>
                       <TableCell className="text-xs tabular-nums">
                         {s.periods ? `${s.periods} × ${s.period_duration_minutes ?? "?"}'` : "—"}
-                        {s.has_extra_time && <Badge variant="outline" className="ml-1 text-[9px]">ET</Badge>}
-                        {s.has_penalties && <Badge variant="outline" className="ml-1 text-[9px]">PEN</Badge>}
+                        {s.has_extra_time && <Badge variant="outline" className="ml-1 text-xs">ET</Badge>}
+                        {s.has_penalties && <Badge variant="outline" className="ml-1 text-xs">PEN</Badge>}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
-                          {(s.age_groups || []).map((g) => <Badge key={g} variant="secondary" className="text-[9px] font-mono">{g}</Badge>)}
+                          {(s.age_groups || []).map((g) => <Badge key={g} variant="secondary" className="text-xs font-mono">{g}</Badge>)}
                         </div>
                       </TableCell>
                       <TableCell className="text-xs tabular-nums">{s.min_squad_size && s.max_squad_size ? `${s.min_squad_size}–${s.max_squad_size}` : "—"}</TableCell>
@@ -92,7 +92,7 @@ export default function NashSportsPage() {
           </CardContent>
         </Card>
 
-        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
+        <p className="text-xs text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
       </div>
     </div>
   );

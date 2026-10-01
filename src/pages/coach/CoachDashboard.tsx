@@ -90,23 +90,23 @@ export default function CoachDashboard() {
   return (
     <div className="min-h-screen bg-background">
       <NashHeader />
-      <div className="max-w-[1400px] mx-auto px-4 md:px-6 py-6 space-y-6">
+      <div className="max-w-workspace mx-auto px-4 md:px-6 py-6 space-y-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">Coach Dashboard</p>
+            <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">Coach Dashboard</p>
             <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight">{user?.email?.split("@")[0] ?? "Coach"}</h1>
             <p className="text-xs text-muted-foreground mt-0.5">{season?.name ?? "Current season"}</p>
           </div>
           <div className="flex items-end gap-2">
-            <SeasonSelector value={seasonId} onChange={(id, s) => { setSeasonId(id); setSeason(s); }} className="h-9 w-56" />
+            <SeasonSelector value={seasonId} onChange={(id, s) => { setSeasonId(id); setSeason(s); }} className="min-h-11 w-56" />
             <Button asChild><Link to="/coach/registration"><Plus className="h-4 w-4 mr-1" /> Register Team</Link></Button>
           </div>
         </div>
 
         {deadline && daysToDeadline !== null && daysToDeadline > 0 && daysToDeadline < 30 && (
-          <Card className="border-accent/40 bg-accent/5">
+          <Card className="border-border bg-accent/5">
             <CardContent className="p-3 flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-accent" />
+              <Calendar className="h-5 w-5 text-foreground" />
               <div className="flex-1 text-sm">
                 <span className="font-semibold">Registration closes in {daysToDeadline} day{daysToDeadline === 1 ? "" : "s"}</span>
                 <span className="text-muted-foreground"> · {deadline.toLocaleDateString()}</span>
@@ -125,8 +125,8 @@ export default function CoachDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <Card className="lg:col-span-2">
             <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><Users className="h-4 w-4 text-accent" /> My Squad</CardTitle>
-              <Link to="/coach/registration" className="text-xs text-accent hover:underline">Manage →</Link>
+              <CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><Users className="h-4 w-4 text-foreground" /> My Squad</CardTitle>
+              <Link to="/coach/registration" className="text-xs text-foreground underline underline-offset-4">Manage →</Link>
             </CardHeader>
             <CardContent className="p-0">
               {squad.length === 0 && !loading && (
@@ -143,12 +143,12 @@ export default function CoachDashboard() {
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium truncate">
                           {m.athlete ? `${m.athlete.first_name} ${m.athlete.last_name}` : "—"}
-                          {m.is_captain && <Badge variant="outline" className="ml-2 text-[9px]">C</Badge>}
+                          {m.is_captain && <Badge variant="outline" className="ml-2 text-xs">C</Badge>}
                         </div>
-                        <div className="text-[10px] text-muted-foreground font-mono">{m.athlete?.nash_id}</div>
+                        <div className="text-xs text-muted-foreground font-mono">{m.athlete?.nash_id}</div>
                       </div>
                       {m.team?.discipline && <SportBadge code={m.team.discipline.toUpperCase().slice(0, 2)} />}
-                      {m.age_group && <Badge variant="secondary" className="text-[10px] font-mono">{m.age_group}</Badge>}
+                      {m.age_group && <Badge variant="secondary" className="text-xs font-mono">{m.age_group}</Badge>}
                       <EligibilityIndicator
                         status={
                           m.registration_status === "rejected" ? "suspended" :
@@ -165,20 +165,20 @@ export default function CoachDashboard() {
           </Card>
 
           <Card>
-            <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><ArrowRight className="h-4 w-4 text-accent" /> Quick Actions</CardTitle></CardHeader>
+            <CardHeader className="pb-3"><CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><ArrowRight className="h-4 w-4 text-foreground" /> Quick Actions</CardTitle></CardHeader>
             <CardContent className="space-y-2">
-              <Button asChild variant="outline" className="w-full justify-start h-10"><Link to="/coach/registration"><Plus className="h-4 w-4 mr-2 text-accent" />Register / update team</Link></Button>
-              <Button asChild variant="outline" className="w-full justify-start h-10"><Link to="/school/eligibility"><AlertTriangle className="h-4 w-4 mr-2 text-accent" />Check eligibility flags</Link></Button>
-              <Button asChild variant="outline" className="w-full justify-start h-10"><Link to="/coach/team-sheet/new"><FileText className="h-4 w-4 mr-2 text-accent" />Generate team sheet</Link></Button>
-              <Button asChild variant="outline" className="w-full justify-start h-10"><Link to="/calendar"><Calendar className="h-4 w-4 mr-2 text-accent" />My fixtures</Link></Button>
+              <Button asChild variant="outline" className="w-full justify-start min-h-11"><Link to="/coach/registration"><Plus className="h-4 w-4 mr-2 text-foreground" />Register / update team</Link></Button>
+              <Button asChild variant="outline" className="w-full justify-start min-h-11"><Link to="/school/eligibility"><AlertTriangle className="h-4 w-4 mr-2 text-foreground" />Check eligibility flags</Link></Button>
+              <Button asChild variant="outline" className="w-full justify-start min-h-11"><Link to="/coach/team-sheet/new"><FileText className="h-4 w-4 mr-2 text-foreground" />Generate team sheet</Link></Button>
+              <Button asChild variant="outline" className="w-full justify-start min-h-11"><Link to="/calendar"><Calendar className="h-4 w-4 mr-2 text-foreground" />My fixtures</Link></Button>
             </CardContent>
           </Card>
         </div>
 
         <Card>
           <CardHeader className="pb-3 flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><Calendar className="h-4 w-4 text-accent" /> Upcoming Fixtures</CardTitle>
-            <Link to="/calendar" className="text-xs text-accent hover:underline">Calendar →</Link>
+            <CardTitle className="text-base font-display tracking-wide flex items-center gap-2"><Calendar className="h-4 w-4 text-foreground" /> Upcoming Fixtures</CardTitle>
+            <Link to="/calendar" className="text-xs text-foreground underline underline-offset-4">Calendar →</Link>
           </CardHeader>
           <CardContent>
             {loading && <p className="text-xs text-muted-foreground">Loading…</p>}
@@ -189,7 +189,7 @@ export default function CoachDashboard() {
           </CardContent>
         </Card>
 
-        <p className="text-[10px] text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
+        <p className="text-xs text-muted-foreground text-center pt-2">Powered by NASH & NAPH · Built by Aetheris Innovative Enterprises</p>
       </div>
     </div>
   );

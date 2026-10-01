@@ -40,10 +40,10 @@ export default function StandingsPage() {
 
         {groups.map((g) => (
           <div key={g} className="mb-8">
-            <p className="text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted mb-3">{g}</p>
+            <p className="text-xs mono tracking-[0.15em] uppercase text-nexus-muted mb-3">{g}</p>
             <div className="hairline rounded-xl overflow-hidden">
               <table className="w-full text-sm">
-                <thead className="bg-nexus-surface/50 text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted">
+                <thead className="bg-nexus-surface/50 text-xs mono tracking-[0.15em] uppercase text-nexus-muted">
                   <tr><Th>#</Th><Th className="text-left">Team</Th><Th>P</Th><Th>W</Th><Th>D</Th><Th>L</Th><Th>SF</Th><Th>SA</Th><Th>±</Th><Th>Pts</Th></tr>
                 </thead>
                 <tbody>

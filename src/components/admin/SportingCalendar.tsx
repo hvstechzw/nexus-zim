@@ -30,7 +30,7 @@ const TYPES: EventType[] = ["competition", "camp", "trial", "congress", "holiday
 
 const inputCls =
   "bg-nexus-surface hairline rounded-lg px-3 py-2 text-sm text-foreground placeholder:text-nexus-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground/20 w-full";
-const labelCls = "text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold";
+const labelCls = "text-xs mono tracking-[0.15em] uppercase text-nexus-muted font-semibold";
 
 /**
  * NASH-style sporting calendar. Auto-mirrors Handball/Netball competitions via a DB trigger,
@@ -139,7 +139,7 @@ export function SportingCalendar() {
       <div className="hairline rounded-xl p-6 bg-card card-shadow">
         <div className="flex flex-wrap items-end justify-between gap-4 mb-4">
           <div>
-            <p className="text-[10px] mono tracking-[0.2em] uppercase text-nexus-muted">NASH-style</p>
+            <p className="text-xs mono tracking-[0.2em] uppercase text-nexus-muted">NASH-style</p>
             <h2 className="display-font text-xl font-bold text-foreground">Sporting Calendar</h2>
             <p className="text-xs text-nexus-muted mt-1">
               Live schedule of competitions, camps, trials and congresses across Handball and Netball. Competition entries are
@@ -149,7 +149,7 @@ export function SportingCalendar() {
           {canCreate && (
             <button
               onClick={() => setShowForm((s) => !s)}
-              className="h-9 px-4 text-xs font-semibold rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click"
+              className="min-h-11 px-4 text-xs font-semibold rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click"
             >
               {showForm ? "Cancel" : "+ Add Entry"}
             </button>
@@ -276,12 +276,12 @@ export function SportingCalendar() {
               return (
                 <li key={ev.id} className="p-4 flex flex-wrap items-center gap-4">
                   <div className="w-28 flex-shrink-0">
-                    <p className="text-[10px] mono tracking-wider text-nexus-muted uppercase">{ev.event_type}</p>
+                    <p className="text-xs mono tracking-wider text-nexus-muted uppercase">{ev.event_type}</p>
                     <p className="text-xs mono font-semibold text-foreground">{range}</p>
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-foreground truncate">{ev.title}</p>
-                    <p className="text-[10px] mono text-nexus-muted">
+                    <p className="text-xs mono text-nexus-muted">
                       {ev.discipline} · <span className="capitalize">{ev.level}</span>
                       {ev.region ? ` · ${ev.region}` : ""}
                       {ev.season ? ` · ${ev.season}` : ""}
@@ -290,7 +290,7 @@ export function SportingCalendar() {
                     {ev.description && <p className="text-xs text-nexus-muted mt-1 line-clamp-2">{ev.description}</p>}
                   </div>
                   {canDelete && !ev.competition_id && (
-                    <button onClick={() => remove(ev.id)} className="text-[10px] mono uppercase text-nexus-muted hover:text-foreground">
+                    <button onClick={() => remove(ev.id)} className="text-xs mono uppercase text-nexus-muted hover:text-foreground">
                       Remove
                     </button>
                   )}

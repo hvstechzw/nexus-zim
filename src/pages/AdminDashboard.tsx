@@ -71,7 +71,7 @@ const ALL_TABS: TabDef[] = [
 ];
 
 const inputCls = "bg-nexus-surface hairline rounded-lg px-4 py-2.5 text-sm text-foreground placeholder:text-nexus-muted/50 focus:outline-none focus:ring-2 focus:ring-foreground/20 transition-all w-full";
-const labelCls = "text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold";
+const labelCls = "text-xs mono tracking-[0.15em] uppercase text-nexus-muted font-semibold";
 const PROVINCES = ["Harare","Bulawayo","Manicaland","Mashonaland Central","Mashonaland East","Mashonaland West","Masvingo","Matabeleland North","Matabeleland South","Midlands"];
 const LEVELS = ["primary_school","secondary_school","club_academy","provincial","national_league","national_cup","international"] as const;
 const FORMATS = ["round_robin","single_elimination","double_elimination","swiss","league","ladder","custom_heats"] as const;
@@ -415,8 +415,8 @@ function DetailPanel({ open, onClose, title, children }: { open: boolean; onClos
             className="fixed right-0 top-0 h-full w-full max-w-lg bg-card z-50 shadow-2xl overflow-y-auto hairline-l"
           >
             <div className="p-6 hairline-b flex items-center justify-between sticky top-0 bg-card/95 backdrop-blur-sm z-10">
-              <p className="text-xs mono tracking-[0.18em] uppercase text-accent font-semibold">{title}</p>
-              <button onClick={onClose} className="w-8 h-8 rounded-lg bg-nexus-surface hover:bg-nexus-silver flex items-center justify-center transition-colors">
+              <p className="text-xs mono tracking-[0.18em] uppercase text-foreground font-semibold">{title}</p>
+              <button onClick={onClose} className="w-8 min-h-11 rounded-lg bg-nexus-surface hover:bg-nexus-silver flex items-center justify-center transition-colors">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
@@ -432,7 +432,7 @@ function DetailPanel({ open, onClose, title, children }: { open: boolean; onClos
 function DetailField({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-1 py-3 hairline-b last:border-0">
-      <p className="text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold">{label}</p>
+      <p className="text-xs mono tracking-[0.15em] uppercase text-nexus-muted font-semibold">{label}</p>
       <p className="text-sm text-foreground">{value || "—"}</p>
     </div>
   );
@@ -498,12 +498,12 @@ function FixtureEditPanel({ fixture, onUpdate, onDelete }: {
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        <button onClick={save} disabled={saving} className="h-9 px-4 text-xs font-semibold rounded-lg bg-foreground text-primary-foreground hover:opacity-85 transition-opacity disabled:opacity-50">
+        <button onClick={save} disabled={saving} className="min-h-11 px-4 text-xs font-semibold rounded-lg bg-foreground text-primary-foreground hover:opacity-85 transition-opacity disabled:opacity-50">
           {saving ? "Saving…" : "Save changes"}
         </button>
-        <a href={`/scoring`} className="h-9 px-4 text-xs font-semibold rounded-lg bg-nexus-surface text-foreground flex items-center hover:bg-nexus-silver transition-colors">Open in Scoring</a>
-        <a href={`/broadcast/${fixture.id}`} className="h-9 px-4 text-xs font-semibold rounded-lg bg-nexus-surface text-foreground flex items-center hover:bg-nexus-silver transition-colors">Broadcast CG</a>
-        <button onClick={() => onDelete(fixture.id)} className="h-9 px-4 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors ml-auto">
+        <a href={`/scoring`} className="min-h-11 px-4 text-xs font-semibold rounded-lg bg-nexus-surface text-foreground flex items-center hover:bg-nexus-silver transition-colors">Open in Scoring</a>
+        <a href={`/broadcast/${fixture.id}`} className="min-h-11 px-4 text-xs font-semibold rounded-lg bg-nexus-surface text-foreground flex items-center hover:bg-nexus-silver transition-colors">Broadcast CG</a>
+        <button onClick={() => onDelete(fixture.id)} className="min-h-11 px-4 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors ml-auto">
           Delete fixture
         </button>
       </div>
@@ -561,8 +561,8 @@ function ScholasticPanel({ user, toast, refetchTeams, refetchAthletes, refetchVe
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-3 h-3 rounded-full bg-foreground/60 animate-pulse" />
-              <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium">
+              <div className="w-3 h-3 rounded-full bg-foreground/60 " />
+              <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">
                 Linked to scholasticservices.online
               </p>
             </div>
@@ -572,12 +572,12 @@ function ScholasticPanel({ user, toast, refetchTeams, refetchAthletes, refetchVe
             </p>
           </div>
           <div className="flex-shrink-0 flex items-center gap-2">
-            <span className="text-[9px] mono uppercase tracking-widest px-3 py-1.5 rounded-full bg-foreground/10 text-foreground font-semibold">Connected</span>
+            <span className="text-xs mono uppercase tracking-widest px-3 py-1.5 rounded-full bg-foreground/10 text-foreground font-semibold">Connected</span>
           </div>
         </div>
 
         {lastSynced && (
-          <p className="text-[10px] mono text-nexus-muted mb-4">Last synced: {lastSynced}</p>
+          <p className="text-xs mono text-nexus-muted mb-4">Last synced: {lastSynced}</p>
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -614,7 +614,7 @@ function ScholasticPanel({ user, toast, refetchTeams, refetchAthletes, refetchVe
       {/* Discover Results */}
       {discoverResult && (
         <div className="hairline rounded-xl p-6 bg-card card-shadow mb-6">
-          <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Discovered Tables</p>
+          <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Discovered Tables</p>
           {Object.keys(discoverResult.tables || {}).length === 0 ? (
             <div className="py-8 text-center">
               <p className="text-sm text-nexus-muted mb-2">No publicly accessible tables found.</p>
@@ -625,13 +625,13 @@ function ScholasticPanel({ user, toast, refetchTeams, refetchAthletes, refetchVe
               {Object.entries(discoverResult.tables).map(([table, info]: [string, any]) => (
                 <div key={table} className="hairline rounded-lg p-4">
                   <p className="text-sm font-semibold text-foreground mb-1">{table}</p>
-                  <p className="text-[10px] mono text-nexus-muted">{info.columns?.length || 0} columns</p>
+                  <p className="text-xs mono text-nexus-muted">{info.columns?.length || 0} columns</p>
                   {info.columns?.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2">
                       {info.columns.slice(0, 8).map((col: string) => (
-                        <span key={col} className="text-[9px] mono px-2 py-0.5 rounded bg-nexus-surface text-nexus-muted">{col}</span>
+                        <span key={col} className="text-xs mono px-2 py-0.5 rounded bg-nexus-surface text-nexus-muted">{col}</span>
                       ))}
-                      {info.columns.length > 8 && <span className="text-[9px] mono text-nexus-muted">+{info.columns.length - 8} more</span>}
+                      {info.columns.length > 8 && <span className="text-xs mono text-nexus-muted">+{info.columns.length - 8} more</span>}
                     </div>
                   )}
                 </div>
@@ -644,7 +644,7 @@ function ScholasticPanel({ user, toast, refetchTeams, refetchAthletes, refetchVe
       {/* Sync Results */}
       {syncResult && (
         <div className="hairline rounded-xl p-6 bg-card card-shadow mb-6">
-          <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Sync Results</p>
+          <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Sync Results</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {syncResult.schools && (
               <div className="hairline rounded-lg p-4">
@@ -677,9 +677,9 @@ function ScholasticPanel({ user, toast, refetchTeams, refetchAthletes, refetchVe
                 </div>
                 {syncResult.errors?.length > 0 && (
                   <div className="mt-2">
-                    <p className="text-[10px] mono text-nexus-muted uppercase mb-1">Errors</p>
+                    <p className="text-xs mono text-nexus-muted uppercase mb-1">Errors</p>
                     {syncResult.errors.slice(0, 5).map((e: string, i: number) => (
-                      <p key={i} className="text-[10px] mono text-nexus-muted">{e}</p>
+                      <p key={i} className="text-xs mono text-nexus-muted">{e}</p>
                     ))}
                   </div>
                 )}
@@ -691,7 +691,7 @@ function ScholasticPanel({ user, toast, refetchTeams, refetchAthletes, refetchVe
 
       {/* Info Panel */}
       <div className="hairline rounded-xl p-6 bg-card card-shadow">
-        <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">How It Works</p>
+        <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">How It Works</p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="space-y-2">
             <p className="text-sm font-semibold text-foreground">1. Discover</p>
@@ -756,7 +756,7 @@ export default function AdminDashboard() {
       <div className="min-h-screen bg-background text-foreground">
         <NashHeader />
         <div className="max-w-[900px] mx-auto pt-32 px-8 text-center">
-          <p className="text-[10px] mono tracking-[0.2em] uppercase text-nexus-muted mb-3">403 Forbidden</p>
+          <p className="text-xs mono tracking-[0.2em] uppercase text-nexus-muted mb-3">403 Forbidden</p>
           <h1 className="text-2xl font-semibold mb-3">Admin access required</h1>
           <p className="text-nexus-muted text-sm">
             Your account doesn't carry an admin-tier NASH or NAPH role (platform, federation, provincial, district, zonal or organiser). Request access via <Link to="/register" className="underline">registration</Link>.
@@ -778,7 +778,7 @@ export default function AdminDashboard() {
   );
 
   const tableHead = (...cols: string[]) => (
-    <thead><tr className="hairline-b">{cols.map(c => <th key={c} className="px-4 sm:px-6 py-4 text-left text-[10px] mono tracking-[0.15em] uppercase text-nexus-muted font-semibold whitespace-nowrap">{c}</th>)}</tr></thead>
+    <thead><tr className="hairline-b">{cols.map(c => <th key={c} className="px-4 sm:px-6 py-4 text-left text-xs mono tracking-[0.15em] uppercase text-nexus-muted font-semibold whitespace-nowrap">{c}</th>)}</tr></thead>
   );
 
   const EmptyState = ({ msg }: { msg: string }) => (
@@ -877,10 +877,10 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <NashHeader />
-      <div className="max-w-[1400px] mx-auto py-6">
+      <div className="max-w-workspace mx-auto py-6">
         <div className="px-4 md:px-6 flex flex-wrap items-end justify-between gap-3 mb-4">
           <div>
-            <p className="text-[10px] font-display tracking-[0.2em] uppercase text-accent">Platform · Administration</p>
+            <p className="text-xs font-display tracking-[0.2em] uppercase text-foreground">Platform · Administration</p>
             <h1 className="text-2xl md:text-3xl font-display font-bold tracking-tight mt-1">Admin Dashboard</h1>
             <p className="text-xs text-muted-foreground mt-0.5">Manage schools, competitions, fixtures, officials, users and the Scholastic Services bridge — all in one place.</p>
           </div>
@@ -927,14 +927,14 @@ export default function AdminDashboard() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Status Breakdown */}
                 <div className="hairline rounded-xl p-6 bg-card card-shadow">
-                  <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Competition Status Breakdown</p>
+                  <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Competition Status Breakdown</p>
                   <div className="space-y-3">
                     {["draft","registration_open","ongoing","completed","cancelled"].map(status => {
                       const count = (competitions as any[]).filter(c => c.status === status).length;
                       const pct = competitions.length > 0 ? (count / competitions.length) * 100 : 0;
                       return (
                         <div key={status} className="flex items-center gap-3">
-                          <span className="text-[10px] mono w-28 text-nexus-muted capitalize flex-shrink-0">{status.replace(/_/g," ")}</span>
+                          <span className="text-xs mono w-28 text-nexus-muted capitalize flex-shrink-0">{status.replace(/_/g," ")}</span>
                           <div className="flex-1 h-2 rounded-full bg-nexus-surface overflow-hidden">
                             <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 0.6, delay: 0.1 }} className="h-full rounded-full bg-foreground/60" />
                           </div>
@@ -947,7 +947,7 @@ export default function AdminDashboard() {
 
                 {/* Fixture Status */}
                 <div className="hairline rounded-xl p-6 bg-card card-shadow">
-                  <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Fixture Status</p>
+                  <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Fixture Status</p>
                   <div className="grid grid-cols-3 gap-3">
                     {[
                       { label: "Scheduled", status: "scheduled", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" },
@@ -961,7 +961,7 @@ export default function AdminDashboard() {
                             <path d={icon} strokeLinecap="round" strokeLinejoin="round" />
                           </svg>
                           <p className="score-display text-xl text-foreground">{count}</p>
-                          <p className="text-[9px] mono text-nexus-muted mt-1 uppercase tracking-wider">{label}</p>
+                          <p className="text-xs mono text-nexus-muted mt-1 uppercase tracking-wider">{label}</p>
                         </div>
                       );
                     })}
@@ -970,7 +970,7 @@ export default function AdminDashboard() {
 
                 {/* Discipline Distribution */}
                 <div className="hairline rounded-xl p-6 bg-card card-shadow">
-                  <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Discipline Distribution</p>
+                  <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Discipline Distribution</p>
                   <div className="flex flex-wrap gap-2">
                     {Object.entries(
                       (competitions as any[]).reduce((acc: Record<string, number>, c) => {
@@ -980,7 +980,7 @@ export default function AdminDashboard() {
                     ).sort((a, b) => (b[1] as number) - (a[1] as number)).map(([disc, count]) => (
                       <div key={disc} className="hairline rounded-lg px-3 py-2 flex items-center gap-2 hover:bg-nexus-surface/40 transition-colors">
                         <span className="text-xs font-semibold text-foreground">{disc}</span>
-                        <span className="text-[10px] mono text-nexus-muted bg-nexus-surface px-1.5 py-0.5 rounded">{count as number}</span>
+                        <span className="text-xs mono text-nexus-muted bg-nexus-surface px-1.5 py-0.5 rounded">{count as number}</span>
                       </div>
                     ))}
                     {competitions.length === 0 && <p className="text-xs text-nexus-muted mono">No data</p>}
@@ -989,20 +989,20 @@ export default function AdminDashboard() {
 
                 {/* Recent Activity */}
                 <div className="hairline rounded-xl p-6 bg-card card-shadow">
-                  <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Recent Activity</p>
+                  <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Recent Activity</p>
                   <div className="space-y-3 max-h-48 overflow-y-auto">
                     {(fixtures as any[]).slice(0, 8).map((f) => (
                       <div key={f.id} className="flex items-center gap-3 py-1.5 hairline-b last:border-0">
-                        <span className={`w-2 h-2 rounded-full flex-shrink-0 ${f.status === "live" ? "bg-nexus-live animate-pulse" : f.status === "completed" ? "bg-foreground/40" : "bg-nexus-surface"}`} />
+                        <span className={`w-2 h-2 rounded-full flex-shrink-0 ${f.status === "live" ? "bg-nexus-live " : f.status === "completed" ? "bg-foreground/40" : "bg-nexus-surface"}`} />
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-semibold text-foreground truncate">{f.home_team?.name || "TBD"} vs {f.away_team?.name || "TBD"}</p>
-                          <p className="text-[10px] mono text-nexus-muted">{f.competition?.name || "—"}</p>
+                          <p className="text-xs mono text-nexus-muted">{f.competition?.name || "—"}</p>
                         </div>
                         <div className="text-right flex-shrink-0">
                           {f.status === "completed" ? (
                             <span className="text-xs font-bold mono text-foreground">{f.home_score ?? 0} — {f.away_score ?? 0}</span>
                           ) : (
-                            <span className="text-[9px] mono uppercase text-nexus-muted bg-nexus-surface px-2 py-0.5 rounded-full">{f.status}</span>
+                            <span className="text-xs mono uppercase text-nexus-muted bg-nexus-surface px-2 py-0.5 rounded-full">{f.status}</span>
                           )}
                         </div>
                       </div>
@@ -1013,7 +1013,7 @@ export default function AdminDashboard() {
 
                 {/* Provincial Coverage */}
                 <div className="hairline rounded-xl p-6 bg-card card-shadow lg:col-span-2">
-                  <p className="text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Provincial Coverage</p>
+                  <p className="text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium mb-4">Provincial Coverage</p>
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                     {PROVINCES.map(prov => {
                       const teamCount = (teams as any[]).filter(t => t.province === prov).length;
@@ -1021,7 +1021,7 @@ export default function AdminDashboard() {
                       return (
                         <div key={prov} className="hairline rounded-lg p-3 text-center hover:bg-nexus-surface/40 transition-colors">
                           <p className="text-xs font-semibold text-foreground">{prov}</p>
-                          <p className="text-[9px] mono text-nexus-muted mt-1">{teamCount} teams · {compCount} comps</p>
+                          <p className="text-xs mono text-nexus-muted mt-1">{teamCount} teams · {compCount} comps</p>
                         </div>
                       );
                     })}
@@ -1035,12 +1035,12 @@ export default function AdminDashboard() {
           {activeTab === "competitions" && (
             <div>
               <div className="px-4 sm:px-8 pt-4">
-                <Link to="/admin/competitions" className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-accent hover:underline">
+                <Link to="/admin/competitions" className="inline-flex items-center gap-1.5 text-xs font-semibold text-foreground underline underline-offset-4">
                   Prefer the NASH-sanctioned competition builder? Open Competitions & Tournament Wizard <ArrowRight className="h-3 w-3" />
                 </Link>
               </div>
               {sectionHeader("Competitions (legacy list)", user && (
-                <button onClick={() => setShowForm(!showForm)} className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click">
+                <button onClick={() => setShowForm(!showForm)} className="min-h-11 px-4 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click">
                   {showForm ? "Cancel" : "+ New Competition"}
                 </button>
               ))}
@@ -1059,11 +1059,11 @@ export default function AdminDashboard() {
                           {user ? (
                             <select value={comp.status} onChange={e => { e.stopPropagation(); updateCompStatus(comp.id, e.target.value); }}
                               onClick={e => e.stopPropagation()}
-                              className="text-[10px] mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2.5 py-1 rounded-full border-0 focus:outline-none cursor-pointer">
+                              className="text-xs mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2.5 py-1 rounded-full border-0 focus:outline-none cursor-pointer">
                               {STATUSES.map(s => <option key={s} value={s}>{s.replace(/_/g," ")}</option>)}
                             </select>
                           ) : (
-                            <span className="text-[10px] mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2.5 py-1 rounded-full">{comp.status?.replace(/_/g," ")}</span>
+                            <span className="text-xs mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2.5 py-1 rounded-full">{comp.status?.replace(/_/g," ")}</span>
                           )}
                         </td>
                         <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{comp.province || "National"}</td>
@@ -1071,7 +1071,7 @@ export default function AdminDashboard() {
                         <td className="px-4 sm:px-6 py-4">
                           <button
                             onClick={(e) => { e.stopPropagation(); deleteCompetition(comp.id, comp.name); }}
-                            className="h-7 px-3 text-[10px] font-semibold tracking-wide rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+                            className="h-7 px-3 text-xs font-semibold tracking-wide rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
                           >
                             Delete
                           </button>
@@ -1090,10 +1090,10 @@ export default function AdminDashboard() {
             <div>
               {sectionHeader("Fixtures", user && (
                 <div className="flex gap-2">
-                  <button onClick={() => { setShowGenerator(!showGenerator); setShowForm(false); }} className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-nexus-surface hover:bg-nexus-silver transition-colors btn-click">
+                  <button onClick={() => { setShowGenerator(!showGenerator); setShowForm(false); }} className="min-h-11 px-4 text-xs font-semibold tracking-wide rounded-lg bg-nexus-surface hover:bg-nexus-silver transition-colors btn-click">
                     {showGenerator ? "Cancel" : "Generate Fixtures"}
                   </button>
-                  <button onClick={() => { setShowForm(!showForm); setShowGenerator(false); }} className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click">
+                  <button onClick={() => { setShowForm(!showForm); setShowGenerator(false); }} className="min-h-11 px-4 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click">
                     {showForm ? "Cancel" : "+ New Fixture"}
                   </button>
                 </div>
@@ -1109,13 +1109,13 @@ export default function AdminDashboard() {
                         <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{f.home_team?.name || "TBD"} vs {f.away_team?.name || "TBD"}</td>
                         <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{f.competition?.name || "—"}</td>
                         <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{f.round_label || "—"}</td>
-                        <td className="px-4 sm:px-6 py-4"><span className="text-[10px] mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2.5 py-1 rounded-full">{f.status}</span></td>
+                        <td className="px-4 sm:px-6 py-4"><span className="text-xs mono tracking-widest uppercase text-nexus-muted bg-nexus-surface px-2.5 py-1 rounded-full">{f.status}</span></td>
                         <td className="px-4 sm:px-6 py-4 text-sm mono font-semibold text-foreground">{f.home_score ?? 0} — {f.away_score ?? 0}</td>
                         <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{f.scheduled_at ? new Date(f.scheduled_at).toLocaleString("en-ZW", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) : "TBD"}</td>
                         <td className="px-4 sm:px-6 py-4">
                           <button
                             onClick={(e) => { e.stopPropagation(); deleteFixture(f.id); }}
-                            className="h-7 px-3 text-[10px] font-semibold tracking-wide rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+                            className="h-7 px-3 text-xs font-semibold tracking-wide rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
                           >
                             Delete
                           </button>
@@ -1145,23 +1145,23 @@ export default function AdminDashboard() {
               <div className="p-4 sm:p-8 space-y-6">
                 <SchoolsDirectory />
                 <div className="hairline rounded-xl bg-card overflow-hidden">
-                  <p className="px-6 py-4 hairline-b text-[10px] mono tracking-[0.18em] uppercase text-nexus-muted font-medium">All synced schools</p>
+                  <p className="px-6 py-4 hairline-b text-xs mono tracking-[0.18em] uppercase text-nexus-muted font-medium">All synced schools</p>
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[720px]">
                       {tableHead("","Name","Discipline","Level","Province","Status","Actions")}
                       <tbody>
                         {(teams as any[]).map((t) => (
                           <tr key={t.id} className={clickableRow} onClick={() => openDetail(t, "team")}>
-                            <td className="px-4 sm:px-6 py-4 w-10">{t.logo_url ? <img src={t.logo_url} className="w-8 h-8 rounded-lg object-cover bg-white" alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} /> : <div className="w-8 h-8 rounded-lg bg-nexus-surface flex items-center justify-center text-[9px] mono text-nexus-muted">{t.short_name?.slice(0,2) || t.name?.slice(0,2)}</div>}</td>
+                            <td className="px-4 sm:px-6 py-4 w-10">{t.logo_url ? <img src={t.logo_url} className="w-8 h-8 rounded-lg object-cover bg-white" alt="" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} /> : <div className="w-8 h-8 rounded-lg bg-nexus-surface flex items-center justify-center text-xs mono text-nexus-muted">{t.short_name?.slice(0,2) || t.name?.slice(0,2)}</div>}</td>
                             <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{t.name}</td>
                             <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{t.discipline || "—"}</td>
                             <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{t.level?.replace(/_/g," ") || "—"}</td>
                             <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{t.province || "—"}</td>
-                            <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${t.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{t.is_active ? "Active" : "Inactive"}</span></td>
+                            <td className="px-4 sm:px-6 py-4"><span className={`text-xs mono px-2.5 py-1 rounded-full ${t.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{t.is_active ? "Active" : "Inactive"}</span></td>
                             <td className="px-4 sm:px-6 py-4">
                               <button
                                 onClick={(e) => { e.stopPropagation(); deleteSchool(t.id, t.name); }}
-                                className="h-7 px-3 text-[10px] font-semibold tracking-wide rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+                                className="h-7 px-3 text-xs font-semibold tracking-wide rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
                               >
                                 Delete
                               </button>
@@ -1195,11 +1195,11 @@ export default function AdminDashboard() {
                         <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{o.disciplines?.join(", ")}</td>
                         <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{o.province || "—"}</td>
                         <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{o.performance_rating ? `${o.performance_rating}/5` : "—"}</td>
-                        <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${o.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{o.is_active ? "Active" : "Inactive"}</span></td>
+                        <td className="px-4 sm:px-6 py-4"><span className={`text-xs mono px-2.5 py-1 rounded-full ${o.is_active ? "bg-foreground text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{o.is_active ? "Active" : "Inactive"}</span></td>
                         <td className="px-4 sm:px-6 py-4">
                           <button
                             onClick={(e) => { e.stopPropagation(); deleteOfficial(o.id, `${o.first_name} ${o.last_name}`); }}
-                            className="h-7 px-3 text-[10px] font-semibold tracking-wide rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+                            className="h-7 px-3 text-xs font-semibold tracking-wide rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
                           >
                             Remove
                           </button>
@@ -1242,13 +1242,13 @@ export default function AdminDashboard() {
                         <td className="px-4 sm:px-6 py-4 text-sm font-semibold text-foreground">{b.title}</td>
                         <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{b.competition?.name || "—"}</td>
                         <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{b.platform || "—"}</td>
-                        <td className="px-4 sm:px-6 py-4"><span className={`text-[10px] mono px-2.5 py-1 rounded-full ${b.is_live ? "bg-nexus-live text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{b.is_live ? "Live" : "Offline"}</span></td>
+                        <td className="px-4 sm:px-6 py-4"><span className={`text-xs mono px-2.5 py-1 rounded-full ${b.is_live ? "bg-nexus-live text-primary-foreground" : "bg-nexus-surface text-nexus-muted"}`}>{b.is_live ? "Live" : "Offline"}</span></td>
                         <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{b.viewer_count?.toLocaleString() || "—"}</td>
                         <td className="px-4 sm:px-6 py-4 text-xs mono text-nexus-muted">{b.quality || "HD"}</td>
                         <td className="px-4 sm:px-6 py-4">
                           <button
                             onClick={(e) => { e.stopPropagation(); deleteBroadcast(b.id, b.title); }}
-                            className="h-7 px-3 text-[10px] font-semibold tracking-wide rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+                            className="h-7 px-3 text-xs font-semibold tracking-wide rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
                           >
                             Delete
                           </button>
@@ -1262,7 +1262,7 @@ export default function AdminDashboard() {
 
               <div className="mt-8">
                 {sectionHeader("Sponsorships", user && (
-                  <button onClick={() => setShowForm(!showForm)} className="h-8 px-4 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click">
+                  <button onClick={() => setShowForm(!showForm)} className="min-h-11 px-4 text-xs font-semibold tracking-wide rounded-lg bg-foreground text-primary-foreground hover:opacity-85 btn-click">
                     {showForm ? "Cancel" : "+ Add Sponsor"}
                   </button>
                 ))}
@@ -1280,7 +1280,7 @@ export default function AdminDashboard() {
                           <td className="px-4 sm:px-6 py-4">
                             <button
                               onClick={(e) => { e.stopPropagation(); deleteSponsorship(s.id, s.sponsor_name); }}
-                              className="h-7 px-3 text-[10px] font-semibold tracking-wide rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+                              className="h-7 px-3 text-xs font-semibold tracking-wide rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
                             >
                               Remove
                             </button>
@@ -1334,7 +1334,7 @@ export default function AdminDashboard() {
             <DetailField label="Sponsor" value={selectedItem.sponsor} />
             <DetailField label="Description" value={selectedItem.description} />
             <div className="mt-4">
-              <button onClick={() => deleteCompetition(selectedItem.id, selectedItem.name)} className="h-9 px-4 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
+              <button onClick={() => deleteCompetition(selectedItem.id, selectedItem.name)} className="min-h-11 px-4 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
                 Delete competition
               </button>
             </div>
@@ -1367,7 +1367,7 @@ export default function AdminDashboard() {
             <DetailField label="Kit Colors" value={selectedItem.kit_colors?.join(", ")} />
             <DetailField label="Status" value={selectedItem.is_active ? "Active" : "Inactive"} />
             <div className="mt-4">
-              <button onClick={() => deleteSchool(selectedItem.id, selectedItem.name)} className="h-9 px-4 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
+              <button onClick={() => deleteSchool(selectedItem.id, selectedItem.name)} className="min-h-11 px-4 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
                 Delete school
               </button>
             </div>
@@ -1389,7 +1389,7 @@ export default function AdminDashboard() {
             <DetailField label="ID Card" value={selectedItem.id_card_number} />
             <DetailField label="Status" value={selectedItem.is_suspended ? "Suspended" : selectedItem.is_active ? "Active" : "Inactive"} />
             <div className="mt-4">
-              <a href="/athletes/id-cards" className="h-9 px-4 text-xs font-semibold rounded-lg bg-foreground text-primary-foreground inline-flex items-center hover:opacity-85 transition-opacity">View ID Card</a>
+              <a href="/athletes/id-cards" className="min-h-11 px-4 text-xs font-semibold rounded-lg bg-foreground text-primary-foreground inline-flex items-center hover:opacity-85 transition-opacity">View ID Card</a>
             </div>
           </div>
         )}
@@ -1407,7 +1407,7 @@ export default function AdminDashboard() {
             <DetailField label="Total Matches" value={selectedItem.total_matches} />
             <DetailField label="Status" value={selectedItem.is_active ? "Active" : "Inactive"} />
             <div className="mt-4">
-              <button onClick={() => deleteOfficial(selectedItem.id, `${selectedItem.first_name} ${selectedItem.last_name}`)} className="h-9 px-4 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
+              <button onClick={() => deleteOfficial(selectedItem.id, `${selectedItem.first_name} ${selectedItem.last_name}`)} className="min-h-11 px-4 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
                 Remove official
               </button>
             </div>
@@ -1441,7 +1441,7 @@ export default function AdminDashboard() {
             <DetailField label="Contract Start" value={selectedItem.contract_start} />
             <DetailField label="Contract End" value={selectedItem.contract_end} />
             <div className="mt-4">
-              <button onClick={() => deleteSponsorship(selectedItem.id, selectedItem.sponsor_name)} className="h-9 px-4 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
+              <button onClick={() => deleteSponsorship(selectedItem.id, selectedItem.sponsor_name)} className="min-h-11 px-4 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
                 Remove sponsor
               </button>
             </div>
@@ -1461,9 +1461,9 @@ export default function AdminDashboard() {
             <DetailField label="Stream URL" value={selectedItem.stream_url} />
             <div className="mt-4 flex flex-wrap gap-2">
               {selectedItem.stream_url && (
-                <a href={selectedItem.stream_url} target="_blank" rel="noreferrer" className="h-9 px-4 text-xs font-semibold rounded-lg bg-nexus-surface text-foreground flex items-center hover:bg-nexus-silver transition-colors">Open stream</a>
+                <a href={selectedItem.stream_url} target="_blank" rel="noreferrer" className="min-h-11 px-4 text-xs font-semibold rounded-lg bg-nexus-surface text-foreground flex items-center hover:bg-nexus-silver transition-colors">Open stream</a>
               )}
-              <button onClick={() => deleteBroadcast(selectedItem.id, selectedItem.title)} className="h-9 px-4 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
+              <button onClick={() => deleteBroadcast(selectedItem.id, selectedItem.title)} className="min-h-11 px-4 text-xs font-semibold rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
                 Delete broadcast
               </button>
             </div>
